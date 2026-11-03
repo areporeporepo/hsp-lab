@@ -1,0 +1,314 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CS259Q Road to L13</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: lab notebook. Narrow margin column of section marks, wide working column, every figure hairline monochrome. */
+:root {
+  --bg: #f3f4f5; --paper: #fbfbfc; --ink: #15171a; --muted: #5b616a; --rule: #c4c9cf; --fill: #e3e6ea;
+  --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #101214; --paper: #16191c; --ink: #e6e8eb; --muted: #9aa1a9; --rule: #3a4047; --fill: #23272c; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #101214; --paper: #16191c; --ink: #e6e8eb; --muted: #9aa1a9; --rule: #3a4047; --fill: #23272c; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 17px/1.55 var(--serif);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 80px; }
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 56px; }
+header h1 { font: 600 clamp(34px, 6vw, 58px)/1.02 var(--serif); letter-spacing: -0.02em; margin: 0 0 12px; text-wrap: balance; }
+header p { max-width: 64ch; margin: 0; color: var(--muted); }
+.ladder { display: flex; flex-wrap: wrap; gap: 6px 0; margin-top: 20px; font: 12px/1 var(--mono); color: var(--muted); }
+.ladder a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); padding: 4px 0; }
+.ladder a:hover, .ladder a:focus-visible { border-color: var(--ink); }
+.ladder span { padding: 4px 10px; }
+
+section { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 24px; border-top: 1px solid var(--rule); padding-top: 20px; }
+.mark { font: 12px/1.4 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.mark b { display: block; font: 500 26px/1 var(--mono); color: var(--ink); letter-spacing: 0; margin-bottom: 6px; }
+.body { min-width: 0; display: grid; gap: 16px; }
+h2 { font: 600 28px/1.15 var(--serif); margin: 0; text-wrap: balance; }
+h3 { font: 600 19px/1.2 var(--serif); margin: 8px 0 0; }
+p { margin: 0; max-width: 68ch; }
+.note { color: var(--muted); font-size: 15px; }
+a { color: inherit; }
+.eq { overflow-x: auto; padding: 4px 0; }
+
+.panel { background: var(--paper); border: 1px solid var(--rule); padding: 16px; display: grid; gap: 14px; min-width: 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: end; }
+label i.u { text-transform: none; font-style: normal; }
+label { white-space: nowrap; display: grid; gap: 4px; font: 11px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+input, select { font: 15px/1.2 var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--rule); padding: 7px 8px; width: 9ch; border-radius: 0; }
+input.wide { width: 14ch; }
+button { font: 500 13px/1 var(--mono); color: var(--bg); background: var(--ink); border: 1px solid var(--ink); padding: 9px 14px; cursor: pointer; border-radius: 0; }
+button.ghost { background: transparent; color: var(--ink); }
+button:hover { opacity: .85; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.readout { display: flex; flex-wrap: wrap; gap: 6px 22px; font: 14px/1.4 var(--mono); font-variant-numeric: tabular-nums; }
+.readout span { color: var(--muted); }
+.readout b { font-weight: 500; color: var(--ink); }
+canvas { width: 100%; display: block; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; font: 13px/1.4 var(--mono); font-variant-numeric: tabular-nums; width: 100%; }
+th { text-align: left; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-size: 11px; border-bottom: 1px solid var(--ink); padding: 6px 10px 6px 0; }
+td { border-bottom: 1px solid var(--rule); padding: 7px 10px 7px 0; vertical-align: top; }
+td.serif { font: 15px/1.4 var(--serif); }
+.log { font: 13px/1.5 var(--mono); max-height: 220px; overflow: auto; border-top: 1px solid var(--rule); padding-top: 8px; white-space: pre-wrap; }
+.verdict { font: 500 14px/1.4 var(--mono); padding: 8px 10px; border: 1px solid var(--ink); }
+.verdict.fail { border-style: dashed; color: var(--muted); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.tag { font: 11px/1 var(--mono); border: 1px solid var(--rule); padding: 3px 6px; white-space: nowrap; }
+ol.actions { margin: 0; padding-left: 22px; display: grid; gap: 10px; max-width: 70ch; }
+ol.actions li span { display: block; font: 13px/1.4 var(--mono); color: var(--muted); }
+svg text { font-family: var(--mono); }
+
+.prob { background: var(--paper); border: 1px solid var(--rule); padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.prob header { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.prob h3 { margin: 0; }
+.fields { display: grid; gap: 10px; }
+.field { text-transform: none; letter-spacing: 0; font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font: 13px/1.3 var(--mono); }
+.field > span.lbl { min-width: 14ch; color: var(--muted); }
+.field input { width: 16ch; }
+.mark-ok { font: 500 13px var(--mono); min-width: 8ch; }
+.reveal { border-top: 1px solid var(--rule); padding-top: 10px; }
+.pad { width: 100%; height: 280px; background: var(--bg); border: 1px dashed var(--rule); touch-action: none; display: block; }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.score { font: 500 14px var(--mono); }
+.notation td:first-child { white-space: nowrap; }
+@media (max-width: 700px) { section { grid-template-columns: 1fr; gap: 10px; } .mark b { display: inline; margin-right: 8px; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.keep { border-left: 2px solid var(--ink); padding-left: 12px; font-weight: 600; }
+.link { color: var(--muted); font-size: 15px; }
+details.check { border: 1px solid var(--rule); background: var(--paper); padding: 10px 14px; }
+details.check summary { cursor: pointer; font: 15px/1.45 var(--serif); }
+details.check summary::marker { content: "?  "; font-family: var(--mono); }
+details.check[open] summary::marker { content: "↓  "; }
+details.check p { margin-top: 10px; border-top: 1px solid var(--rule); padding-top: 10px; }
+code { font: 13px var(--mono); }
+mjx-container[display="true"] { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+.eq { max-width: 100%; }
+</style>
+<script>
+window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] }, svg: { fontCache: "global" } };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+<div class="wrap">
+<header>
+  <h1>CS259Q Road to L13</h1>
+  <p>A walk through Lectures 1 to 12, in the order the course builds them, ending at Thursday's L13: the hidden subgroup problem. Each lecture gives you the one idea to keep, the equations in course notation, how it feeds into L13, and a check you can do with the Apple Pencil before you reveal the answer.</p>
+  <p class="note">Sources: the 2026 CS259Q notes for L10, L11 and L12 (followed closely, same symbols). L1 to L9 are rebuilt from the 2026 lecture plan, Tutorial 1, Problem Sets 1 to 3, and Trevisan's 2012 CS259Q handouts, because the 2026 notes for those lectures are not on this machine. If your L1 to L9 notes use different symbols, trust the notes.</p>
+  <nav class="ladder" aria-label="Lectures">
+    <a href="#chain">chain</a><span>/</span><a href="#L1">L1</a><span>/</span><a href="#L2">L2</a><span>/</span><a href="#L3">L3</a><span>/</span><a href="#L4">L4</a><span>/</span><a href="#L5">L5</a><span>/</span><a href="#L6">L6</a><span>/</span><a href="#L7">L7</a><span>/</span><a href="#L8">L8</a><span>/</span><a href="#L9">L9</a><span>/</span><a href="#L10">L10</a><span>/</span><a href="#L11">L11</a><span>/</span><a href="#L12">L12</a><span>/</span><a href="#L13">into L13</a><span>/</span><a href="index.html#practice">practice</a>
+  </nav>
+</header>
+
+<section id="chain">
+  <div class="mark"><b>↓</b>The chain</div>
+  <div class="body">
+    <h2>What each lecture hands to the next</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Lecture</th><th>Gives you</th><th>Used by</th></tr></thead>
+      <tbody>
+        <tr><td>L1 to L3</td><td class="serif">states, the Born rule, tensor products, partial measurement</td><td class="serif">every state calculation after this</td></tr>
+        <tr><td>L4 to L6</td><td class="serif">gates, universality, reversible computing, the oracle \(O_f\) and phase kickback</td><td class="serif">"query \(f\) in superposition", the first step of every algorithm</td></tr>
+        <tr><td>L7</td><td class="serif">\(H^{\otimes n}\) and the sign pattern \((-1)^{x\cdot y}\)</td><td class="serif">Simon (L8), and the Fourier transform over \(\mathbb{Z}_2^n\) in L13</td></tr>
+        <tr><td>L8</td><td class="serif">Simon: measure \(f\), Fourier transform, get a random linear constraint</td><td class="serif">the template L9 to L10 copy, and that L13 generalizes</td></tr>
+        <tr><td>L9 to L10</td><td class="serif">\(\mathrm{QFT}_n\), period finding, the comb picture, an \(O(n^2)\) circuit</td><td class="serif">L11 (factoring), L12 (phase estimation)</td></tr>
+        <tr><td>L11</td><td class="serif">factoring reduces to order finding, an efficient oracle \(a^x \bmod N\)</td><td class="serif">L12, and as an HSP example in L13</td></tr>
+        <tr><td>L12</td><td class="serif">phase estimation, and Shor as phase estimation of \(U_a\)</td><td class="serif">L13 (characters as eigenvectors of shifts), L14 (amplitude estimation)</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="L1">
+  <div class="mark"><b>L1</b>Qubits</div>
+  <div class="body">
+    <h2>Qubits, amplitudes, measurement</h2>
+    <p class="keep">Keep: a state is a unit vector of complex amplitudes, and measuring gives outcome \(x\) with probability \(|\alpha_x|^2\).</p>
+    <div class="eq">\[ |\psi\rangle = \alpha|0\rangle + \beta|1\rangle, \qquad |\alpha|^2 + |\beta|^2 = 1, \qquad \Pr[0] = |\alpha|^2,\ \Pr[1] = |\beta|^2 . \]</div>
+    <p>After the measurement the state collapses to the observed basis state. A global phase \(e^{i\varphi}|\psi\rangle\) changes no probability, so it is physically invisible. A relative phase (\(|+\rangle\) versus \(|-\rangle\)) is visible after a change of basis:</p>
+    <div class="eq">\[ |\pm\rangle = \tfrac{1}{\sqrt 2}(|0\rangle \pm |1\rangle), \qquad H|0\rangle = |+\rangle,\ H|1\rangle = |-\rangle,\ H|\pm\rangle = |0\rangle, |1\rangle. \]</div>
+    <p class="link">For L13: the whole HSP algorithm ends in "a global phase \(\chi(g_0)\) disappears when you measure". That is this lecture.</p>
+    <details class="check"><summary>Check: what is \(\Pr[0]\) if you measure \(|-\rangle\)? And if you apply \(H\) first?</summary><p>\(|-\rangle\) gives \(\Pr[0] = |1/\sqrt2|^2 = 1/2\). After \(H\), \(H|-\rangle = |1\rangle\), so \(\Pr[0] = 0\). The minus sign is a relative phase: invisible in one basis, decisive in another.</p></details>
+  </div>
+</section>
+
+<section id="L2">
+  <div class="mark"><b>L2</b>Tensors</div>
+  <div class="body">
+    <h2>Tensor products and entanglement</h2>
+    <p class="keep">Keep: \(n\) qubits live in \(\mathbb{C}^{2^n}\), and measuring part of a system means summing squared amplitudes over the unmeasured part, then renormalizing.</p>
+    <div class="eq">\[ |\psi\rangle = \sum_{x \in \{0,1\}^n} \alpha_x |x\rangle, \qquad (|a\rangle\otimes|b\rangle)_{ij} = a_i b_j . \]</div>
+    <p>For two qubits, \(\Pr[\text{first} = 0] = |\alpha_{00}|^2 + |\alpha_{01}|^2\), and the second qubit becomes \((\alpha_{00}|0\rangle + \alpha_{01}|1\rangle)/\sqrt{\Pr[0]}\). A state is a product state if it factors as \(|a\rangle\otimes|b\rangle\); otherwise it is entangled. For two qubits, it factors exactly when</p>
+    <div class="eq">\[ \alpha_{00}\,\alpha_{11} = \alpha_{01}\,\alpha_{10}. \]</div>
+    <p class="link">For L13: "measure the second register \(|f(x)\rangle\)" is a partial measurement. It leaves the first register in a uniform superposition over one coset \(g_0 + H\). This is exactly the rule above.</p>
+    <details class="check"><summary>Check (Tutorial 1): \(|\Psi\rangle = \tfrac{1}{\sqrt2}|00\rangle + \tfrac{i}{2}|10\rangle - \tfrac12|11\rangle\). Find \(\Pr[\text{first} = 0]\), the second qubit after seeing 1, and whether it is entangled.</summary><p>\(\Pr[0] = |1/\sqrt2|^2 = 1/2\), leaving \(|0\rangle\). Seeing 1 (probability \(1/4 + 1/4 = 1/2\)) leaves \(\tfrac{1}{\sqrt{1/2}}(\tfrac{i}{2}|0\rangle - \tfrac12|1\rangle) = \tfrac{1}{\sqrt2}(i|0\rangle - |1\rangle)\). Entangled: \(\alpha_{00}\alpha_{11} = -\tfrac{1}{2\sqrt2} \ne 0 = \alpha_{01}\alpha_{10}\). Note the post-measurement state of the second qubit depends on the first outcome, which a product state could not do.</p></details>
+  </div>
+</section>
+
+<section id="L3">
+  <div class="mark"><b>L3</b>Strange</div>
+  <div class="body">
+    <h2>Superposition, measurement, non-local correlations</h2>
+    <p class="keep">Keep: superposition is not ignorance. \(|+\rangle\) and a fair coin give the same \(\Pr[0]\), but only \(|+\rangle\) can interfere. And acting on your half of an entangled state never changes the statistics on the other half (no-signaling).</p>
+    <div class="eq">\[ |\Phi^+\rangle = \tfrac{1}{\sqrt2}(|00\rangle + |11\rangle): \quad \text{each side alone looks like a fair coin, yet outcomes always agree.} \]</div>
+    <p>No-signaling (Problem Set 2, Q1): if Alice applies any unitary or measurement to her qubit, the distribution of Bob's measurement outcomes, averaged over Alice's results, is unchanged.</p>
+    <p class="link">For L13 and L12: no-signaling is the reason "measuring the second register or not" gives the same output distribution on the first register. L12 uses it explicitly.</p>
+    <details class="check"><summary>Check: you measure \(|+\rangle\) in the \(\{|+\rangle,|-\rangle\}\) basis. What do you get? What would a fair coin give?</summary><p>\(|+\rangle\) gives \(+\) with probability 1. A coin (a 50/50 mixture of \(|0\rangle\) and \(|1\rangle\)) gives \(+\) with probability \(1/2\) in that basis, because \(|\langle +|0\rangle|^2 = |\langle +|1\rangle|^2 = 1/2\). The difference only shows up after a basis change, which is exactly what \(H\) and the QFT do.</p></details>
+  </div>
+</section>
+
+<section id="L4">
+  <div class="mark"><b>L4</b>CHSH</div>
+  <div class="body">
+    <h2>The CHSH game, and the circuit model</h2>
+    <p class="keep">Keep: entanglement gives correlations no classical strategy can match: CHSH has classical value \(3/4\) and quantum value \(\cos^2(\pi/8) \approx 0.854\). Computation is a sequence of unitary gates followed by measurement.</p>
+    <div class="eq">\[ \text{win iff } a \oplus b = x \wedge y, \qquad \max_{\text{classical}} \Pr[\text{win}] = \tfrac34, \qquad \max_{\text{quantum}} \Pr[\text{win}] = \cos^2\!\tfrac{\pi}{8}. \]</div>
+    <p>Gates are unitary (\(U^\dagger U = I\)), so they preserve norm and are reversible. The basic ones:</p>
+    <div class="eq">\[ X = \begin{pmatrix}0&1\\1&0\end{pmatrix},\ Z = \begin{pmatrix}1&0\\0&-1\end{pmatrix},\ H = \tfrac{1}{\sqrt2}\begin{pmatrix}1&1\\1&-1\end{pmatrix},\ \mathrm{CNOT}|a,b\rangle = |a, a\oplus b\rangle . \]</div>
+    <details class="check"><summary>Check: why can no deterministic classical strategy win CHSH on all four inputs?</summary><p>Write Alice's answers \(a_0, a_1\) and Bob's \(b_0, b_1\). Winning all four needs \(a_0\oplus b_0 = 0,\ a_0\oplus b_1 = 0,\ a_1\oplus b_0 = 0,\ a_1\oplus b_1 = 1\). XOR all four: the left side is \(0\) (each variable appears twice) but the right side is \(1\). So at most 3 of 4 inputs, value \(3/4\); shared randomness is a mixture of deterministic strategies and cannot do better.</p></details>
+  </div>
+</section>
+
+<section id="L5">
+  <div class="mark"><b>L5</b>Universal</div>
+  <div class="body">
+    <h2>Universality of 2-qubit gates</h2>
+    <p class="keep">Keep: any unitary on \(n\) qubits is a product of one- and two-qubit gates (CNOT plus single-qubit gates suffice). Universality says what is possible; efficiency, the number of gates, is a separate question.</p>
+    <div class="eq">\[ U = e^{i\alpha}\, R_z(\beta)\, R_y(\gamma)\, R_z(\delta) \quad\text{for any single-qubit } U, \qquad R_z(\theta) = \begin{pmatrix} e^{-i\theta/2} & 0 \\ 0 & e^{i\theta/2}\end{pmatrix}. \]</div>
+    <p>Problem Set 2 asks you to build any single-qubit gate from \(H\) and \(R_Z(\theta)\). Problem Set 3 asks about combining CNOTs. A generic \(n\)-qubit unitary needs exponentially many gates, so "universal" does not mean "efficient". The interesting algorithms are the ones whose unitaries have short circuits, like the QFT in L10.</p>
+    <p class="link">For L13: the HSP algorithm is efficient only because \(\mathcal{F}_G\) has a short circuit, a tensor product of small QFTs.</p>
+    <details class="check"><summary>Check: show \(HZH = X\).</summary><p>\(HZH|0\rangle = HZ|+\rangle = H|-\rangle = |1\rangle\) and \(HZH|1\rangle = HZ|-\rangle = H|+\rangle = |0\rangle\). So \(HZH = X\). Conjugating by \(H\) swaps the \(Z\) and \(X\) bases, the one-qubit case of "the Fourier transform turns shifts into phases".</p></details>
+  </div>
+</section>
+
+<section id="L6">
+  <div class="mark"><b>L6</b>Queries</div>
+  <div class="body">
+    <h2>Reversible computing and the query model</h2>
+    <p class="keep">Keep: any classical circuit for \(f\) becomes a reversible quantum circuit (Toffoli gates plus ancillas, uncompute the garbage). In the query model you count calls to the oracle</p>
+    <div class="eq">\[ O_f\,|x\rangle|b\rangle = |x\rangle|b \oplus f(x)\rangle . \]</div>
+    <p>Phase kickback: put \(|-\rangle\) in the target and the bit flip becomes a sign on the input:</p>
+    <div class="eq">\[ O_f\,|x\rangle|-\rangle = (-1)^{f(x)}\,|x\rangle|-\rangle . \]</div>
+    <p class="link">For L13: the HSP is a query problem. "Efficient" means few queries to \(f\) and few other gates, and L11's point is that for factoring the oracle itself is efficient.</p>
+    <details class="check"><summary>Check: verify phase kickback for \(f(x) = 1\).</summary><p>\(O_f|x\rangle\tfrac{|0\rangle - |1\rangle}{\sqrt2} = |x\rangle\tfrac{|1\rangle - |0\rangle}{\sqrt2} = -|x\rangle|-\rangle\). For \(f(x) = 0\) nothing changes. So the phase is \((-1)^{f(x)}\).</p></details>
+  </div>
+</section>
+
+<section id="L7">
+  <div class="mark"><b>L7</b>DJ, BV</div>
+  <div class="body">
+    <h2>Deutsch-Jozsa and Bernstein-Vazirani</h2>
+    <p class="keep">Keep the identity that powers everything through L13:</p>
+    <div class="eq">\[ H^{\otimes n}|x\rangle = \frac{1}{\sqrt{2^n}} \sum_{y \in \{0,1\}^n} (-1)^{x\cdot y}\,|y\rangle, \qquad x\cdot y = \textstyle\sum_i x_i y_i \bmod 2 . \]</div>
+    <p>Both algorithms: \(H^{\otimes n}\), one phase query \(\sum_x (-1)^{f(x)}|x\rangle\), then \(H^{\otimes n}\) again. The amplitude of \(|y\rangle\) is</p>
+    <div class="eq">\[ \alpha_y = \frac{1}{2^n}\sum_x (-1)^{f(x) + x\cdot y}. \]</div>
+    <p><b>Deutsch-Jozsa</b> (constant or balanced): \(\alpha_{0^n} = \pm 1\) if constant and \(0\) if balanced. One query, against \(2^{n-1}+1\) for a deterministic classical algorithm. <b>Bernstein-Vazirani</b> (\(f(x) = s\cdot x\)): \(\alpha_y = 1\) exactly at \(y = s\). One query, against \(n\) classically.</p>
+    <p class="link">For L13: \(H^{\otimes n}\) is the Fourier transform over \(\mathbb{Z}_2^n\), and \((-1)^{x\cdot y}\) are its characters \(\chi_y(x)\).</p>
+    <details class="check"><summary>Check: in BV, why is \(\alpha_s = 1\)?</summary><p>\(\alpha_s = 2^{-n}\sum_x (-1)^{s\cdot x + x\cdot s} = 2^{-n}\sum_x 1 = 1\). Every term agrees, and since the state is normalized, every other amplitude is 0.</p></details>
+  </div>
+</section>
+
+<section id="L8">
+  <div class="mark"><b>L8</b>Simon</div>
+  <div class="body">
+    <h2>Simon's algorithm, and the discrete Fourier transform</h2>
+    <p class="keep">Keep the four-step template: superpose, query, measure \(f\), Fourier transform. Each run gives a random \(y\) with \(y\cdot s = 0\).</p>
+    <p>Promise: \(f(x) = f(x')\) if and only if \(x' \in \{x, x\oplus s\}\). Run:</p>
+    <div class="eq">\[ \frac{1}{\sqrt{2^n}}\sum_x |x\rangle|f(x)\rangle \;\xrightarrow{\text{measure 2nd}}\; \frac{|x_0\rangle + |x_0\oplus s\rangle}{\sqrt2} \;\xrightarrow{H^{\otimes n}}\; \frac{1}{\sqrt{2^{n+1}}}\sum_y (-1)^{x_0\cdot y}\big(1 + (-1)^{s\cdot y}\big)|y\rangle . \]</div>
+    <p>The bracket is \(2\) when \(s\cdot y = 0\) and \(0\) otherwise, so \(y\) is uniform over the \(2^{n-1}\) solutions of \(s\cdot y = 0\). The unknown \(x_0\) only contributes a sign. After about \(n\) runs you hold \(n-1\) independent equations and solve for \(s\) by Gaussian elimination over \(\mathrm{GF}(2)\). Classically you need about \(2^{n/2}\) queries to find a collision (the birthday bound).</p>
+    <p>The DFT on \(\mathbb{Z}_N\), which L9 turns into the QFT:</p>
+    <div class="eq">\[ \hat v_y = \frac{1}{\sqrt N}\sum_{x=0}^{N-1} \omega^{xy} v_x, \qquad \omega = e^{2\pi i/N}. \]</div>
+    <p class="link">For L13: this is literally the HSP algorithm with \(G = \mathbb{Z}_2^n\), \(H = \{0, s\}\), and \(H^\perp = \{y : y \cdot s = 0\}\). Try the <a href="index.html#simon">Simon simulator</a>.</p>
+    <details class="check"><summary>Check: why does the offset \(x_0\) not matter?</summary><p>It appears only as \((-1)^{x_0\cdot y}\), a sign on each amplitude, so \(|{\rm amplitude}|^2\) does not depend on it. In L13 language, the coset shift becomes a character value \(\chi_y(x_0)\) of modulus 1.</p></details>
+  </div>
+</section>
+
+<section id="L9">
+  <div class="mark"><b>L9</b>Shor I</div>
+  <div class="body">
+    <h2>Period finding and the QFT</h2>
+    <p class="keep">Keep: the period-finding problem, the definition of \(\mathrm{QFT}_n\), and the state after the oracle and measurement.</p>
+    <p>Toy problem (course version): \(f\) on \(\{0,\dots,N-1\}\), \(N = 2^n\), with period \(p\) dividing \(N\), and \(f\) takes distinct values within one period. Find \(p\).</p>
+    <div class="eq">\[ \mathrm{QFT}_n|x\rangle = \frac{1}{\sqrt N}\sum_{y=0}^{N-1}\omega^{xy}|y\rangle, \qquad \omega = e^{2\pi i/N}. \]</div>
+    <p>It is unitary because the columns are orthonormal: \(\sum_y \omega^{(x-x')y} = N\) if \(x = x'\) and \(0\) otherwise (a geometric series of roots of unity). The algorithm is Simon's, with \(H^{\otimes n}\) replaced by \(\mathrm{QFT}_n\). After the oracle and measuring \(f = z\):</p>
+    <div class="eq">\[ \frac{1}{\sqrt{N/p}}\sum_{k=0}^{N/p-1}|x + kp\rangle, \qquad x = \text{smallest input with } f(x) = z. \]</div>
+    <details class="check"><summary>Check: show \(\sum_{y=0}^{N-1}\omega^{jy} = 0\) for \(j \not\equiv 0 \pmod N\).</summary><p>It is a geometric series with ratio \(\omega^j \ne 1\): \(\frac{1 - \omega^{jN}}{1 - \omega^j} = \frac{1 - 1}{1 - \omega^j} = 0\). This one fact gives unitarity of the QFT, the output of period finding, and in L13 the orthogonality of characters.</p></details>
+  </div>
+</section>
+
+<section id="L10">
+  <div class="mark"><b>L10</b>Shor II</div>
+  <div class="body">
+    <h2>Why the QFT finds the period, and its circuit</h2>
+    <p class="keep">Keep: the output is a uniformly random multiple of \(N/p\); a gcd of two samples recovers it; the QFT has an \(O(n^2)\) circuit because its output on a basis state is a product state.</p>
+    <p><b>Amplitudes</b> (notes §10.1). Applying \(\mathrm{QFT}_n\):</p>
+    <div class="eq">\[ \alpha_y = \frac{\omega^{xy}}{\sqrt{N/p}\,\sqrt N}\sum_{k=0}^{N/p-1}\omega^{ykp}, \qquad \sum_{k=0}^{N/p-1}\omega^{ykp} = \begin{cases} N/p & \omega^{yp} = 1 \\ \dfrac{1 - \omega^{yN}}{1-\omega^{yp}} = 0 & \text{otherwise.}\end{cases} \]</div>
+    <p>So \(y = cN/p\), \(c \in \{0,\dots,p-1\}\), each with probability \(1/p\), and \(x\) only enters through the phase \(\omega^{xy}\). <b>Post-processing</b>: \(\gcd(y_1, y_2, \dots) = \tfrac{N}{p}\gcd(c_1, c_2,\dots)\), and two random \(c\)'s are coprime with probability about \(6/\pi^2 \approx 0.61\). Check any candidate with \(f(x) = f(x+p')\).</p>
+    <p><b>Comb picture</b>: spikes spaced \(p\) apart transform into spikes spaced \(N/p\) apart, and a shift changes only phases.</p>
+    <p><b>Circuit</b> (notes §10.3, \(n = 3\), \(x = 4x_1 + 2x_2 + x_3\)):</p>
+    <div class="eq">\[ \mathrm{QFT}_3|x\rangle = \tfrac{1}{\sqrt 8}\big(|0\rangle + \omega^{4x}|1\rangle\big)\otimes\big(|0\rangle + \omega^{2x}|1\rangle\big)\otimes\big(|0\rangle + \omega^{x}|1\rangle\big) \]</div>
+    <div class="eq">\[ \omega^{4x} = (-1)^{x_3}, \qquad \omega^{2x} = (-1)^{x_2}\, i^{x_3}. \]</div>
+    <p>The first factor is \(H|x_3\rangle\). The second is \(H|x_2\rangle\) followed by a controlled \(R_2 = \mathrm{diag}(1, i)\) from \(x_3\). In general \(R_k = \mathrm{diag}(1, e^{2\pi i/2^k})\), and \(T(n) = T(n-1) + O(n) = O(n^2)\). Unlike the classical FFT (\(O(N\log N)\), which outputs the whole vector), the QFT costs \(O(\log^2 N)\) gates but only lets you <em>sample</em> from the output.</p>
+    <p class="link">Try it: the <a href="index.html#qft">QFT circuit simulator</a> runs this gate list and compares it with the DFT matrix.</p>
+    <details class="check"><summary>Check: in \(\mathrm{QFT}_3\), derive the third factor's phase \(\omega^{x}\) in terms of bits.</summary><p>\(\omega^x = \omega^{4x_1}\omega^{2x_2}\omega^{x_3} = (-1)^{x_1}\, i^{x_2}\, \omega^{x_3}\) with \(\omega = e^{2\pi i/8}\). So the third factor is \(H|x_1\rangle\), then controlled-\(R_2\) from \(x_2\), then controlled-\(R_3\) from \(x_3\). That is the top row of the circuit.</p></details>
+  </div>
+</section>
+
+<section id="L11">
+  <div class="mark"><b>L11</b>Shor III</div>
+  <div class="body">
+    <h2>Factoring reduces to order finding</h2>
+    <p class="keep">Keep: \(f(x) = a^x \bmod N\) has period \(r = \mathrm{ord}_N(a)\), can be computed with \(O(n)\) modular multiplications by repeated squaring, and an even \(r\) with \(a^{r/2}\not\equiv -1\) splits \(N\).</p>
+    <div class="eq">\[ r = \min\{t > 0 : a^t \equiv 1 \pmod N\}, \qquad a^x = \prod_j \big(a^{2^{n-j}}\big)^{x_j} \bmod N . \]</div>
+    <p>Steps: pick random \(a\), check \(\gcd(a, N)\); find \(r\) (the only quantum step); if \(r\) is odd, restart; set \(b = a^{r/2} \bmod N\). Then \(b^2 \equiv 1\), so \(N \mid (b-1)(b+1)\). \(b \not\equiv 1\) by minimality of \(r\). If \(b \equiv -1\), restart. Otherwise \(p\) and \(q\) cannot both divide the same factor (that would make \(b \equiv \pm 1\)), so</p>
+    <div class="eq">\[ \gcd(b - 1, N) \ \text{and}\ \gcd(b + 1, N) \ \text{are the factors } p, q. \]</div>
+    <p>From the notes: for a semiprime \(N\), a random \(a\) has even order with probability at least \(1/2\). Modular exponentiation in superposition is by far the most expensive part of a real run. Experiments that pick \(a\) using knowledge of the factors are not genuine runs of Shor's algorithm.</p>
+    <p class="link">Try it: <a href="index.html#period">period explorer</a> and <a href="index.html#shor">full Shor run</a>. Practice problem 3 is this calculation.</p>
+    <details class="check"><summary>Check: \(N = 21\), \(a = 2\). Find \(r\), \(b\), and the factors.</summary><p>Powers of 2 mod 21: \(2, 4, 8, 16, 11, 1\), so \(r = 6\). \(b = 2^3 = 8\). \(\gcd(7, 21) = 7\), \(\gcd(9, 21) = 3\). So \(21 = 3 \times 7\).</p></details>
+  </div>
+</section>
+
+<section id="L12">
+  <div class="mark"><b>L12</b>Kitaev</div>
+  <div class="body">
+    <h2>Phase estimation, and Shor as phase estimation</h2>
+    <p class="keep">Keep: phase estimation reads an eigenphase into a register using controlled powers \(U^{2^j}\) and \(\mathrm{QFT}^\dagger\). Shor is phase estimation of \(U_a|y\rangle = |ay \bmod N\rangle\) on \(|1\rangle\), an equal superposition of eigenvectors.</p>
+    <div class="eq">\[ |0^n\rangle|\psi\rangle \xrightarrow{H^{\otimes n}} \frac{1}{\sqrt N}\sum_x |x\rangle|\psi\rangle \xrightarrow{\text{c-}U^x} \Big(\frac{1}{\sqrt N}\sum_x e^{i\theta x}|x\rangle\Big)\otimes|\psi\rangle \xrightarrow{\mathrm{QFT}_n^\dagger} \text{measure}. \]</div>
+    <p>If \(\theta = 2\pi y/N\) exactly, the first register is \(\mathrm{QFT}_n|y\rangle\) and the output is \(y\) with probability 1. Otherwise, with \(\theta = 2\pi\gamma/N\), the output is one of the two integers nearest \(\gamma\) with probability at least \(8/\pi^2 \approx 0.81\). Cost: \(N - 1 = O(1/\varepsilon)\) uses of \(U\), which is optimal. Boost by taking the median of several runs, not the mean.</p>
+    <p><b>Eigenvectors of \(U_a\)</b> (notes §12.2.4), with \(\omega_r = e^{2\pi i/r}\):</p>
+    <div class="eq">\[ |\psi_j\rangle = \frac{1}{\sqrt r}\sum_{k=0}^{r-1}\omega_r^{-jk}\,|a^k \bmod N\rangle, \qquad U_a|\psi_j\rangle = \omega_r^{\,j}|\psi_j\rangle, \qquad |1\rangle = \frac{1}{\sqrt r}\sum_{j=0}^{r-1}|\psi_j\rangle . \]</div>
+    <p>So phase estimation on \(|1\rangle\) returns \(j/r\) for a uniformly random \(j\): with register size \(N' = 2^n\) and \(r \mid N'\), \(y = jN'/r\), the same distribution as period finding. Kitaev's version needs only about \(n + 1\) qubits by recycling one control qubit.</p>
+    <p class="link">For L13: \(U_a\) is a cyclic shift on the orbit, and its eigenvectors are Fourier vectors. Characters being the eigenvectors of shifts is exactly why the Fourier transform solves every abelian HSP.</p>
+    <details class="check"><summary>Check: verify \(U_a|\psi_j\rangle = \omega_r^j|\psi_j\rangle\).</summary><p>\(U_a|\psi_j\rangle = \tfrac{1}{\sqrt r}\sum_k \omega_r^{-jk}|a^{k+1}\rangle\). Substitute \(\ell = k+1\): \(\omega_r^{-jk} = \omega_r^{j}\omega_r^{-j\ell}\), and \(a^r \equiv 1\) makes the sum wrap around. You get \(\omega_r^j \tfrac{1}{\sqrt r}\sum_\ell \omega_r^{-j\ell}|a^\ell\rangle = \omega_r^j|\psi_j\rangle\).</p></details>
+  </div>
+</section>
+
+<section id="L13">
+  <div class="mark"><b>L13</b>Thursday</div>
+  <div class="body">
+    <h2>Into L13: one algorithm behind L8, L10 and L12</h2>
+    <p>Put Simon and period finding side by side and the same structure appears:</p>
+    <div class="scroll"><table>
+      <thead><tr><th></th><th>Simon (L8)</th><th>Period finding (L10)</th><th>General abelian HSP (L13)</th></tr></thead>
+      <tbody>
+        <tr><td>group \(G\)</td><td>\(\mathbb{Z}_2^n\), operation \(\oplus\)</td><td>\(\mathbb{Z}_N\), addition mod \(N\)</td><td>\(\mathbb{Z}_{N_1}\times\cdots\times\mathbb{Z}_{N_k}\)</td></tr>
+        <tr><td>hidden \(H\)</td><td>\(\{0, s\}\)</td><td>\(\{0, p, 2p, \dots\}\)</td><td>any subgroup</td></tr>
+        <tr><td>promise</td><td colspan="3">\(f\) is constant on each coset \(g + H\) and distinct on different cosets</td></tr>
+        <tr><td>Fourier transform</td><td>\(H^{\otimes n}\)</td><td>\(\mathrm{QFT}_n\)</td><td>\(\mathrm{QFT}_{N_1}\otimes\cdots\otimes\mathrm{QFT}_{N_k}\)</td></tr>
+        <tr><td>characters \(\chi_y(x)\)</td><td>\((-1)^{x\cdot y}\)</td><td>\(\omega^{xy}\)</td><td>\(\prod_i e^{2\pi i x_i y_i/N_i}\)</td></tr>
+        <tr><td>each sample</td><td>\(y\cdot s = 0\)</td><td>\(y = cN/p\)</td><td>\(\chi_y(h) = 1\) for all \(h\in H\), i.e. \(y \in H^\perp\)</td></tr>
+        <tr><td>post-processing</td><td>Gaussian elimination mod 2</td><td>gcd</td><td>linear algebra over \(\mathbb{Z}_{N_i}\)</td></tr>
+      </tbody>
+    </table></div>
+    <p>The general step, which you have now done three times:</p>
+    <div class="eq">\[ \frac{1}{\sqrt{|H|}}\sum_{h\in H}|g_0 + h\rangle \;\xrightarrow{\ \mathcal F_G\ }\; \sum_{y} \Big(\frac{1}{\sqrt{|G||H|}}\,\chi_y(g_0)\sum_{h\in H}\chi_y(h)\Big)|y\rangle, \qquad \sum_{h\in H}\chi_y(h) = \begin{cases}|H| & y\in H^\perp\\ 0 & \text{otherwise.}\end{cases} \]</div>
+    <p>The last fact is the L9 geometric-series argument again: a nontrivial character summed over a group gives 0. So each run is a uniformly random \(y\in H^\perp\), each with probability \(|H|/|G|\), and \(O(\log|G|)\) samples determine \(H\). Expect Thursday to also cover discrete log as an HSP over \(\mathbb{Z}_r\times\mathbb{Z}_r\), and why non-abelian groups (graph isomorphism, dihedral) are hard.</p>
+    <p class="link">Next: <a href="index.html#practice">practice problems 6 to 10</a> drill exactly this, and your <a href="../">HSP lab site</a> has the coset-state widgets and the L13 watch list.</p>
+    <details class="check"><summary>Check: in period finding, \(G = \mathbb{Z}_N\), \(H = \langle p\rangle\). Show \(H^\perp = \{cN/p\}\) directly from \(\chi_y(p) = 1\).</summary><p>\(\chi_y(p) = \omega^{py} = e^{2\pi i py/N} = 1 \iff N \mid py \iff y\) is a multiple of \(N/p\). Since \(H\) is generated by \(p\), being trivial on \(p\) means being trivial on all of \(H\). This is the L10 answer, rederived in one line.</p></details>
+  </div>
+</section>
+</div>
