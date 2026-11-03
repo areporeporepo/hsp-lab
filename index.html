@@ -276,7 +276,7 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
   <div class="card" id="w-ae">
     <span class="eyebrow">L14 · Amplitude estimation</span>
     <h2>Phase estimation on the Grover iterate</h2>
-    <p>In the \(|w\rangle,|r\rangle\) plane, \(G\) is a rotation by \(2\theta\), so its eigenvalues there are \(e^{\pm 2i\theta}\), and \(|s\rangle\) is an equal mix of the two eigenvectors. Phase estimation with \(m\) qubits reads \(\theta\), hence \(a=\sin^2\theta\), using \(2^m-1\) applications of \(G\). Compare with estimating \(a\) from \(2^m-1\) classical samples (the same number of oracle calls).</p>
+    <p>In the \(|w\rangle,|r\rangle\) plane, \(G\) is a rotation by \(2\theta\), so its eigenvalues there are \(e^{\pm 2i\theta}\), and \(|s\rangle\) is an equal-weight superposition of the two eigenvectors. Phase estimation with \(m\) qubits reads \(\theta\), hence \(a=\sin^2\theta\), using \(2^m-1\) applications of \(G\). Compare with estimating \(a\) from \(2^m-1\) classical samples (the same number of oracle calls).</p>
     <div class="row">
       <div class="ctrl"><label for="aeA">True \(a\) = <span id="aeAV" class="num"></span></label><input type="range" id="aeA" min="1" max="99" value="30"></div>
       <div class="ctrl"><label for="aeM">Phase qubits \(m\) = <span id="aeMV" class="num"></span></label><input type="range" id="aeM" min="2" max="8" value="5"></div>
@@ -296,7 +296,7 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
     <p class="small muted">New instance every click. Type what you got on paper; the checker names the specific mistake.</p>
     <div class="row">
       <div class="ctrl"><label for="genType">Problem</label>
-        <select id="genType"><option value="period">Period finding: find H⊥ in a cyclic group</option><option value="simon">Simon: find H⊥ in ℤ₂ⁿ</option><option value="dlog">Discrete log: which s fit the samples?</option><option value="factor">Factoring: run the reduction</option><option value="grover">Grover: optimal iterations</option></select></div>
+        <select id="genType"><option value="period">Period finding: find H⊥ in a cyclic group</option><option value="simon">Simon: find H⊥ in ℤ₂ⁿ</option><option value="dlog">Discrete log: which s fit the samples?</option><option value="factor">Factoring: run the reduction</option><option value="grover">Grover: iterations to the first peak</option></select></div>
       <button id="genNew">New numbers</button>
     </div>
     <div id="genQ"></div>
@@ -508,13 +508,13 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
 
   <div class="drill" id="d-kopt" data-id="kopt">
     <div class="hd"><h3>How many iterations, and what if you overshoot?</h3><span class="tag">L14</span></div>
-    <p>\(N=2^{20}\), \(M=1\). Estimate \(k_{\text{opt}}\). What is the success probability after \(2k_{\text{opt}}\) iterations?</p>
+    <p>\(N=2^{20}\), \(M=1\). Estimate the first-peak iteration count \(k^*\). What is the success probability after \(2k^*\) iterations?</p>
     <div class="ladder">
       <div class="step" hidden><b class="k">Hint 1</b><p>For small \(\theta\), \(\theta\approx\sqrt{M/N}\). You want \((2k+1)\theta\approx\pi/2\).</p></div>
       <button class="nexthint">Hint 1 of 1</button>
     </div>
     <div class="solution" hidden>
-      <p>\(\theta\approx2^{-10}\), so \(k_{\text{opt}}\approx\tfrac{\pi}{4}\cdot2^{10}\approx804\), giving \(P\approx1-O(1/N)\). After \(2k_{\text{opt}}\) steps the angle is within a few \(\theta\) of \(\pi\), so \(P=O(M/N)\) (here about \(9\times10^{-11}\)): Grover is a rotation, and running it longer overshoots. When \(M\) is unknown, pick \(k\) at random from growing ranges (Boyer–Brassard–Høyer–Tapp).</p>
+      <p>\(\theta\approx2^{-10}\), so \(k^*\approx\tfrac{\pi}{4}\cdot2^{10}\approx804\), giving \(P\approx1-O(1/N)\). After \(2k^*\) steps the angle is within a few \(\theta\) of \(\pi\), so \(P=O(M/N)\) (here about \(9\times10^{-11}\)): Grover is a rotation, and running it longer overshoots. When \(M\) is unknown, pick \(k\) at random from growing ranges (Boyer–Brassard–Høyer–Tapp).</p>
     </div>
     <button class="ghost openSol">Open solution</button>
     <div class="mastery"></div>
@@ -546,7 +546,7 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
       <button class="nexthint">Hint 1 of 1</button>
     </div>
     <div class="solution" hidden>
-      <p>Classical \(T=O(1/\varepsilon^2)\approx10^6\). Quantum \(t=O(1/\varepsilon)\approx10^3\): with a register of size \(Q=t+1\), \(|\tilde a-a|\le\frac{2\pi\sqrt{a(1-a)}}{Q}+\frac{\pi^2}{Q^2}\) with probability at least \(8/\pi^2\) (Brassard–Høyer–Mosca–Tapp). These counts assume \(a\) is bounded away from \(0\) and \(1\). A quadratic speedup, the same one as Grover's.</p>
+      <p>Classical \(T=O(1/\varepsilon^2)\approx10^6\). Quantum \(t=O(1/\varepsilon)\approx10^3\): with a register of size \(Q=t+1\), \(|\tilde a-a|\le\frac{2\pi\sqrt{a(1-a)}}{Q}+\frac{\pi^2}{Q^2}\) with probability at least \(8/\pi^2\) (Brassard–Høyer–Mosca–Tapp). These are orders of magnitude: at \(a=\tfrac12\) the bound certifies \(10^{-3}\) once \(Q\ge3142\), so \(Q=4096\) with binary phase estimation. They assume \(a\) is bounded away from \(0\) and \(1\). A quadratic speedup, the same one as Grover's.</p>
     </div>
     <button class="ghost openSol">Open solution</button>
     <div class="mastery"></div>
@@ -651,20 +651,20 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
   <div class="card">
     <span class="eyebrow">Grover</span>
     <h3>12. Don't overcook it</h3>
-    <p>Success probability \(\sin^2((2k+1)\theta)\) oscillates. Stop at \(k\approx\frac{\pi}{4\theta}-\frac12\), which is \(\approx\frac{\pi}{4}\sqrt{N/M}\) when \(M\ll N\). Twice that brings the success probability back down to \(O(M/N)\), near zero when \(M\ll N\). Unknown \(M\): choose \(k\) at random from growing ranges.</p>
-    <p class="small"><b>Play:</b> keep pressing "Full step" and watch the curve wrap. <b>Generator:</b> Board → "Grover: optimal iterations".</p>
+    <p>Success probability \(\sin^2((2k+1)\theta)\) oscillates. Stop at the first peak \(k\approx\frac{\pi}{4\theta}-\frac12\), which is \(\approx\frac{\pi}{4}\sqrt{N/M}\) when \(M\ll N\). Twice that brings the success probability back down to \(O(M/N)\), near zero when \(M\ll N\). Unknown \(M\): choose \(k\) at random from growing ranges.</p>
+    <p class="small"><b>Play:</b> keep pressing "Full step" and watch the curve wrap. <b>Generator:</b> Board → "Grover: iterations to the first peak".</p>
   </div>
 
   <div class="card">
     <span class="eyebrow">Grover</span>
     <h3>13. Why \(\sqrt N\) is the best possible</h3>
-    <p>Bennett, Bernstein, Brassard and Vazirani (1997): any quantum algorithm for unstructured search needs \(\Omega(\sqrt N)\) queries. A single query's effect is spread over all \(N\) items, so for a worst-case marked item it changes the state by only \(O(1/\sqrt N)\) compared with an empty oracle (hybrid argument). So Grover gives a quadratic speedup, not an exponential one, and does not by itself make NP-complete problems easy.</p>
+    <p>Bennett, Bernstein, Brassard and Vazirani (1997): any bounded-error quantum algorithm for unstructured search needs \(\Omega(\sqrt N)\) queries in the worst case (\(\Omega(\sqrt{N/M})\) with \(M\) marked items). A single query's effect is spread over all \(N\) items, so averaged over which item is marked it changes the state by only \(O(1/\sqrt N)\) compared with an empty oracle; hence some marked item is hard to detect (hybrid argument). So Grover gives a quadratic speedup, not an exponential one, and does not by itself make NP-complete problems easy.</p>
   </div>
 
   <div class="card">
     <span class="eyebrow">Amplitude amplification</span>
     <h3>14. Grover works on any algorithm, not just \(\mathsf{H}^{\otimes n}\)</h3>
-    <p>If a measurement-free (unitary) algorithm \(A\) succeeds with probability \(a\), replace \(\mathsf{H}^{\otimes n}\) by \(A\) and \(|s\rangle\) by \(A|0\rangle\): the iterate \(Q=-A S_0 A^{-1} S_\chi\) boosts success to near \(1\) (for small \(a\); exact tuning needs a phase or ancilla trick) in \(O(1/\sqrt a)\) rounds, instead of \(O(1/a)\) classical repetitions. Here \(S_\chi\) flips the sign of good states and \(S_0\) flips the sign of \(|0\rangle\).</p>
+    <p>If a measurement-free (unitary) algorithm \(A\) succeeds with probability \(a\), and you can run \(A\), \(A^{-1}\) and a phase oracle marking good outcomes, replace \(\mathsf{H}^{\otimes n}\) by \(A\) and \(|s\rangle\) by \(A|0\rangle\): the iterate \(Q=-A S_0 A^{-1} S_\chi\) boosts success to near \(1\) (for small \(a\); exact tuning needs a phase or ancilla trick) in \(O(1/\sqrt a)\) rounds, instead of \(O(1/a)\) classical repetitions. Here \(S_\chi\) flips the sign of good states and \(S_0\) flips the sign of \(|0\rangle\).</p>
   </div>
 
   <div class="card">
@@ -1115,7 +1115,7 @@ function drawGrover() {
   } else { t = S('text', { x: 10, y: 100 }, bEl); t.textContent = `N = ${Nn}: too many bars to draw; marked amplitude ${fmt(aw, 4)}, others ${fmt(ar, 4)}`; }
   // curve
   const cEl = $('#grCurve'); cEl.innerHTML = '';
-  const kopt = Math.max(0, Math.round(Math.PI / (4 * th) - 0.5)), K = Math.max(4, 2 * kopt + 2), L2 = 30, R2 = 410, T2 = 14, B2 = 130;
+  const kopt = Math.max(0, Math.round(Math.PI / (4 * th) - 0.5)), K = Math.max(4, 2 * kopt + 2, gs.k + 1), L2 = 30, R2 = 410, T2 = 14, B2 = 130;
   S('line', { x1: L2, y1: B2, x2: R2, y2: B2, class: 'axis' }, cEl);
   const X = k => L2 + (R2 - L2) * k / K, Y = p => B2 - (B2 - T2) * p;
   let d = ''; for (let k = 0; k <= K; k++) d += (k ? ' L' : 'M') + X(k) + ',' + Y(Math.sin((2 * k + 1) * th) ** 2);
@@ -1123,8 +1123,8 @@ function drawGrover() {
   for (let k = 0; k <= K; k++) S('circle', { cx: X(k), cy: Y(Math.sin((2 * k + 1) * th) ** 2), r: K > 40 ? 1.2 : 2.2, class: 'dot' }, cEl);
   S('line', { x1: X(kopt), y1: T2, x2: X(kopt), y2: B2, class: 'floor' }, cEl);
   if (gs.k <= K) S('circle', { cx: X(gs.k), cy: Y(gs.cw ** 2), r: 5, class: 'ph' }, cEl);
-  t = S('text', { x: L2, y: 150 }, cEl); t.textContent = `success probability vs k (dashed: k_opt = ${kopt})`;
-  $('#grStat').innerHTML = `\\(N=${Nn},\\ M=${gs.M},\\ \\theta=\\arcsin\\sqrt{M/N}=${fmt(th, 4)}\\). State: \\(${gs.half ? 'O\\,' : ''}G^{${gs.k}}|s\\rangle\\). \\(P(\\text{marked})=${fmt(gs.cw ** 2, 4)}\\), which matches \\(\\sin^2((2k+1)\\theta)=${fmt(Math.sin((2 * gs.k + 1) * th) ** 2, 4)}\\) with \\(k=${gs.k}\\)${gs.half ? ' (the oracle only flips a sign, so it leaves probabilities unchanged)' : ''}. Optimal \\(k_{\\text{opt}}=${kopt}\\) gives \\(${fmt(Math.sin((2 * kopt + 1) * th) ** 2, 4)}\\).${gs.last === 'D' && Nn <= 64 ? ' The diffusion flipped every amplitude about the dashed mean.' : ''}`;
+  t = S('text', { x: L2, y: 150 }, cEl); t.textContent = `success probability vs k (dashed: first peak k* = ${kopt})`;
+  $('#grStat').innerHTML = `\\(N=${Nn},\\ M=${gs.M},\\ \\theta=\\arcsin\\sqrt{M/N}=${fmt(th, 4)}\\). State: \\(${gs.half ? 'O\\,' : ''}G^{${gs.k}}|s\\rangle\\). \\(P(\\text{marked})=${fmt(gs.cw ** 2, 4)}\\), which matches \\(\\sin^2((2k+1)\\theta)=${fmt(Math.sin((2 * gs.k + 1) * th) ** 2, 4)}\\) with \\(k=${gs.k}\\)${gs.half ? ' (the oracle only flips a sign, so it leaves probabilities unchanged)' : ''}. First peak \\(k^*=\\mathrm{round}\\big(\\tfrac{\\pi}{4\\theta}-\\tfrac12\\big)=${kopt}\\) gives \\(${fmt(Math.sin((2 * kopt + 1) * th) ** 2, 4)}\\) (later peaks can be slightly higher but cost more queries).${gs.last === 'D' && Nn <= 64 ? ' The diffusion flipped every amplitude about the dashed mean.' : ''}`;
   typeset($('#grStat'));
 }
 grInit();
@@ -1191,7 +1191,7 @@ function genNew() {
   if (t === 'period') { const Nn = pick([8, 10, 12, 15, 16, 18, 20]); const ds = []; for (let p = 2; p < Nn; p++) if (Nn % p === 0) ds.push(p); const p = pick(ds), off = rnd(0, p - 1); const ans = []; for (let y = 0; y < Nn; y += Nn / p) ans.push(String(y)); cur = { t, Nn, p, ans, H: Array.from({ length: Nn / p }, (_, k) => String(k * p)) }; $('#genQ').innerHTML = `<p>\\(f\\) on \\(\\mathbb{Z}_{${Nn}}\\) has period \\(${p}\\) (distinct on each coset). The measured coset is \\(${off} + H\\). List every outcome with nonzero probability after \\(\\mathrm{QFT}_{\\mathbb{Z}_{${Nn}}}\\), comma-separated.</p>`; }
   if (t === 'simon') { const n = pick([3, 4]); const s = rnd(1, 2 ** n - 1); const ans = []; for (let y = 0; y < 2 ** n; y++) { let b = y & s, c = 0; while (b) { c ^= b & 1; b >>= 1; } if (!c) ans.push(y.toString(2).padStart(n, '0')); } cur = { t, n, s: s.toString(2).padStart(n, '0'), ans }; $('#genQ').innerHTML = `<p>Simon on \\(\\mathbb{Z}_2^{${n}}\\) with hidden \\(s = ${cur.s}\\). List all of \\(H^\\perp\\) as bitstrings.</p>`; }
   if (t === 'dlog') { const p = pick([7, 11, 13]), r = p - 1; let g = 2; while (order(g, p) !== r) g++; const s = rnd(1, r - 1), h = powmod(g, s, p); const nonInv = []; const inv = []; for (let y = 1; y < r; y++) (gcd(y, r) > 1 ? nonInv : inv).push(y); const y1s = Math.random() < 0.6 ? [pick(nonInv)] : [pick(nonInv), pick(inv)]; const samples = y1s.map(y => [y, mod(s * y, r)]); const ans = []; for (let c = 0; c < r; c++) if (samples.every(([a, b]) => mod(b - c * a, r) === 0)) ans.push(String(c)); const wrong = []; for (let c = 0; c < p; c++) if (samples.every(([a, b]) => mod(b - c * a, p) === 0)) wrong.push(String(c)); cur = { t, p, r, g, h, s, samples, ans, wrong }; $('#genQ').innerHTML = `<p>In \\(\\mathbb{Z}_{${p}}^*\\), \\(g = ${g}\\) has order \\(${r}\\), and \\(h = ${h} = g^s\\). Fourier sampling returned ${samples.map(([a, b]) => `\\((${a}, ${b})\\)`).join(' and ')}. List every \\(s \\in \\{0,\\dots,${r - 1}\\}\\) consistent with these samples.</p>`; }
-  if (t === 'grover') { const n = rnd(4, 14), M = rnd(1, 6), Nn = 2 ** n, th = Math.asin(Math.sqrt(M / Nn)), k = Math.max(0, Math.round(Math.PI / (4 * th) - 0.5)); cur = { t, n, M, Nn, th, k, P: Math.sin((2 * k + 1) * th) ** 2 }; $('#genQ').innerHTML = `<p>Grover search over \\(N = 2^{${n}} = ${Nn}\\) items with \\(M = ${M}\\) marked. How many iterations \\(k\\) maximize the success probability? Enter one integer.</p>`; typeset($('#genQ')); }
+  if (t === 'grover') { const n = rnd(4, 14), M = rnd(1, 6), Nn = 2 ** n, th = Math.asin(Math.sqrt(M / Nn)), k = Math.max(0, Math.round(Math.PI / (4 * th) - 0.5)); cur = { t, n, M, Nn, th, k, P: Math.sin((2 * k + 1) * th) ** 2 }; $('#genQ').innerHTML = `<p>Grover search over \\(N = 2^{${n}} = ${Nn}\\) items with \\(M = ${M}\\) marked. How many iterations \\(k\\) reach the first peak of the success probability? Enter one integer.</p>`; typeset($('#genQ')); }
   if (t === 'factor') { const Nn = pick([15, 21, 33, 35, 39]); const as = []; for (let a = 2; a < Nn - 1; a++) if (gcd(a, Nn) === 1) as.push(a); const a = pick(as), r = order(a, Nn); let out = 'fail'; if (r % 2 === 0) { const b = powmod(a, r / 2, Nn); if (b !== Nn - 1) out = [gcd(b - 1, Nn), gcd(b + 1, Nn)].sort((x, y) => x - y).join(','); } cur = { t, Nn, a, r, out }; $('#genQ').innerHTML = `<p>Factor \\(N = ${Nn}\\) with \\(a = ${a}\\). Answer as <code>r; p,q</code> (smaller factor first) or <code>r; fail</code> if the reduction must restart.</p>`; }
   typeset($('#genQ'));
 }
@@ -1212,6 +1212,7 @@ function genCheck() {
   if (cur.t === 'grover') {
     const kk = parseInt(raw, 10), Pk = Number.isFinite(kk) && kk >= 0 ? Math.sin((2 * kk + 1) * cur.th) ** 2 : null;
     if (Pk === null) msg = 'Enter a nonnegative integer.';
+    else if (kk !== cur.k && Pk >= cur.P - 1e-9) msg = `That is a later peak (\\(P = ${fmt(Pk, 4)}\\)), which costs more queries. The first peak is \\(k = ${cur.k}\\).`;
     else if (Pk >= cur.P - 1e-9) msg = `✓ Correct: \\(\\theta = ${fmt(cur.th, 4)}\\), \\(P = \\sin^2((2k+1)\\theta) = ${fmt(Pk, 4)}\\).`;
     else if (Pk > cur.P - 0.02) msg = `Close: \\(P = ${fmt(Pk, 4)}\\) versus the best \\(${fmt(cur.P, 4)}\\) at \\(k = ${cur.k}\\). Use \\(k = \\mathrm{round}\\big(\\tfrac{\\pi}{4\\theta} - \\tfrac12\\big)\\) with the exact \\(\\theta\\).`;
     else msg = `✗ \\(P = ${fmt(Pk, 4)}\\). ${kk > cur.k ? 'You overshot: the state rotated past \\(|w\\rangle\\).' : 'Too few steps.'} Compute \\(\\theta = \\arcsin\\sqrt{M/N}\\) and solve \\((2k+1)\\theta \\approx \\pi/2\\).`;
@@ -1239,9 +1240,9 @@ const PROMPTS = [
   [R`Walk through the factoring reduction and say where each failure comes from.`, [R`Pick a random \(a\); if \(\gcd(a,N)>1\) you are already done.`, R`Find the order \(r\) quantumly; restart if \(r\) is odd.`, R`\(b=a^{r/2}\) satisfies \((b-1)(b+1)\equiv0 \pmod N\), and \(b\not\equiv1\) by minimality of \(r\).`, R`Restart if \(b\equiv-1\); otherwise \(\gcd(b\pm1,N)\) are the factors.`]],
   [R`How is Shor's algorithm phase estimation in disguise?`, [R`Shor's oracle with second register \(|1\rangle\) is controlled powers of \(U_a\), by repeated squaring.`, R`On the orbit of \(1\), \(U_a\) is a cyclic shift with eigenphases \(2\pi j/r\).`, R`\(|1\rangle=\frac{1}{\sqrt r}\sum_j|\psi_j\rangle\) is a uniform superposition of those eigenvectors.`, R`So the output estimates a uniformly random \(j/r\); continued fractions give \(r\).`]],
   [R`Why is one Grover iteration a rotation by \(2\theta\)?`, [R`The state stays in the plane of \(|w\rangle\) and \(|r\rangle\).`, R`The oracle reflects about \(|r\rangle\); the diffusion reflects about \(|s\rangle\).`, R`Two reflections compose to a rotation by twice the angle between the mirrors.`, R`The angle between \(|r\rangle\) and \(|s\rangle\) is \(\theta=\arcsin\sqrt{M/N}\).`]],
-  [R`Why can't you just run Grover longer to be safe?`, [R`Success probability is \(\sin^2((2k+1)\theta)\), which oscillates.`, R`Past \(k_{\text{opt}}\approx\frac{\pi}{4}\sqrt{N/M}\) the state rotates away from \(|w\rangle\).`, R`At about \(2k_{\text{opt}}\) the success probability is back near zero.`, R`With unknown \(M\), pick \(k\) at random from growing ranges.`]],
-  [R`How does amplitude estimation beat classical sampling?`, [R`\(G\) acts as a rotation by \(2\theta\), with eigenvalues \(e^{\pm2i\theta}\).`, R`\(|s\rangle\) has equal weight on the two eigenvectors.`, R`Phase estimation with \(t\) uses of \(G\) gives \(\theta\), hence \(a=\sin^2\theta\), to error \(O(1/t)\).`, R`Classical sampling needs \(O(1/\varepsilon^2)\) samples: a quadratic speedup.`]],
-  [R`Why is Grover's speedup only quadratic?`, [R`Any quantum algorithm for unstructured search needs \(\Omega(\sqrt N)\) queries (Bennett–Bernstein–Brassard–Vazirani).`, R`Each query can only move the state a little toward a marked item (hybrid argument).`, R`So there is no exponential speedup without structure.`, R`Grover alone does not make NP-complete problems efficient.`]],
+  [R`Why can't you just run Grover longer to be safe?`, [R`Success probability is \(\sin^2((2k+1)\theta)\), which oscillates.`, R`Past the first peak \(k^*\approx\frac{\pi}{4}\sqrt{N/M}\) (for \(M\ll N\)) the state rotates away from \(|w\rangle\).`, R`At about \(2k^*\) the success probability is back down to \(O(M/N)\).`, R`With unknown \(M\), pick \(k\) at random from growing ranges.`]],
+  [R`How does amplitude estimation beat classical sampling?`, [R`\(G\) acts as a rotation by \(2\theta\), with eigenvalues \(e^{\pm2i\theta}\).`, R`\(|s\rangle\) is an equal-weight superposition of the two eigenvectors.`, R`Phase estimation with \(t\) uses of \(G\) gives \(\theta\), hence \(a=\sin^2\theta\), to error \(O(1/t)\).`, R`Classical sampling needs \(O(1/\varepsilon^2)\) samples: a quadratic speedup.`]],
+  [R`Why is Grover's speedup only quadratic?`, [R`Any bounded-error quantum algorithm for unstructured search needs \(\Omega(\sqrt N)\) queries in the worst case (Bennett–Bernstein–Brassard–Vazirani).`, R`Averaged over which item is marked, each query changes the state only by \(O(1/\sqrt N)\) (hybrid argument).`, R`So there is no exponential speedup without structure.`, R`Grover alone does not make NP-complete problems efficient.`]],
   [R`Why is the non-abelian HSP hard if few queries suffice?`, [R`Ettinger–Høyer–Knill: \(\mathrm{poly}(\log|G|)\) queries carry enough information to identify \(H\).`, R`Extracting it needs a joint measurement on many coset states with no known efficient circuit.`, R`Irreducible representations are \(d\times d\) matrices, so the coset shift is not just a phase.`, R`Instances: graph isomorphism via \(S_{2n}\); the dihedral HSP connects to lattice problems.`]],
 ];
 const rated = load('cs259q-speak', {});
