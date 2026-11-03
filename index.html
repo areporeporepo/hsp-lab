@@ -276,7 +276,7 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
   <div class="card" id="w-ae">
     <span class="eyebrow">L14 · Amplitude estimation</span>
     <h2>Phase estimation on the Grover iterate</h2>
-    <p>In the \(|w\rangle,|r\rangle\) plane, \(G\) is a rotation by \(2\theta\), so its eigenvalues are \(e^{\pm 2i\theta}\), and \(|s\rangle\) is an equal mix of the two eigenvectors. Phase estimation with \(m\) qubits reads \(\theta\), hence \(a=\sin^2\theta\), using \(2^m-1\) applications of \(G\). Compare with estimating \(a\) by sampling \(2^m\) times classically.</p>
+    <p>In the \(|w\rangle,|r\rangle\) plane, \(G\) is a rotation by \(2\theta\), so its eigenvalues there are \(e^{\pm 2i\theta}\), and \(|s\rangle\) is an equal mix of the two eigenvectors. Phase estimation with \(m\) qubits reads \(\theta\), hence \(a=\sin^2\theta\), using \(2^m-1\) applications of \(G\). Compare with estimating \(a\) from \(2^m-1\) classical samples (the same number of oracle calls).</p>
     <div class="row">
       <div class="ctrl"><label for="aeA">True \(a\) = <span id="aeAV" class="num"></span></label><input type="range" id="aeA" min="1" max="99" value="30"></div>
       <div class="ctrl"><label for="aeM">Phase qubits \(m\) = <span id="aeMV" class="num"></span></label><input type="range" id="aeM" min="2" max="8" value="5"></div>
@@ -514,7 +514,7 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
       <button class="nexthint">Hint 1 of 1</button>
     </div>
     <div class="solution" hidden>
-      <p>\(\theta\approx2^{-10}\), so \(k_{\text{opt}}\approx\tfrac{\pi}{4}\cdot2^{10}\approx804\), giving \(P\approx1-O(1/N)\). After \(2k_{\text{opt}}\) steps the angle is about \(\pi\), so \(P\approx0\): Grover is a rotation, and running it longer overshoots. When \(M\) is unknown, pick \(k\) at random from growing ranges (Boyer–Brassard–Høyer–Tapp).</p>
+      <p>\(\theta\approx2^{-10}\), so \(k_{\text{opt}}\approx\tfrac{\pi}{4}\cdot2^{10}\approx804\), giving \(P\approx1-O(1/N)\). After \(2k_{\text{opt}}\) steps the angle is within a few \(\theta\) of \(\pi\), so \(P=O(M/N)\) (here about \(9\times10^{-11}\)): Grover is a rotation, and running it longer overshoots. When \(M\) is unknown, pick \(k\) at random from growing ranges (Boyer–Brassard–Høyer–Tapp).</p>
     </div>
     <button class="ghost openSol">Open solution</button>
     <div class="mastery"></div>
@@ -529,7 +529,7 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
     </div>
     <div class="audit">
       <fieldset data-ans="b" data-why="|s⟩ has equal weight on the two eigenvectors, so phase estimation returns +2θ or −2θ with probability 1/2 each; both give the same a = sin²θ."><legend>Phase estimation on \(G\) with input \(|s\rangle\) returns</legend>
-        <label><input type="radio" name="ei1" value="a"> always \(+2\theta\)</label><label><input type="radio" name="ei1" value="b"> \(\pm2\theta\), each with probability \(\tfrac12\)</label></fieldset>
+        <label><input type="radio" name="ei1" value="a"> always \(+2\theta\)</label><label><input type="radio" name="ei1" value="b"> estimates of \(\pm2\theta \pmod{2\pi}\), each with probability \(\tfrac12\) (for \(0\lt M\lt N\))</label></fieldset>
       <button class="checkaudit">Check self-check and open solution</button>
     </div>
     <div class="solution" hidden>
@@ -546,7 +546,7 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
       <button class="nexthint">Hint 1 of 1</button>
     </div>
     <div class="solution" hidden>
-      <p>Classical \(T=O(1/\varepsilon^2)\approx10^6\). Quantum \(t=O(1/\varepsilon)\approx10^3\): the error bound is \(|\tilde a-a|\le\frac{2\pi\sqrt{a(1-a)}}{t}+\frac{\pi^2}{t^2}\) with probability at least \(8/\pi^2\) (Brassard–Høyer–Mosca–Tapp). A quadratic speedup, the same one as Grover's.</p>
+      <p>Classical \(T=O(1/\varepsilon^2)\approx10^6\). Quantum \(t=O(1/\varepsilon)\approx10^3\): with a register of size \(Q=t+1\), \(|\tilde a-a|\le\frac{2\pi\sqrt{a(1-a)}}{Q}+\frac{\pi^2}{Q^2}\) with probability at least \(8/\pi^2\) (Brassard–Høyer–Mosca–Tapp). These counts assume \(a\) is bounded away from \(0\) and \(1\). A quadratic speedup, the same one as Grover's.</p>
     </div>
     <button class="ghost openSol">Open solution</button>
     <div class="mastery"></div>
@@ -644,34 +644,34 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
   <div class="card">
     <span class="eyebrow">Grover</span>
     <h3>11. Inversion about the mean</h3>
-    <p>The same diffusion step, seen on the amplitudes: \(\alpha_x\mapsto2\mu-\alpha_x\). The oracle pushes the marked amplitude below the mean; flipping about the mean throws it far above. Each step adds about \(2/\sqrt N\) to it.</p>
+    <p>The same diffusion step, seen on the amplitudes: \(\alpha_x\mapsto2\mu-\alpha_x\). Before the optimum (and for \(M\ll N\)), the oracle pushes the marked amplitude below the mean; flipping about the mean throws it far above. Early on (while \(k\theta\ll1\)) each step adds about \(2/\sqrt N\) to it; in general step \(k\) adds \(\tfrac{2}{\sqrt N}\cos(2k\theta)\), which shrinks to zero near the optimum.</p>
     <p class="small"><b>Play:</b> <a href="#w-grover">Grover simulator</a> with \(n\le6\): the dashed line is the mean. <b>Whiteboard:</b> <a href="#d-mean">the \(N=4\) drill</a>.</p>
   </div>
 
   <div class="card">
     <span class="eyebrow">Grover</span>
     <h3>12. Don't overcook it</h3>
-    <p>Success probability \(\sin^2((2k+1)\theta)\) oscillates. Stop at \(k\approx\frac{\pi}{4}\sqrt{N/M}\); twice that brings you back near zero. Unknown \(M\): choose \(k\) at random from growing ranges.</p>
+    <p>Success probability \(\sin^2((2k+1)\theta)\) oscillates. Stop at \(k\approx\frac{\pi}{4\theta}-\frac12\), which is \(\approx\frac{\pi}{4}\sqrt{N/M}\) when \(M\ll N\). Twice that brings the success probability back down to \(O(M/N)\), near zero when \(M\ll N\). Unknown \(M\): choose \(k\) at random from growing ranges.</p>
     <p class="small"><b>Play:</b> keep pressing "Full step" and watch the curve wrap. <b>Generator:</b> Board → "Grover: optimal iterations".</p>
   </div>
 
   <div class="card">
     <span class="eyebrow">Grover</span>
     <h3>13. Why \(\sqrt N\) is the best possible</h3>
-    <p>Bennett, Bernstein, Brassard and Vazirani (1997): any quantum algorithm for unstructured search needs \(\Omega(\sqrt N)\) queries. Each query can move the state only a little toward any one marked item (hybrid argument). So Grover gives a quadratic speedup, not an exponential one, and does not by itself make NP-complete problems easy.</p>
+    <p>Bennett, Bernstein, Brassard and Vazirani (1997): any quantum algorithm for unstructured search needs \(\Omega(\sqrt N)\) queries. A single query's effect is spread over all \(N\) items, so for a worst-case marked item it changes the state by only \(O(1/\sqrt N)\) compared with an empty oracle (hybrid argument). So Grover gives a quadratic speedup, not an exponential one, and does not by itself make NP-complete problems easy.</p>
   </div>
 
   <div class="card">
     <span class="eyebrow">Amplitude amplification</span>
     <h3>14. Grover works on any algorithm, not just \(\mathsf{H}^{\otimes n}\)</h3>
-    <p>If an algorithm \(A\) succeeds with probability \(a\), replace \(\mathsf{H}^{\otimes n}\) by \(A\) and \(|s\rangle\) by \(A|0\rangle\): the iterate \(Q=-A S_0 A^{-1} S_\chi\) boosts success to near \(1\) in \(O(1/\sqrt a)\) rounds, instead of \(O(1/a)\) classical repetitions. Here \(S_\chi\) flips the sign of good states and \(S_0\) flips the sign of \(|0\rangle\).</p>
+    <p>If a measurement-free (unitary) algorithm \(A\) succeeds with probability \(a\), replace \(\mathsf{H}^{\otimes n}\) by \(A\) and \(|s\rangle\) by \(A|0\rangle\): the iterate \(Q=-A S_0 A^{-1} S_\chi\) boosts success to near \(1\) (for small \(a\); exact tuning needs a phase or ancilla trick) in \(O(1/\sqrt a)\) rounds, instead of \(O(1/a)\) classical repetitions. Here \(S_\chi\) flips the sign of good states and \(S_0\) flips the sign of \(|0\rangle\).</p>
   </div>
 
   <div class="card">
     <span class="eyebrow">Amplitude estimation · links L12 to L14</span>
     <h3>15. Amplitude estimation is phase estimation of \(G\)</h3>
-    <p>\(G\) is a rotation by \(2\theta\), so its eigenvalues are \(e^{\pm2i\theta}\). Run L12's phase estimation on \(G\) with input \(|s\rangle\): you learn \(\theta\), hence \(a=\sin^2\theta\), to accuracy \(O(1/t)\) with \(t\) uses of \(G\). Classical sampling needs \(O(1/\varepsilon^2)\). Same quadratic speedup, now for estimation.</p>
-    <p class="small"><b>Play:</b> <a href="#w-ae">amplitude estimation widget</a>: add a qubit and the quantum error halves, while the classical error only shrinks by \(1/\sqrt2\). <b>Whiteboard:</b> <a href="#d-eig">eigenvalues of \(G\)</a>.</p>
+    <p>On the plane spanned by \(|w\rangle,|r\rangle\), \(G\) is a rotation by \(2\theta\), so its eigenvalues there are \(e^{\pm2i\theta}\). Run L12's phase estimation on \(G\) with input \(|s\rangle\): you learn \(\theta\), hence \(a=\sin^2\theta\), to additive error \(\varepsilon=O(1/t)\) with probability \(\ge8/\pi^2\), using \(t\) uses of \(G\). Classical sampling needs \(O(1/\varepsilon^2)\) samples. Same quadratic speedup, now for estimation.</p>
+    <p class="small"><b>Play:</b> <a href="#w-ae">amplitude estimation widget</a>: add a qubit and the guaranteed quantum error halves, while the classical error only shrinks by \(1/\sqrt2\). <b>Whiteboard:</b> <a href="#d-eig">eigenvalues of \(G\)</a>.</p>
   </div>
 
   <div class="card">
@@ -1084,8 +1084,8 @@ $('#shReset').addEventListener('click', () => { sh.rs = []; sh.log = []; drawSho
 const gs = { n: 4, M: 1, cw: 0, cr: 0, k: 0, half: false, last: '' };
 const grTheta = () => Math.asin(Math.sqrt(gs.M / 2 ** gs.n));
 function grInit() { const th = grTheta(); gs.cw = Math.sin(th); gs.cr = Math.cos(th); gs.k = 0; gs.half = false; gs.last = ''; }
-function grO() { gs.cw = -gs.cw; gs.half = true; gs.last = 'O'; }
-function grD() { const th = grTheta(), sw = Math.sin(th), sr = Math.cos(th), dot = gs.cw * sw + gs.cr * sr; gs.cw = 2 * dot * sw - gs.cw; gs.cr = 2 * dot * sr - gs.cr; if (gs.half) { gs.k++; gs.half = false; } gs.last = 'D'; }
+function grO() { gs.cw = -gs.cw; gs.half = !gs.half; gs.last = 'O'; }
+function grD() { const th = grTheta(), sw = Math.sin(th), sr = Math.cos(th), dot = gs.cw * sw + gs.cr * sr; gs.cw = 2 * dot * sw - gs.cw; gs.cr = 2 * dot * sr - gs.cr; if (gs.half) { gs.k++; gs.half = false; } else if (gs.k > 0) { gs.k--; gs.half = true; } gs.last = 'D'; }
 function drawGrover() {
   if ($('#v-lab').hidden) return;
   const Nn = 2 ** gs.n, th = grTheta();
@@ -1124,15 +1124,15 @@ function drawGrover() {
   S('line', { x1: X(kopt), y1: T2, x2: X(kopt), y2: B2, class: 'floor' }, cEl);
   if (gs.k <= K) S('circle', { cx: X(gs.k), cy: Y(gs.cw ** 2), r: 5, class: 'ph' }, cEl);
   t = S('text', { x: L2, y: 150 }, cEl); t.textContent = `success probability vs k (dashed: k_opt = ${kopt})`;
-  $('#grStat').innerHTML = `\\(N=${Nn},\\ M=${gs.M},\\ \\theta=\\arcsin\\sqrt{M/N}=${fmt(th, 4)}\\). After \\(k=${gs.k}\\) full steps${gs.half ? ' and an oracle' : ''}: \\(P(\\text{marked})=${fmt(gs.cw ** 2, 4)}\\)${gs.half ? '' : `, which matches \\(\\sin^2((2k+1)\\theta)=${fmt(Math.sin((2 * gs.k + 1) * th) ** 2, 4)}\\)`}. Optimal \\(k_{\\text{opt}}=${kopt}\\) gives \\(${fmt(Math.sin((2 * kopt + 1) * th) ** 2, 4)}\\).${gs.last === 'D' && Nn <= 64 ? ' The diffusion flipped every amplitude about the dashed mean.' : ''}`;
+  $('#grStat').innerHTML = `\\(N=${Nn},\\ M=${gs.M},\\ \\theta=\\arcsin\\sqrt{M/N}=${fmt(th, 4)}\\). State: \\(${gs.half ? 'O\\,' : ''}G^{${gs.k}}|s\\rangle\\). \\(P(\\text{marked})=${fmt(gs.cw ** 2, 4)}\\), which matches \\(\\sin^2((2k+1)\\theta)=${fmt(Math.sin((2 * gs.k + 1) * th) ** 2, 4)}\\) with \\(k=${gs.k}\\)${gs.half ? ' (the oracle only flips a sign, so it leaves probabilities unchanged)' : ''}. Optimal \\(k_{\\text{opt}}=${kopt}\\) gives \\(${fmt(Math.sin((2 * kopt + 1) * th) ** 2, 4)}\\).${gs.last === 'D' && Nn <= 64 ? ' The diffusion flipped every amplitude about the dashed mean.' : ''}`;
   typeset($('#grStat'));
 }
 grInit();
 $('#grN').addEventListener('input', e => { gs.n = +e.target.value; if (gs.M >= 2 ** gs.n) gs.M = 1; $('#grM').value = gs.M; grInit(); drawGrover(); });
-$('#grM').addEventListener('change', e => { gs.M = Math.min(+e.target.value, 2 ** gs.n - 1); grInit(); drawGrover(); });
+$('#grM').addEventListener('change', e => { gs.M = Math.min(+e.target.value, 2 ** gs.n - 1); $('#grM').value = gs.M; grInit(); drawGrover(); });
 $('#grO').addEventListener('click', () => { grO(); drawGrover(); });
 $('#grD').addEventListener('click', () => { grD(); drawGrover(); });
-$('#grG').addEventListener('click', () => { if (gs.half) grD(); else { grO(); grD(); } drawGrover(); });
+$('#grG').addEventListener('click', () => { if (gs.half) grD(); else { grO(); grD(); } gs.last = 'G'; drawGrover(); });
 $('#grReset').addEventListener('click', () => { grInit(); drawGrover(); });
 
 /* ---------------- L14: amplitude estimation widget ---------------- */
@@ -1147,14 +1147,19 @@ function drawAE() {
   const L = 30, R = 664, Tp = 30, B = 190, X = v => L + (R - L) * v, mx = Math.max(...dist.values());
   S('line', { x1: L, y1: B, x2: R, y2: B, class: 'axis' }, el);
   [0, 0.25, 0.5, 0.75, 1].forEach(v => { S('line', { x1: X(v), y1: B, x2: X(v), y2: B + 5, class: 'axis' }, el); const tt = S('text', { x: X(v) - 8, y: B + 18 }, el); tt.textContent = v; });
-  let qErr = 0;
-  dist.forEach((p, k) => { const v = +k; qErr += p * Math.abs(v - ae.a); const h = (B - Tp) * p / mx; S('rect', { x: X(v) - 2.5, y: B - h, width: 5, height: Math.max(h, 0.5), class: 'bar' }, el); });
+  const q80 = (pairs) => { pairs.sort((x, y) => x[0] - y[0]); let c = 0; for (const [e, pr] of pairs) { c += pr; if (c >= 0.8 - 1e-12) return e; } return pairs.length ? pairs[pairs.length - 1][0] : 0; };
+  const qPairs = []; dist.forEach((p, k) => { const v = +k; qPairs.push([Math.abs(v - ae.a), p]); const h = (B - Tp) * p / mx; S('rect', { x: X(v) - 2.5, y: B - h, width: 5, height: Math.max(h, 0.5), class: 'bar' }, el); });
+  const qE = q80(qPairs);
+  // classical: T - 1 samples (same number of oracle calls as T - 1 uses of G), exact binomial
+  const n = T - 1, lg = x => { let r = 0; for (let i = 2; i <= x; i++) r += Math.log(i); return r; }, cPairs = [];
+  for (let k = 0; k <= n; k++) { const lp = lg(n) - lg(k) - lg(n - k) + (k ? k * Math.log(ae.a) : 0) + (n - k ? (n - k) * Math.log(1 - ae.a) : 0); cPairs.push([Math.abs(k / n - ae.a), Math.exp(lp)]); }
+  const cE = q80(cPairs), bound = 2 * Math.PI * Math.sqrt(ae.a * (1 - ae.a)) / T + Math.PI ** 2 / T ** 2;
   S('line', { x1: X(ae.a), y1: Tp - 12, x2: X(ae.a), y2: B, class: 'floor' }, el);
-  const sig = Math.sqrt(ae.a * (1 - ae.a) / T), cErr = sig * Math.sqrt(2 / Math.PI);
-  const br = (y, w, lab) => { S('line', { x1: X(ae.a - w), y1: y, x2: X(ae.a + w), y2: y, class: 'res' }, el); [ae.a - w, ae.a + w].forEach(v => S('line', { x1: X(v), y1: y - 5, x2: X(v), y2: y + 5, class: 'res' }, el)); const tt = S('text', { x: Math.min(X(ae.a + w) + 6, R - 150), y: y + 4 }, el); tt.textContent = lab; };
-  br(14, cErr, 'classical, same queries'); br(B + 34, qErr, 'amplitude estimation');
+  const cl = v => Math.min(1, Math.max(0, v));
+  const br = (y, w, lab) => { const lo = cl(ae.a - w), hi = cl(ae.a + w); S('line', { x1: X(lo), y1: y, x2: X(hi), y2: y, class: 'res' }, el); [lo, hi].forEach(v => S('line', { x1: X(v), y1: y - 5, x2: X(v), y2: y + 5, class: 'res' }, el)); const tt = S('text', { x: Math.min(X(hi) + 6, R - 170), y: y + 4 }, el); tt.textContent = lab; };
+  br(14, cE, `classical, ${n} samples (80%)`); br(B + 34, qE, 'amplitude estimation (80%)');
   el.setAttribute('viewBox', '0 0 680 240');
-  $('#aeStat').innerHTML = `Bars: distribution of the estimate \\(\\tilde a=\\sin^2(\\pi y/2^m)\\). Mean error, quantum: \\(${fmt(qErr, 4)}\\). Classical with \\(${T}\\) samples: \\(\\approx ${fmt(cErr, 4)}\\). Ratio \\(${fmt(cErr / Math.max(qErr, 1e-12), 1)}\\times\\). Add one qubit: the quantum error roughly halves, the classical one shrinks only by \\(1/\\sqrt2\\).`;
+  $('#aeStat').innerHTML = `Bars: distribution of \\(\\tilde a=\\sin^2(\\pi y/2^m)\\). 80% error, quantum: \\(${fmt(qE, 4)}\\); classical with \\(${n}\\) samples (exact binomial): \\(${fmt(cE, 4)}\\)${qE > 1e-9 ? `, ratio \\(${fmt(cE / qE, 1)}\\times\\)` : ' (quantum is exact here: \\(\\theta/\\pi\\) lies on the grid)'}. Guarantee (Brassard–Høyer–Mosca–Tapp): \\(|\\tilde a-a|\\le\\frac{2\\pi\\sqrt{a(1-a)}}{2^m}+\\frac{\\pi^2}{2^{2m}}=${fmt(bound, 4)}\\) with probability \\(\\ge 8/\\pi^2\\). That bound halves with each qubit; the actual error also depends on how close \\(\\theta/\\pi\\) falls to the grid, so try several \\(a\\). The classical error only shrinks by \\(1/\\sqrt2\\) per doubling.`;
   typeset($('#aeStat'));
 }
 $('#aeA').addEventListener('input', e => { ae.a = +e.target.value / 100; drawAE(); });
