@@ -4,7 +4,7 @@
   "use strict";
   const P = [
     { id: "p1", lec: "L10", title: "Toy period finding: which outcomes survive?",
-      body: String.raw`Let \(n = 4\), so \(N = 2^n = 16\) and \(\omega = e^{2\pi i/16}\). A function \(f\) on \(\{0,\dots,15\}\) has period \(p = 4\). After the oracle, measuring the second register, and applying \(\mathrm{QFT}_n\), which outcomes \(y\) have nonzero probability, and what is each probability?`,
+      body: String.raw`Let \(n = 4\), so \(N = 2^n = 16\) and \(\omega = e^{2\pi i/16}\). A function \(f\) on \(\{0,\dots,15\}\) has period \(p = 4\) in the course's sense: \(f(x) = f(x')\) exactly when \(x \equiv x' \pmod 4\). Start from the uniform superposition. After the oracle, measuring the second register, and applying \(\mathrm{QFT}_n\), which outcomes \(y\) have nonzero probability, and what is each probability?`,
       fields: [{ label: "outcomes y (comma list)", kind: "set", answer: ["0", "4", "8", "12"] }, { label: "probability of each", kind: "num", answer: 0.25, tol: 1e-3 }],
       hint: String.raw`The amplitude of \(|y\rangle\) contains the geometric sum \(\sum_{k=0}^{N/p-1} \omega^{ykp}\). When is \(\omega^{yp} = 1\)?`,
       solution: String.raw`\(\sum_{k=0}^{N/p-1} \omega^{ykp}\) equals \(N/p\) if \(\omega^{yp}=1\) and \(0\) otherwise. \(\omega^{yp}=1 \iff yp/N \in \mathbb{Z} \iff y = cN/p\). With \(N/p = 4\): \(y \in \{0,4,8,12\}\), each with probability \(1/p = 1/4\).` },
@@ -28,10 +28,10 @@
       solution: String.raw`\(U_a|\psi_s\rangle = \tfrac{1}{\sqrt r}\sum_k e^{-2\pi i sk/r}|a^{k+1}\rangle = e^{2\pi i s/r}|\psi_s\rangle\), so \(\theta/2\pi = s/r = 1/4\). Since \(|1\rangle = \tfrac{1}{\sqrt r}\sum_{s=0}^{r-1}|\psi_s\rangle\), phase estimation returns \(s/r\) with probability \(1/r\) each. With \(2^3 = 8\): \(x = 8s/4 \in \{0,2,4,6\}\), exact because \(r \mid 8\), each with probability \(1/4\).` },
 
     { id: "p5", lec: "L12", title: "The worst case behind \\(8/\\pi^2\\)",
-      body: String.raw`In phase estimation, suppose \(\gamma = N\theta/2\pi\) sits exactly halfway between integers \(y_0\) and \(y_1\). For large \(N\), what is \(|\alpha_{y_0}|^2\)? (Then check that \(|\alpha_{y_0}|^2 + |\alpha_{y_1}|^2 = 8/\pi^2\).)`,
+      body: String.raw`In phase estimation, suppose \(\gamma = N\theta/2\pi\) sits exactly halfway between integers \(y_0\) and \(y_1\). For large \(N\), what is \(\lim_{N\to\infty}|\alpha_{y_0}|^2\)? (Then check that the two consecutive integers together carry \(8/\pi^2\) in the limit.)`,
       fields: [{ label: "|α_{y0}|² (decimal)", kind: "num", answer: 4 / (Math.PI * Math.PI), tol: 2e-3 }],
       hint: String.raw`\(\alpha_{y_0} \approx \int_0^1 e^{\pi i t}\,dt\).`,
-      solution: String.raw`\(\int_0^1 e^{\pi i t}dt = \tfrac{e^{\pi i}-1}{\pi i} = \tfrac{-2}{\pi i}\), so \(|\alpha_{y_0}|^2 = 4/\pi^2 \approx 0.405\). By symmetry \(|\alpha_{y_1}|^2\) is the same, total \(8/\pi^2 \approx 0.811\).` },
+      solution: String.raw`\(\int_0^1 e^{\pi i t}dt = \tfrac{e^{\pi i}-1}{\pi i} = \tfrac{-2}{\pi i}\), so \(|\alpha_{y_0}|^2 = 4/\pi^2 \approx 0.405\). By symmetry \(|\alpha_{y_1}|^2\) is the same, total \(8/\pi^2 \approx 0.811\). For finite \(N\) the exact value is \(|\alpha_{y_j}|^2 = \frac{1}{N^2\sin^2(\pi/2N)}\), which tends to \(4/\pi^2\) from above.` },
 
     { id: "p6", lec: "L13", title: "Simon as an HSP: list \\(H^\\perp\\)",
       body: String.raw`\(G = \mathbb{Z}_2^3\), \(H = \{000, 101\}\). The characters are \(\chi_y(x) = (-1)^{x\cdot y}\). List \(H^\perp = \{y : \chi_y(h) = 1\ \forall h \in H\}\). How big is it?`,
@@ -46,7 +46,7 @@
       solution: String.raw`\(H = \{0, 4, 8\}\). \(\omega^{4y} = 1 \iff 12 \mid 4y \iff 3 \mid y\), so \(H^\perp = \{0,3,6,9\}\): the multiples of \(N/p = 12/4 = 3\), the same answer as toy period finding with period 4.` },
 
     { id: "p8", lec: "L13", title: "A product group: \\(\\mathbb{Z}_4 \\times \\mathbb{Z}_6\\)",
-      body: String.raw`\(G = \mathbb{Z}_4 \times \mathbb{Z}_6\), \(H = \langle (2,3) \rangle\). Characters are \(\chi_{(y_1,y_2)}(x_1,x_2) = e^{2\pi i (x_1y_1/4 + x_2y_2/6)}\). (a) \(|H|\)? (b) \(|H^\perp|\)? (c) Is \((1,3) \in H^\perp\)? (d) After measuring \(f\) and applying \(\mathcal{F}_G = \mathrm{QFT}_4 \otimes \mathrm{QFT}_6\), what is the probability of each \(y \in H^\perp\)?`,
+      body: String.raw`\(G = \mathbb{Z}_4 \times \mathbb{Z}_6\), \(H = \langle (2,3) \rangle\). Characters are \(\chi_{(y_1,y_2)}(x_1,x_2) = e^{2\pi i (x_1y_1/4 + x_2y_2/6)}\). (a) \(|H|\)? (b) \(|H^\perp|\)? (c) Is \((1,3) \in H^\perp\)? (d) Start from the uniform superposition over \(G\), query an \(f\) with \(f(x) = f(x') \iff x - x' \in H\), measure the output register, and apply \(\mathcal{F}_G = \mathcal{F}_{\mathbb{Z}_4} \otimes \mathcal{F}_{\mathbb{Z}_6}\) (Fourier transforms on 4 and 6 states, not on 4 and 6 qubits). What is the probability of each \(y \in H^\perp\)?`,
       fields: [{ label: "(a) |H|", kind: "num", answer: 2, tol: 0 }, { label: "(b) |H⊥|", kind: "num", answer: 12, tol: 0 }, { label: "(c) yes / no", kind: "text", answer: "yes" }, { label: "(d) probability", kind: "num", answer: 1 / 12, tol: 1e-3 }],
       hint: String.raw`\(2\cdot(2,3) = (4,6) = (0,0)\). Then \(\chi_y((2,3)) = e^{2\pi i(2y_1/4 + 3y_2/6)} = e^{\pi i (y_1 + y_2)}\).`,
       solution: String.raw`(a) \(H = \{(0,0),(2,3)\}\), so \(|H| = 2\). (b) \(\chi_y\) trivial on \(H \iff y_1 + y_2\) even, half of the 24 pairs: \(|H^\perp| = 12 = |G|/|H|\). (c) \(1 + 3 = 4\) is even, yes. (d) Uniform over \(H^\perp\): \(|H|/|G| = 1/12\).` },
@@ -64,14 +64,14 @@
       solution: String.raw`Both equations force \(s_1 = s_2 = s_3\). The nonzero solution is \(s = 111\). Check: \(011\cdot111 = 0\oplus1\oplus1 = 0\), \(110\cdot111 = 1\oplus1\oplus0 = 0\).` },
 
     { id: "p11", lec: "L14", title: "Grover with \\(N = 4\\), \\(M = 1\\)",
-      body: String.raw`With \(\sin\theta = \sqrt{M/N}\), after \(k\) Grover iterations the success probability is \(\sin^2((2k+1)\theta)\). For \(N = 4\), \(M = 1\): (a) \(\theta\) in degrees? (b) success probability after \(k = 1\)? (c) after \(k = 2\)?`,
+      body: String.raw`With \(\theta = \arcsin\sqrt{M/N} \in [0, \pi/2]\), after \(k\) Grover iterations the success probability is \(\sin^2((2k+1)\theta)\). For \(N = 4\), \(M = 1\): (a) \(\theta\) in degrees? (b) success probability after \(k = 1\)? (c) after \(k = 2\)?`,
       fields: [{ label: "(a) θ (degrees)", kind: "num", answer: 30, tol: 0.05 }, { label: "(b) k = 1", kind: "num", answer: 1, tol: 1e-3 }, { label: "(c) k = 2", kind: "num", answer: 0.25, tol: 1e-3 }],
       hint: String.raw`\(\sin\theta = 1/2\).`,
       solution: String.raw`(a) \(\theta = 30^\circ\). (b) \(\sin^2(90^\circ) = 1\). (c) \(\sin^2(150^\circ) = 1/4\): overshooting rotates past the target.` },
 
     { id: "p12", lec: "L14", title: "How many iterations for \\(N = 1024\\)?",
-      body: String.raw`\(N = 2^{10}\), \(M = 1\). What integer \(k\) maximizes \(\sin^2((2k+1)\theta)\)? What is the success probability at that \(k\) (3 decimals)?`,
-      fields: [{ label: "k", kind: "num", answer: 25, tol: 0 }, { label: "success probability", kind: "num", answer: 0.99945, tol: 2e-3 }],
+      body: String.raw`\(N = 2^{10}\), \(M = 1\). What is the first \(k\) at which \(\sin^2((2k+1)\theta)\) peaks, i.e. the integer nearest \(\tfrac{\pi}{4\theta} - \tfrac12\)? What is the success probability there (3 decimals)? (Later peaks such as \(k = 75\) come slightly closer to 1, but cost three times as many queries.)`,
+      fields: [{ label: "k", kind: "num", answer: 25, tol: 0 }, { label: "success probability", kind: "num", answer: 0.99946, tol: 1.5e-3 }],
       hint: String.raw`\(\theta = \arcsin(1/32) \approx 0.03125\). You want \((2k+1)\theta \approx \pi/2\).`,
       solution: String.raw`\(k \approx \tfrac{\pi}{4\theta} - \tfrac12 \approx 25.1 - 0.5\), so \(k = 25\) and \((2k+1)\theta = 51\theta \approx 1.594\) rad. \(\sin^2(1.594) \approx 0.9995\). That is about \(\tfrac{\pi}{4}\sqrt N\) iterations, against about \(N/2\) classical queries.` },
   ];

@@ -51,8 +51,9 @@ ok(64 / Q.gcd(24, 40) === get("p2")[0].answer, "p2 p");
 ok(Q.gf2NullVector([0b011, 0b110], 3).toString(2) === get("p10")[0].answer, "p10");
 // p11 / p12
 { const th = Math.asin(0.5); ok(Math.abs(th * 180 / Math.PI - 30) < 1e-9, "p11a"); ok(Math.abs(Math.sin(3 * th) ** 2 - 1) < 1e-9 && Math.abs(Math.sin(5 * th) ** 2 - 0.25) < 1e-9, "p11 bc");
-  const t = Math.asin(1 / 32); let best = 0, bk = 0; for (let k = 0; k < 60; k++) { const v = Math.sin((2 * k + 1) * t) ** 2; if (v > best) { best = v; bk = k; } }
+  const t = Math.asin(1 / 32); let best = 0, bk = 0; for (let k = 0; k < 40; k++) { const v = Math.sin((2 * k + 1) * t) ** 2; if (v > best) { best = v; bk = k; } }
   ok(bk === get("p12")[0].answer && Math.abs(best - get("p12")[1].answer) < 1e-3, `p12 k=${bk} p=${best}`); }
+ok(Math.round(Math.PI / (4 * Math.asin(1 / 32)) - 0.5) === 25, "p12 nearest-integer formula");
 // checker parsing
 ok(check({ kind: "num", answer: 1 / 12, tol: 1e-3 }, "1/12") && check({ kind: "set", answer: ["3", "5"] }, "{5, 3}") && !check({ kind: "set", answer: ["3", "5"] }, "3,5,5"), "checker parsing");
 console.log(fails ? `${fails} FAILURES` : "all problem keys verified");
