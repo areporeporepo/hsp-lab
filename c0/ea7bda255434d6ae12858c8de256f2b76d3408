@@ -1,0 +1,24 @@
+shor/test_problems.js
+  s_47ef183768d092::t_725bd5f568e531 1-59
+shor/index.html
+  s_47ef183768d092::t_9ab67a016e1a13 65-78,87,94,98-118,546-583
+  s_47ef183768d092::t_d8d0231713aae4 584
+shor/problems.js
+  s_47ef183768d092::t_345b5cdc75079b 1-97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c0ea7bda255434d6ae12858c8de256f2b76d3408",
+  "prompts": {},
+  "sessions": {
+    "s_47ef183768d092": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "add34c86-b9d3-41c1-a467-46e5e5a10cf0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "anh nguyen <anh.nqqq@icloud.com>"
+    }
+  }
+}
