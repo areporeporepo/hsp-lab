@@ -1,6 +1,6 @@
-# hsp-lab
+# hsp-lab (CS259Q Lab)
 
-Interactive, browser-only explorations of the **Hidden Subgroup Problem** and the algorithms it unifies (Simon, period finding, order finding, discrete log, phase estimation). One static HTML file, no build, no backend.
+Interactive, browser-only explorations of the **Hidden Subgroup Problem** and the algorithms it unifies (Simon, period finding, order finding, discrete log, phase estimation), plus **Grover search and amplitude estimation**. One static HTML file, no build, no backend.
 
 Open `index.html` in a browser.
 
