@@ -1,0 +1,22 @@
+shor/review.html
+  s_47ef183768d092::t_f33db2324fedf5 90-254
+  s_47ef183768d092::t_258c5ddd45bbe9 1-89,255-314
+shor/index.html
+  s_47ef183768d092::t_06dfd6eb240d54 94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3f8cd4d54b89d70978a0b1afa3f95b76e4733be2",
+  "prompts": {},
+  "sessions": {
+    "s_47ef183768d092": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "add34c86-b9d3-41c1-a467-46e5e5a10cf0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "anh nguyen <anh.nqqq@icloud.com>"
+    }
+  }
+}
