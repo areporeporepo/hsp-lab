@@ -129,6 +129,15 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
 .fb { font-size: 14px; }
 .notedge li { list-style: none; }
 .notedge li::before { content: "✗ "; font-family: var(--mono); }
+.tutor { display: grid; gap: 8px; background: var(--bg); }
+.pboard { display: grid; gap: 6px; }
+.pboard canvas { width: 100%; height: 460px; border: 1px solid var(--fg); border-radius: 4px; background: var(--bg); touch-action: none; display: block; }
+.ptools button[aria-pressed="true"] { border-width: 2px; font-weight: 600; }
+.openboard { justify-self: start; }
+.tutor textarea { font: 15px/1.5 var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--faint); border-radius: 4px; padding: 8px 10px; width: 100%; min-width: 0; resize: vertical; }
+.tutor .ans p, .tutor .body p { margin: 0 0 6px; }
+.photo { display: inline-flex; gap: 8px; align-items: center; border: 1px dashed var(--fg); border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+.photo input { max-width: 13rem; font-size: 13px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -141,6 +150,7 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
   <p class="muted">Every algorithm so far as one connected map, plus small simulators, whiteboard drills and speak-aloud drills. Lecture 13 (Hidden Subgroup Problem) content is predicted from the schedule; your L10 to L12 notes are the source for the rest. Brainstormed with Gemini and Astra; math cross-checked by both.</p>
 </header>
 
+<p id="claudeOff" class="small muted" hidden>Claude grading (photo of your whiteboard, spoken answers, tutor chat) turns on when this page is opened on claude.ai.</p>
 <nav class="tabs" aria-label="Views">
   <a href="#map">Map</a><a href="#frames">Frames</a><a href="#lab">Lab</a><a href="#board">Board</a><a href="#speak">Speak</a>
 </nav>
@@ -998,6 +1008,220 @@ PROMPTS.forEach(([q, claims], i) => {
     catch (e) { rec.textContent = 'Mic unavailable here'; rec.disabled = true; }
   });
 });
+
+/* ---------------- Pencil board under each drill ---------------- */
+const BOARDS = {};
+function makeBoard(host, key) {
+  const wrap = document.createElement('div'); wrap.className = 'pboard'; wrap.hidden = true;
+  wrap.innerHTML = `<div class="row ptools"><button class="pen" aria-pressed="true">Pen</button><button class="eraser" aria-pressed="false">Eraser</button><button class="undo ghost">Undo</button><button class="clr ghost">Clear</button><span class="small muted">Apple Pencil writes; once it is detected, finger touches scroll instead.</span></div><canvas></canvas>`;
+  host.appendChild(wrap);
+  const cv = $('canvas', wrap), ctx = cv.getContext('2d');
+  let strokes = load('cs259q-board-' + key, []), cur = null, mode = 'pen', penSeen = false;
+  const ink = () => getComputedStyle(document.body).color;
+  function size() { const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1; if (!r.width) return; cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d); ctx.setTransform(d, 0, 0, d, 0, 0); redraw(); }
+  function drawStroke(c, st, color, scale) {
+    const pts = st.p; if (!pts.length) return;
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    c.globalCompositeOperation = st.e ? 'destination-out' : 'source-over';
+    c.strokeStyle = color;
+    for (let i = 1; i < pts.length; i++) {
+      const [x0, y0, p0] = pts[i - 1], [x1, y1, p1] = pts[i];
+      c.lineWidth = (st.e ? 22 : 1.2 + 3.2 * ((p0 + p1) / 2)) * scale;
+      c.beginPath(); c.moveTo(x0 * scale, y0 * scale); c.lineTo(x1 * scale, y1 * scale); c.stroke();
+    }
+    if (pts.length === 1) { c.beginPath(); c.arc(pts[0][0] * scale, pts[0][1] * scale, 1.5 * scale, 0, 7); c.fillStyle = color; c.fill(); }
+    c.globalCompositeOperation = 'source-over';
+  }
+  function redraw() { const r = cv.getBoundingClientRect(); ctx.clearRect(0, 0, r.width, r.height); const col = ink(); strokes.forEach(st => drawStroke(ctx, st, col, 1)); }
+  const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, e.pressure > 0 ? e.pressure : 0.5]; };
+  cv.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'pen') penSeen = true;
+    if (penSeen && e.pointerType === 'touch') return;            // palm / finger rejection once a Pencil is seen
+    e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    cur = { e: mode === 'eraser' || e.button === 5, p: [pos(e)] }; strokes.push(cur);
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!cur) return; e.preventDefault();
+    let evs = e.getCoalescedEvents ? e.getCoalescedEvents() : []; if (!evs.length) evs = [e];
+    evs.forEach(ev => cur.p.push(pos(ev)));
+    const n = cur.p.length; const col = ink(); drawStroke(ctx, { e: cur.e, p: cur.p.slice(Math.max(0, n - evs.length - 1)) }, col, 1);
+  });
+  const end = () => { if (!cur) return; cur.p = cur.p.map(([x, y, p]) => [Math.round(x * 10) / 10, Math.round(y * 10) / 10, Math.round(p * 100) / 100]); cur = null; save('cs259q-board-' + key, strokes); };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  cv.style.touchAction = 'none';
+  // let fingers scroll once a pencil is known
+  cv.addEventListener('touchstart', e => { if (penSeen && [...e.touches].every(t => t.touchType !== 'stylus')) cv.style.touchAction = 'pan-y'; else cv.style.touchAction = 'none'; }, { passive: true });
+  const setMode = m => { mode = m; $('.pen', wrap).setAttribute('aria-pressed', m === 'pen'); $('.eraser', wrap).setAttribute('aria-pressed', m === 'eraser'); };
+  $('.pen', wrap).addEventListener('click', () => setMode('pen'));
+  $('.eraser', wrap).addEventListener('click', () => setMode('eraser'));
+  $('.undo', wrap).addEventListener('click', () => { strokes.pop(); save('cs259q-board-' + key, strokes); redraw(); });
+  $('.clr', wrap).addEventListener('click', () => { strokes = []; save('cs259q-board-' + key, strokes); redraw(); });
+  new ResizeObserver(size).observe(cv);
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redraw);
+  BOARDS[key] = {
+    wrap,
+    hasInk: () => strokes.some(st => !st.e && st.p.length),
+    // Export black ink on white for legibility, cropped to the ink, at 2x.
+    toBlob: () => new Promise(res => {
+      const r = cv.getBoundingClientRect(), sc = 2;
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      strokes.forEach(st => st.p.forEach(([x, y]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }));
+      x0 = Math.max(0, x0 - 20); y0 = Math.max(0, y0 - 20); x1 = Math.min(r.width, x1 + 20); y1 = Math.min(r.height, y1 + 20);
+      const w = Math.max(40, x1 - x0), h = Math.max(40, y1 - y0);
+      const out = document.createElement('canvas'); out.width = Math.round(w * sc); out.height = Math.round(h * sc);
+      const oc = out.getContext('2d'); oc.fillStyle = '#fff'; oc.fillRect(0, 0, out.width, out.height);
+      const layer = document.createElement('canvas'); layer.width = out.width; layer.height = out.height; const lc = layer.getContext('2d');
+      lc.translate(-x0 * sc, -y0 * sc); strokes.forEach(st => drawStroke(lc, st, '#000', sc));
+      oc.drawImage(layer, 0, 0); out.toBlob(b => res(b), 'image/png');
+    }),
+  };
+  return BOARDS[key];
+}
+$$('.drill').forEach(d => {
+  const id = d.dataset.id;
+  const btn = document.createElement('button'); btn.className = 'ghost openboard'; btn.textContent = '✎ Pencil board';
+  const m = $('.mastery', d); d.insertBefore(btn, m);
+  const bd = makeBoard(d, id); d.insertBefore(bd.wrap, m);
+  btn.addEventListener('click', () => { bd.wrap.hidden = !bd.wrap.hidden; btn.textContent = bd.wrap.hidden ? '✎ Pencil board' : 'Hide board'; if (!bd.wrap.hidden) bd.wrap.scrollIntoView({ block: 'nearest' }); });
+  if (bd.hasInk()) { bd.wrap.hidden = false; btn.textContent = 'Hide board'; }
+});
+
+/* ---------------- Claude tutor (claude.ai only; hidden elsewhere) ---------------- */
+// Snapshot TeX sources now, before MathJax replaces them with SVG.
+const DRILL_SRC = {};
+$$('.drill').forEach(d => {
+  const q = $$(':scope > p', d).map(p => p.textContent.trim()).join('\n');
+  const sol = $('.solution', d);
+  DRILL_SRC[d.dataset.id] = { title: $('h3', d).textContent.trim(), prompt: q, solution: sol ? sol.textContent.replace(/\s+/g, ' ').trim() : '' };
+});
+const FRAMES_SRC = $('#v-frames') ? $('#v-frames').textContent.replace(/\s+/g, ' ').trim().slice(0, 6000) : '';
+const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function renderAnswer(el, text) {
+  const html = esc(text).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').split(/\n{2,}/).map(par => '<p>' + par.replace(/\n- /g, '<br>• ').replace(/^- /, '• ').replace(/\n/g, '<br>') + '</p>').join('');
+  el.innerHTML = html; typeset(el);
+}
+const ERR = { not_granted: 'Claude is not allowed for this page.', sampling_disabled: 'Claude is not available for this account.', rate_limited: 'Too many requests right now. Try again in a minute.', session_expired: 'Sign in to claude.ai again.', image_rejected: 'That photo could not be read. Try a smaller JPEG or PNG.', refused: 'Claude declined this request. Rephrase it.', images_unavailable: 'Photos are not available in this view; type your work instead.' };
+const errText = e => ERR[e && e.code] || 'Something went wrong. Try again.';
+const HIDE_CODES = ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'];
+const TEX_RULE = 'Write every mathematical expression in LaTeX inside \\( \\) (inline) or \\[ \\] (display). Never use Markdown headings or code blocks.';
+
+(async () => {
+  const sample = (window.claude && typeof window.claude.use === 'function') ? await window.claude.use('sample').catch(() => null) : null;
+  if (!sample) { const n = $('#claudeOff'); if (n) n.hidden = false; return; }
+  const lim = await sample.limits().catch(() => null);
+  const canImg = !!(lim && lim.images);
+  const hideAll = () => $$('.tutor').forEach(t => { t.hidden = true; });
+
+  // 1. Check my work, on every drill
+  $$('.drill').forEach(d => {
+    const id = d.dataset.id, src = DRILL_SRC[id];
+    const box = document.createElement('div'); box.className = 'tutor card';
+    box.innerHTML = `<span class="lbl">Check my work with Claude (uses the Pencil board, a photo, or typed steps)</span>
+      <div class="row">${canImg ? `<label class="photo"><input type="file" accept="${lim.images.mediaTypes.join(',')}" capture="environment" id="ph_${id}"> Photo of my board</label>` : ''}
+      <span class="small muted phname"></span></div>
+      <textarea id="tx_${id}" rows="3" placeholder="Or type / dictate your steps here"></textarea>
+      <div class="row"><button class="ask">Find my first mistake</button><button class="stop ghost" hidden>Stop</button></div>
+      <div class="ans small"></div>`;
+    d.insertBefore(box, $('.mastery', d));
+    const file = $('input[type=file]', box), ta = $('textarea', box), ask = $('.ask', box), stop = $('.stop', box), ans = $('.ans', box);
+    if (file) file.addEventListener('change', () => { $('.phname', box).textContent = file.files[0] ? file.files[0].name : ''; });
+    let ctl = null;
+    stop.addEventListener('click', () => ctl && ctl.abort());
+    ask.addEventListener('click', async () => {
+      const bd = BOARDS[id];
+      const img = (file && file.files[0]) || (bd && bd.hasInk() ? await bd.toBlob() : null);
+      const fromBoard = !(file && file.files[0]) && !!img;
+      if (!img && !ta.value.trim()) { ans.textContent = 'Write on the Pencil board, add a photo, or type your steps first.'; return; }
+      const prompt = `You are a precise, encouraging tutor for Stanford CS259Q (quantum algorithms), Lecture 13 on the hidden subgroup problem. The student is practicing a derivation by hand.
+
+PROBLEM: ${src.title}
+${src.prompt}
+
+REFERENCE SOLUTION (for you only; do not reveal it wholesale):
+${src.solution || '(none given; judge from first principles)'}
+
+STUDENT WORK: ${img ? (fromBoard ? 'see the attached image of their handwriting from an iPad drawing board (black ink on white).' : 'see the attached photo of their whiteboard.') : ''}
+${ta.value.trim()}
+
+Do exactly this:
+1. In one line, restate what the student wrote (read the photo carefully; say if any part is illegible).
+2. Name the FIRST incorrect or unjustified step, quote it, and explain why in at most two sentences. If everything is correct, say so and name the one step most worth tightening.
+3. Give one hint toward the fix, not the full answer.
+${TEX_RULE} Under 180 words.`;
+      ctl = new AbortController(); ask.disabled = true; stop.hidden = false; ans.textContent = 'Thinking...';
+      try {
+        const { text, truncated } = await sample(prompt, { signal: ctl.signal, cache: false, images: img ? [img] : undefined, onText: ({ text }) => { ans.textContent = text; } });
+        renderAnswer(ans, text + (truncated ? '\n\n(Answer was cut short.)' : ''));
+      } catch (e) {
+        if (HIDE_CODES.includes(e.code)) { hideAll(); return; }
+        if (e.code === 'cancelled') { if (e.text) renderAnswer(ans, e.text); else ans.textContent = ''; }
+        else { if (e.text) renderAnswer(ans, e.text); ans.insertAdjacentHTML('beforeend', `<p class="muted">${esc(errText(e))}</p>`); }
+      } finally { ask.disabled = false; stop.hidden = true; }
+    });
+  });
+
+  // 2. Grade my spoken answer
+  $$('#speakList > .card').forEach((card, i) => {
+    const [q, claims] = PROMPTS[i];
+    const box = document.createElement('div'); box.className = 'tutor';
+    box.innerHTML = `<textarea id="sa_${i}" rows="3" placeholder="Dictate or type what you said (iPad: tap the mic on the keyboard)"></textarea>
+      <div class="row"><button class="grade">Grade me with Claude</button></div><div class="ans small"></div>`;
+    $('.claims', card).appendChild(box);
+    const ta = $('textarea', box), btn = $('.grade', box), ans = $('.ans', box);
+    btn.addEventListener('click', async () => {
+      if (!ta.value.trim()) { ans.textContent = 'Dictate or type your answer first.'; return; }
+      const prompt = `Grade a CS259Q student's spoken explanation (transcribed by dictation, so ignore filler words and spelling) against a checklist.
+
+QUESTION: ${q}
+CHECKLIST (numbered):
+${claims.map((c, j) => `${j + 1}. ${c}`).join('\n')}
+
+STUDENT ANSWER:
+${ta.value.trim().slice(0, 4000)}
+
+Reply with only JSON: {"said": [true or false for each checklist item, in order; true only if the answer clearly states that idea, in any words], "feedback": "at most two sentences, ${TEX_RULE.replace(/"/g, "'")}", "fix": "the single most important correction or missing idea, one sentence"}`;
+      btn.disabled = true; ans.textContent = 'Thinking...';
+      try {
+        const r = await sample.json(prompt, { cache: false });
+        const said = Array.isArray(r && r.said) ? r.said : [];
+        claims.forEach((_, j) => { const cb = $(`#sp${i}_${j}`); if (cb && typeof said[j] === 'boolean') { cb.checked = said[j]; cb.dispatchEvent(new Event('change')); } });
+        renderAnswer(ans, `${String(r && r.feedback || '')}\n\n**Fix:** ${String(r && r.fix || '')}`);
+      } catch (e) {
+        if (HIDE_CODES.includes(e.code)) { hideAll(); return; }
+        ans.textContent = e.code === 'invalid_json' ? 'Could not read the grade. Try again.' : errText(e);
+      } finally { btn.disabled = false; }
+    });
+  });
+
+  // 3. Tutor chat on the Frames tab
+  const chat = document.createElement('div'); chat.className = 'tutor card';
+  chat.innerHTML = `<h3>Ask the tutor</h3><p class="small muted">Ask about any frame. The tutor answers briefly and ends with a question for you to work on the board.</p>
+    <div class="log" style="display:grid;gap:10px"></div>
+    <textarea id="chatIn" rows="2" placeholder="e.g. Why does the offset only add a phase?"></textarea>
+    <div class="row"><button class="send">Send</button><button class="stop ghost" hidden>Stop</button><button class="clear ghost">New chat</button></div>`;
+  $('#v-frames').appendChild(chat);
+  const RULES = `You are a Socratic tutor for Stanford CS259Q (quantum algorithms), helping a student prepare for Lecture 13 on the hidden subgroup problem. The student learns by whiteboarding and explaining aloud. Answer in under 150 words, correct and precise, then end with exactly one short question or whiteboard task for the student. ${TEX_RULE} The page the student is reading says:\n\n${FRAMES_SRC}`;
+  const turns = []; let cctl = null;
+  const log = $('.log', chat), inp = $('#chatIn'), send = $('.send', chat), cstop = $('.stop', chat);
+  const bubble = (who, text) => { const b = document.createElement('div'); b.className = 'small'; b.innerHTML = `<span class="lbl">${who}</span><div class="body"></div>`; log.appendChild(b); const body = $('.body', b); if (text) renderAnswer(body, text); return body; };
+  cstop.addEventListener('click', () => cctl && cctl.abort());
+  $('.clear', chat).addEventListener('click', () => { turns.length = 0; log.innerHTML = ''; });
+  send.addEventListener('click', async () => {
+    const m = inp.value.trim(); if (!m) return;
+    turns.push({ role: 'user', content: m }); bubble('You', m); inp.value = '';
+    const out = bubble('Tutor', ''); out.textContent = 'Thinking...';
+    cctl = new AbortController(); send.disabled = true; cstop.hidden = false;
+    try {
+      const recent = turns.slice(-12);
+      const { text } = await sample([{ role: 'user', content: RULES }, ...recent], { cache: false, signal: cctl.signal, onText: ({ text }) => { out.textContent = text; } });
+      turns.push({ role: 'assistant', content: text }); renderAnswer(out, text);
+    } catch (e) {
+      if (HIDE_CODES.includes(e.code)) { hideAll(); return; }
+      if (e.text) { turns.push({ role: 'assistant', content: e.text }); renderAnswer(out, e.text); } else out.textContent = e.code === 'cancelled' ? '' : errText(e);
+    } finally { send.disabled = false; cstop.hidden = true; }
+  });
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send.click(); } });
+})();
 
 route();
 select('ahsp');
