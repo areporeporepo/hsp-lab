@@ -1,0 +1,886 @@
+<title>CS259Q Atlas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script>
+window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] }, svg: { fontCache: 'global' }, startup: { typeset: true } };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+<style>
+/* Layout: sticky tab bar over four views (Map, Lab, Board, Speak); single 60rem column; grayscale only, meaning carried by line style, weight and shape */
+:root {
+  --bg: #fafaf9; --fg: #1a1b1d; --muted: #63666c; --faint: #c9cacd; --rule: #dcdde0; --panel: #f0f0ee; --ink: #000;
+  --display: "Source Serif 4", Georgia, serif;
+  --body: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #131416; --fg: #e8e8e5; --muted: #9b9da2; --faint: #45474b; --rule: #323438; --panel: #1c1d20; --ink: #fff; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #131416; --fg: #e8e8e5; --muted: #9b9da2; --faint: #45474b; --rule: #323438; --panel: #1c1d20; --ink: #fff; color-scheme: dark }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font: 15.5px/1.6 var(--body); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 80px; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 60rem; margin: 0 auto; display: grid; gap: 28px; }
+header.top { padding-top: 28px; display: grid; gap: 8px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; color: var(--ink); margin: 0; text-wrap: balance; }
+h1 { font-size: 2rem; line-height: 1.15; }
+h2 { font-size: 1.4rem; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+h3 { font-size: 1.08rem; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); }
+small, .small { font-size: 13.5px; }
+nav.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--rule); display: flex; gap: 4px; overflow-x: auto; padding-block: 8px; }
+nav.tabs a { font: 500 14px var(--mono); text-decoration: none; color: var(--muted); padding: 6px 12px; border: 1px solid transparent; border-radius: 4px; white-space: nowrap; }
+nav.tabs a[aria-current="page"] { color: var(--ink); border-color: var(--fg); }
+nav.tabs a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+section.view { display: grid; gap: 22px; min-width: 0; }
+.card { border: 1px solid var(--rule); background: var(--panel); border-radius: 5px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.scroll { overflow-x: auto; min-width: 0; }
+button, select, input[type=text] { font: 500 14px var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--fg); border-radius: 4px; padding: 6px 12px; }
+button { cursor: pointer; }
+button:hover { background: var(--panel); }
+button[disabled] { opacity: .45; cursor: default; }
+button.ghost { border-color: var(--faint); }
+input[type=text] { font-family: var(--mono); min-width: 0; width: 100%; max-width: 22rem; }
+input[type=range] { width: 100%; accent-color: var(--fg); }
+.row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+.ctrl { display: grid; gap: 4px; min-width: 0; flex: 1 1 180px; }
+.ctrl label, .lbl { font: 500 12px var(--mono); letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 500 12px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+code { font-family: var(--mono); font-size: .92em; }
+mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+ul, ol { margin: 0; padding-left: 1.3rem; display: grid; gap: 6px; }
+
+/* map */
+#mapsvg { display: block; min-width: 760px; width: 100%; height: auto; }
+.node rect { fill: var(--bg); stroke: var(--fg); stroke-width: 1.3; }
+.node.future rect.o { stroke-dasharray: 5 4; }
+.node rect.i { fill: none; stroke: var(--fg); stroke-width: 1; }
+.node text { fill: var(--fg); font: 500 12.5px var(--body); text-anchor: middle; }
+.node text.lec { font: 400 10px var(--mono); fill: var(--muted); }
+.node { cursor: pointer; transition: opacity .15s; }
+.node.sel rect.o { stroke-width: 3; }
+.edge path { fill: none; stroke: var(--fg); transition: opacity .15s; }
+.e-case path.s { stroke-width: 2.6; }
+.e-uses path.s { stroke-width: 1.3; stroke-dasharray: 6 4; }
+.e-en path.s { stroke-width: 1.3; stroke-dasharray: 1.5 4; stroke-linecap: round; }
+.e-eq path.s { stroke-width: 5.5; }
+.e-eq path.k { stroke: var(--bg); stroke-width: 2.2; }
+.mk { fill: var(--fg); }
+.elabel { font: 400 10.5px var(--body); fill: var(--fg); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; text-anchor: middle; }
+.dim { opacity: .1; }
+.dimn { opacity: .28; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; align-items: center; }
+.legend svg { vertical-align: middle; }
+#nodecard .rel { display: grid; gap: 4px; }
+#nodecard .rel button { text-align: left; border-color: var(--faint); font-weight: 400; padding: 5px 10px; }
+
+/* widgets */
+.wsvg { display: block; width: 100%; height: auto; }
+.wsvg text { fill: var(--fg); font: 400 11px var(--mono); }
+.wsvg .cell { fill: none; stroke: var(--faint); }
+.wsvg .ph { fill: none; stroke: var(--fg); stroke-width: 1.4; }
+.wsvg .ndl { stroke: var(--fg); stroke-width: 1.8; stroke-linecap: round; }
+.wsvg .dot { fill: var(--faint); }
+.wsvg .hit { fill: transparent; cursor: pointer; }
+.wsvg .selc { fill: none; stroke: var(--fg); stroke-width: 2.4; }
+.wsvg .bar { fill: var(--fg); }
+.wsvg .barh { fill: url(#hatch); stroke: var(--fg); stroke-width: 1; }
+.wsvg .axis { stroke: var(--muted); stroke-width: 1; }
+.wsvg .floor { stroke: var(--fg); stroke-width: 1.2; stroke-dasharray: 5 4; }
+.wsvg .vec { stroke: var(--muted); stroke-width: 1; }
+.wsvg .res { stroke: var(--fg); stroke-width: 2.6; }
+.wsvg .orig { fill: var(--fg); }
+.wsvg .hatchline { stroke: var(--fg); stroke-width: 1.2; }
+.status { font-family: var(--mono); font-size: 13.5px; padding: 8px 10px; border-left: 3px solid var(--fg); background: var(--bg); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 12.5px var(--mono); border: 1px solid var(--fg); padding: 1px 7px; border-radius: 3px; }
+.chip.dash { border-style: dashed; }
+.two { display: grid; grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); gap: 16px; }
+@media (max-width: 720px) { .two { grid-template-columns: minmax(0,1fr); } }
+
+/* board */
+.drill { border-top: 1px solid var(--rule); padding-top: 16px; display: grid; gap: 10px; }
+.drill .hd { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; justify-content: space-between; }
+.tag { font: 500 11px var(--mono); border: 1px solid var(--muted); color: var(--muted); padding: 1px 6px; border-radius: 3px; }
+.step { border-left: 2px dashed var(--fg); padding-left: 12px; display: grid; gap: 6px; }
+.step b.k { font: 500 12px var(--mono); text-transform: uppercase; letter-spacing: .05em; }
+fieldset { border: 1px solid var(--rule); border-radius: 4px; padding: 8px 12px; margin: 0; display: grid; gap: 4px; min-width: 0; }
+legend { padding: 0 4px; font-weight: 500; }
+fieldset label { display: flex; gap: 8px; align-items: baseline; }
+.verdict { font: 500 13px var(--mono); }
+.solution { border: 1px solid var(--fg); border-radius: 4px; padding: 12px 14px; display: grid; gap: 8px; }
+.mastery { display: flex; gap: 6px; }
+.mastery button { padding: 3px 9px; font-size: 13px; border-color: var(--faint); }
+.mastery button[aria-pressed="true"] { border-color: var(--fg); border-width: 2px; font-weight: 600; }
+.fb { font-size: 14px; }
+.notedge li { list-style: none; }
+.notedge li::before { content: "✗ "; font-family: var(--mono); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+<header class="top">
+  <span class="eyebrow">CS259Q · prep for Thu Nov 5, 2026 · Lecture 13</span>
+  <h1>CS259Q Atlas</h1>
+  <p class="muted">Every algorithm so far as one connected map, plus small simulators, whiteboard drills and speak-aloud drills. Lecture 13 (Hidden Subgroup Problem) content is predicted from the schedule; your L10 to L12 notes are the source for the rest. Brainstormed with Gemini and Astra; math cross-checked by both.</p>
+</header>
+
+<nav class="tabs" aria-label="Views">
+  <a href="#map">Map</a><a href="#lab">Lab</a><a href="#board">Board</a><a href="#speak">Speak</a>
+</nav>
+
+<!-- ============ MAP ============ -->
+<section class="view" id="v-map">
+  <div class="legend" aria-label="Legend">
+    <span><svg width="44" height="10"><line x1="2" y1="5" x2="42" y2="5" stroke="currentColor" stroke-width="2.6"/></svg> is a special case of</span>
+    <span><svg width="44" height="10"><line x1="2" y1="5" x2="42" y2="5" stroke="currentColor" stroke-width="1.3" stroke-dasharray="6 4"/></svg> uses</span>
+    <span><svg width="44" height="10"><line x1="2" y1="5" x2="42" y2="5" stroke="currentColor" stroke-width="5.5"/><line x1="2" y1="5" x2="42" y2="5" stroke="var(--bg)" stroke-width="2.2"/></svg> same circuit / identity</span>
+    <span><svg width="44" height="10"><line x1="2" y1="5" x2="42" y2="5" stroke="currentColor" stroke-width="1.3" stroke-dasharray="1.5 4" stroke-linecap="round"/></svg> enables / leads to</span>
+    <span><svg width="30" height="18"><rect x="2" y="2" width="26" height="14" rx="3" fill="none" stroke="currentColor"/><rect x="5" y="5" width="20" height="8" rx="2" fill="none" stroke="currentColor"/></svg> new in L13</span>
+    <span><svg width="30" height="18"><rect x="2" y="2" width="26" height="14" rx="3" fill="none" stroke="currentColor" stroke-dasharray="4 3"/></svg> later lectures</span>
+  </div>
+  <div class="row">
+    <button id="btnL13" aria-pressed="false">Show only what L13 adds</button>
+    <button id="btnClear" class="ghost">Clear focus</button>
+    <span class="small muted">Tap a node to focus it and its neighbors.</span>
+  </div>
+  <div class="scroll card" style="padding:8px"><svg id="mapsvg" viewBox="0 0 960 690" role="img" aria-label="Concept map of CS259Q lectures"></svg></div>
+  <div class="card" id="nodecard"><p class="muted">Select a node. Start with <b>Abelian HSP</b>: it is the hub Thursday builds.</p></div>
+  <div class="card">
+    <h3>Connections that look right but are wrong</h3>
+    <ul class="notedge">
+      <li><b>Deutsch–Jozsa is not an HSP.</b> A balanced function need not be constant on the cosets of any subgroup. It only shares the 𝖧, O<sub>f</sub>, 𝖧 template.</li>
+      <li><b>Bernstein–Vazirani is not a standard HSP run.</b> There H = ker f and H<sup>⊥</sup> = {0, s}, so Fourier sampling would output 0 or s with probability 1/2 each. BV gets s deterministically in one query because f is itself a character and phase kickback prepares that character directly.</li>
+      <li><b>\(\mathsf{H}^{\otimes n}\) is not the QFT over \(\mathbb{Z}_{2^n}\).</b> It is the QFT over \(\mathbb{Z}_2^n\). The cyclic group has carries between bits, which is why it needs controlled rotations.</li>
+      <li><b>Order finding is not an exact HSP over \(\mathbb{Z}_{2^n}\)</b> unless r divides 2ⁿ. It is an HSP over ℤ with H = rℤ, sampled through a finite window, which is why continued fractions are needed.</li>
+      <li><b>Phase estimation and HSP: neither contains the other.</b> Phase estimation handles arbitrary real phases; HSP handles arbitrary finite abelian groups. Order finding sits in both.</li>
+      <li><b>H ∩ H<sup>⊥</sup> need not be {0}.</b> In ℤ₂³ with s = 110, the element 110 is in both H and H<sup>⊥</sup>. What always holds: |H|·|H<sup>⊥</sup>| = |G| and (H<sup>⊥</sup>)<sup>⊥</sup> = H.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ LAB ============ -->
+<section class="view" id="v-lab" hidden>
+  <!-- HSP sampler -->
+  <div class="card" id="w-hsp">
+    <span class="eyebrow">L13 · Abelian HSP</span>
+    <h2>Coset state to H<sup>⊥</sup></h2>
+    <p>Pick a group and a hidden subgroup. The offset is the random coset you got when the output register was measured. Each circle is an amplitude: radius is its size, needle is its phase. <b>Move the offset and watch which thing changes.</b></p>
+    <div class="row">
+      <div class="ctrl"><label for="hspG">Group</label><select id="hspG"></select></div>
+      <div class="ctrl"><label for="hspP">Hidden subgroup</label><select id="hspP"></select></div>
+      <div class="ctrl"><label for="hspOff">Offset g₀ = <span id="hspOffV" class="num"></span></label><input type="range" id="hspOff" min="0" max="7" value="1"></div>
+    </div>
+    <div id="hspWarn" class="status" hidden></div>
+    <div class="scroll"><svg id="hspSvg" class="wsvg" viewBox="0 0 680 300"></svg></div>
+    <div class="two">
+      <div class="card" style="background:var(--bg)">
+        <span class="lbl">Character sum for the tapped outcome y</span>
+        <svg id="hspPoly" class="wsvg" viewBox="0 0 260 200" style="max-width:340px"></svg>
+        <p id="hspPolyTxt" class="small"></p>
+      </div>
+      <div class="card" style="background:var(--bg)">
+        <span class="lbl">Measure, repeat, recover H</span>
+        <div class="row"><button id="hspDraw">Draw a sample</button><button id="hspDraw5" class="ghost">Draw 5</button><button id="hspReset" class="ghost">Reset</button></div>
+        <div id="hspSamples" class="chips"></div>
+        <div id="hspRec" class="small"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QPE microscope -->
+  <div class="card" id="w-qpe">
+    <span class="eyebrow">L12 · Phase estimation</span>
+    <h2>Phase-estimation microscope</h2>
+    <p>The output register has n qubits, N = 2ⁿ bins. The true phase sits at γ = N·θ/2π, between two bins. Hatched bars are the two nearest bins. Tap any bar to see its amplitude as a sum of N little arrows.</p>
+    <div class="row">
+      <div class="ctrl"><label for="qpeN">Qubits n = <span id="qpeNV" class="num"></span></label><input type="range" id="qpeN" min="2" max="7" value="4"></div>
+      <div class="ctrl"><label for="qpeT">θ / 2π = <span id="qpeTV" class="num"></span></label><input type="range" id="qpeT" min="0" max="999" value="531"></div>
+      <div class="row"><button id="qpeMid" class="ghost">Worst case (δ = ½)</button><button id="qpeExact" class="ghost">Exact (δ = 0)</button><button id="qpeShots">25 shots</button></div>
+    </div>
+    <div class="scroll"><svg id="qpeSvg" class="wsvg" viewBox="0 0 680 250"></svg></div>
+    <div class="two">
+      <div class="status" id="qpeStat"></div>
+      <div class="card" style="background:var(--bg)">
+        <span class="lbl">Sum of arrows for bin z</span>
+        <svg id="qpePoly" class="wsvg" viewBox="0 0 260 200" style="max-width:340px"></svg>
+        <p id="qpePolyTxt" class="small"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shor <-> Kitaev -->
+  <div class="card" id="w-shor">
+    <span class="eyebrow">L11–12 · Shor as phase estimation</span>
+    <h2>Two views of Shor</h2>
+    <p>U<sub>a</sub> multiplies by a mod N, so on the orbit of 1 it is a cyclic shift. Its eigenphases are j/r. Feeding |1⟩ (a uniform mix of eigenvectors) into phase estimation outputs y ≈ jQ/r for a random j. Continued fractions turn y/Q into r; then the gcd step factors N.</p>
+    <div class="row">
+      <div class="ctrl"><label for="shN">N</label><select id="shN"><option>15</option><option>21</option><option>33</option><option>35</option></select></div>
+      <div class="ctrl"><label for="shA">a</label><select id="shA"></select></div>
+      <div class="ctrl"><label for="shQ">Register qubits q = <span id="shQV" class="num"></span></label><input type="range" id="shQ" min="3" max="9" value="6"></div>
+    </div>
+    <div class="two">
+      <div class="scroll"><svg id="shHist" class="wsvg" viewBox="0 0 440 220"></svg></div>
+      <svg id="shCyc" class="wsvg" viewBox="0 0 240 220" style="max-width:300px"></svg>
+    </div>
+    <div class="row"><button id="shDraw">Run once (sample y)</button><button id="shReset" class="ghost">Reset</button></div>
+    <div id="shLog" class="small" style="display:grid;gap:6px"></div>
+  </div>
+</section>
+
+<!-- ============ BOARD ============ -->
+<section class="view" id="v-board" hidden>
+  <p>Pen and paper first. Open hints one at a time. Answer the self-check before the solution opens; it catches the usual hand-algebra slips. Mark yourself honestly: ○ cold, ◐ needed hints, ● clean. Marks are saved in this browser.</p>
+
+  <div class="card" id="gen">
+    <span class="eyebrow">Fresh numbers</span>
+    <h2>Practice generator</h2>
+    <p class="small muted">New instance every click. Type what you got on paper; the checker names the specific mistake.</p>
+    <div class="row">
+      <div class="ctrl"><label for="genType">Problem</label>
+        <select id="genType"><option value="period">Period finding: find H⊥ in ℤ_N</option><option value="simon">Simon: find H⊥ in ℤ₂ⁿ</option><option value="dlog">Discrete log: which s fit the samples?</option><option value="factor">Factoring: run the reduction</option></select></div>
+      <button id="genNew">New numbers</button>
+    </div>
+    <div id="genQ"></div>
+    <div class="row"><input type="text" id="genAns" placeholder="your answer" aria-label="Your answer"><button id="genCheck">Check</button><button id="genShow" class="ghost">Show answer</button></div>
+    <div id="genFb" class="fb"></div>
+  </div>
+
+  <div id="drills" style="display:grid;gap:18px">
+
+  <div class="drill" id="d-coset" data-id="coset">
+    <div class="hd"><h3>Coset state to H<sup>⊥</sup>, from scratch</h3><span class="tag">L13 · hub</span></div>
+    <p>Let \(G\) be finite abelian, \(H\le G\), and \(\mathrm{QFT}_G|x\rangle = \frac{1}{\sqrt{|G|}}\sum_{y\in G}\chi_y(x)|y\rangle\). Compute the probability of measuring \(y\) after applying \(\mathrm{QFT}_G\) to \(|g_0+H\rangle = \frac{1}{\sqrt{|H|}}\sum_{h\in H}|g_0+h\rangle\).</p>
+    <div class="ladder">
+      <div class="step" hidden><b class="k">Hint 1 · setup</b><p>Write \(\langle y|\mathrm{QFT}_G|g_0+H\rangle\) with both normalizations. Use \(\chi_y(g_0+h)=\chi_y(g_0)\chi_y(h)\).</p></div>
+      <div class="step" hidden><b class="k">Hint 2 · key trick</b><p>If \(\chi_y(h')\ne1\) for some \(h'\in H\), re-index the sum by \(h\mapsto h+h'\). The sum is unchanged but also multiplied by \(\chi_y(h')\).</p></div>
+      <div class="step" hidden><b class="k">Hint 3 · finish</b><p>So the sum is \(|H|\) or \(0\). Square, then check the probabilities over \(H^\perp\) add to 1 using \(|H^\perp| = |G|/|H|\).</p></div>
+      <button class="nexthint">Hint 1 of 3</button>
+    </div>
+    <div class="audit">
+      <fieldset data-ans="b" data-why="One 1/√|G| from the QFT and one 1/√|H| from the coset state."><legend>Prefactor in front of \(\sum_{h}\chi_y(h)\)?</legend>
+        <label><input type="radio" name="c1" value="a"> \(1/|G|\)</label><label><input type="radio" name="c1" value="b"> \(\chi_y(g_0)/\sqrt{|G||H|}\)</label><label><input type="radio" name="c1" value="c"> \(1/\sqrt{|G|}\)</label></fieldset>
+      <fieldset data-ans="c" data-why="It is a unit-modulus factor, so it disappears under |·|². It is a relative phase across different y, not a global phase."><legend>Where does the offset \(g_0\) appear in \(\Pr[y]\)?</legend>
+        <label><input type="radio" name="c2" value="a"> In which y have nonzero probability</label><label><input type="radio" name="c2" value="b"> In the normalization</label><label><input type="radio" name="c2" value="c"> Nowhere</label></fieldset>
+      <button class="checkaudit">Check self-check and open solution</button>
+    </div>
+    <div class="solution" hidden>
+      \[ \langle y|\mathrm{QFT}_G|g_0+H\rangle = \frac{\chi_y(g_0)}{\sqrt{|G||H|}}\sum_{h\in H}\chi_y(h) = \begin{cases}\chi_y(g_0)\sqrt{|H|/|G|} & y\in H^\perp\\ 0 & \text{otherwise}\end{cases} \]
+      <p>So \(\Pr[y] = |H|/|G|\) on \(H^\perp\), uniform, independent of \(g_0\). Total \(|H^\perp|\cdot|H|/|G| = 1\). Measuring the output register first is optional: every coset gives the same distribution (no-signaling).</p>
+    </div>
+    <div class="mastery" aria-label="Self-rating"></div>
+  </div>
+
+  <div class="drill" id="d-samples" data-id="samples">
+    <div class="hd"><h3>Why O(log |G|) samples are enough</h3><span class="tag">L13</span></div>
+    <p>Let \(K\) be the subgroup generated by the samples so far. Show that while \(K\ne H^\perp\), each new sample has probability at least 1/2 of growing \(K\), and that \(K\) can grow at most \(\log_2|G|\) times.</p>
+    <div class="ladder">
+      <div class="step" hidden><b class="k">Hint 1</b><p>\(K\) is a proper subgroup of \(H^\perp\). What does Lagrange's theorem say about \(|K|\)?</p></div>
+      <div class="step" hidden><b class="k">Hint 2</b><p>A uniform sample from \(H^\perp\) lands in \(K\) with probability \(|K|/|H^\perp|\le 1/2\).</p></div>
+      <div class="step" hidden><b class="k">Hint 3</b><p>When a sample lands outside \(K\), the new generated subgroup strictly contains \(K\), so its size is a multiple of \(|K|\) bigger than \(|K|\).</p></div>
+      <button class="nexthint">Hint 1 of 3</button>
+    </div>
+    <div class="audit">
+      <fieldset data-ans="b" data-why="It is a probabilistic guarantee: O(log|G| + log(1/δ)) samples succeed with probability 1 − δ."><legend>Do \(\log_2|G|\) samples <i>always</i> generate \(H^\perp\)?</legend>
+        <label><input type="radio" name="s1" value="a"> Yes</label><label><input type="radio" name="s1" value="b"> No, only with high probability given a few more</label></fieldset>
+      <button class="checkaudit">Check self-check and open solution</button>
+    </div>
+    <div class="solution" hidden>
+      <p>\(|K|\) divides \(|H^\perp|\) and \(K\ne H^\perp\), so \(|K|\le|H^\perp|/2\). Each sample escapes \(K\) with probability \(\ge 1/2\), and each escape at least doubles \(|K|\). Since \(|H^\perp|\le|G|\), at most \(\log_2|G|\) escapes are needed; with \(O(\log|G|+\log(1/\delta))\) samples all of them happen with probability \(\ge 1-\delta\).</p>
+      <p class="small muted">Contrast: cyclic ℤ_N needs only about 2 samples (H⊥ is cyclic, and two random multiples are coprime with probability ≈ 6/π²). Simon needs about n because H⊥ has rank n − 1.</p>
+    </div>
+    <div class="mastery"></div>
+  </div>
+
+  <div class="drill" id="d-simon" data-id="simon">
+    <div class="hd"><h3>Simon as an HSP</h3><span class="tag">L8 → L13</span></div>
+    <p>\(G=\mathbb{Z}_2^3\), \(s=110\). List \(H\) and \(H^\perp\). Is \(H\cap H^\perp=\{0\}\)?</p>
+    <div class="ladder">
+      <div class="step" hidden><b class="k">Hint 1</b><p>Characters of \(\mathbb{Z}_2^3\): \(\chi_y(x)=(-1)^{y\cdot x}\). So \(y\in H^\perp\iff y\cdot s\equiv 0\pmod 2\).</p></div>
+      <button class="nexthint">Hint 1 of 1</button>
+    </div>
+    <div class="audit">
+      <fieldset data-ans="b" data-why="110 · 110 = 1 + 1 = 0 mod 2, so 110 is in both. Over 𝔽₂ a vector can be orthogonal to itself."><legend>\(H\cap H^\perp\)?</legend>
+        <label><input type="radio" name="sm1" value="a"> \(\{000\}\)</label><label><input type="radio" name="sm1" value="b"> \(\{000, 110\}\)</label></fieldset>
+      <button class="checkaudit">Check self-check and open solution</button>
+    </div>
+    <div class="solution" hidden><p>\(H=\{000,110\}\), \(H^\perp=\{000,001,110,111\}\). \(|H|\cdot|H^\perp| = 2\cdot4 = 8 = |G|\). Here \(H\subset H^\perp\).</p></div>
+    <div class="mastery"></div>
+  </div>
+
+  <div class="drill" id="d-dlog" data-id="dlog">
+    <div class="hd"><h3>Discrete log in \(\mathbb{Z}_7^*\)</h3><span class="tag">L13</span></div>
+    <p>\(g=3\) has order \(r=6\) mod 7, and \(h=4=3^s\). With \(f(a,b)=g^ah^b\) on \(\mathbb{Z}_6\times\mathbb{Z}_6\), find \(H\) and \(H^\perp\). Then find all \(s\) consistent with each sample set: (a) \((1,4)\); (b) \((2,2)\); (c) \((2,2)\) and \((3,0)\).</p>
+    <div class="ladder">
+      <div class="step" hidden><b class="k">Hint 1</b><p>\(f(a,b)=g^{a+sb}\). It is constant exactly when \(a+sb\) is fixed mod 6.</p></div>
+      <div class="step" hidden><b class="k">Hint 2</b><p>\(H=\langle(-s,1)\rangle\). A character \((y_1,y_2)\) is trivial on it iff \(-sy_1+y_2\equiv0\pmod 6\).</p></div>
+      <button class="nexthint">Hint 1 of 2</button>
+    </div>
+    <div class="audit">
+      <fieldset data-ans="b" data-why="Exponents of g live mod its order r = 6. The values g^a live mod p = 7, but that is the codomain, which has no role in the algebra."><legend>The congruence \(y_2\equiv sy_1\) is mod</legend>
+        <label><input type="radio" name="dl1" value="a"> 7</label><label><input type="radio" name="dl1" value="b"> 6</label></fieldset>
+      <fieldset data-ans="a" data-why="Invertible y₁ is sufficient, not necessary. Two non-invertible samples can still pin s down."><legend>Do you need a sample with \(\gcd(y_1,6)=1\)?</legend>
+        <label><input type="radio" name="dl2" value="a"> No</label><label><input type="radio" name="dl2" value="b"> Yes</label></fieldset>
+      <button class="checkaudit">Check self-check and open solution</button>
+    </div>
+    <div class="solution" hidden>
+      <p>\(H^\perp=\{(y_1,sy_1 \bmod 6)\}\). (a) \(s=4\). (b) \(2s\equiv2\pmod 6\Rightarrow s\in\{1,4\}\). (c) adding \(3s\equiv0\Rightarrow s\) even, so \(s=4\). Check: \(3^4=81\equiv4\pmod 7\).</p>
+    </div>
+    <div class="mastery"></div>
+  </div>
+
+  <div class="drill" id="d-kick" data-id="kick">
+    <div class="hd"><h3>Phase kickback, and when it entangles</h3><span class="tag">L7 · L12</span></div>
+    <p>Apply controlled-\(U\) to \(|+\rangle|\psi\rangle\) where \(U|\psi\rangle=e^{i\theta}|\psi\rangle\). Then redo it with \(|\phi\rangle=\alpha|\psi_0\rangle+\beta|\psi_1\rangle\), two eigenvectors with different phases.</p>
+    <div class="ladder">
+      <div class="step" hidden><b class="k">Hint 1</b><p>Expand by linearity and pull the eigenvalue out as a scalar.</p></div>
+      <button class="nexthint">Hint 1 of 1</button>
+    </div>
+    <div class="audit">
+      <fieldset data-ans="b" data-why="Each eigencomponent kicks back its own phase, so the control ends up correlated with which eigenvector."><legend>With the superposition input, is the result a product state?</legend>
+        <label><input type="radio" name="k1" value="a"> Yes</label><label><input type="radio" name="k1" value="b"> No, in general entangled</label></fieldset>
+      <button class="checkaudit">Check self-check and open solution</button>
+    </div>
+    <div class="solution" hidden>
+      <p>Eigenvector: \(\tfrac{1}{\sqrt2}(|0\rangle+e^{i\theta}|1\rangle)\otimes|\psi\rangle\), unentangled. Superposition: \(\tfrac{1}{\sqrt2}\sum_k c_k(|0\rangle+e^{i\theta_k}|1\rangle)|\psi_k\rangle\), entangled when the \(\theta_k\) differ. This is exactly why Shor's input \(|1\rangle\) gives a random \(j/r\).</p>
+    </div>
+    <div class="mastery"></div>
+  </div>
+
+  <div class="drill" id="d-81" data-id="81">
+    <div class="hd"><h3>Where \(8/\pi^2\) comes from</h3><span class="tag">L12</span></div>
+    <p>Worst case \(\gamma=y_0+\tfrac12\). Get the limiting value of \(P(y_0)+P(y_1)\) from an integral, then state the exact finite-\(Q\) value.</p>
+    <div class="ladder">
+      <div class="step" hidden><b class="k">Hint 1</b><p>\(\alpha_{y_0}=\frac1Q\sum_x e^{\pi i x/Q}\approx\int_0^1 e^{\pi i t}dt\).</p></div>
+      <div class="step" hidden><b class="k">Hint 2</b><p>For the exact value, sum the geometric series: \(\big|\sum_{x=0}^{Q-1}e^{i\phi x}\big| = \big|\sin(Q\phi/2)/\sin(\phi/2)\big|\).</p></div>
+      <button class="nexthint">Hint 1 of 2</button>
+    </div>
+    <div class="audit">
+      <fieldset data-ans="a" data-why="sin x < x, so the finite value is slightly above the limit; the integral gives the limit, not the finite bound."><legend>At finite \(Q\), is each bin's probability above or below \(4/\pi^2\)?</legend>
+        <label><input type="radio" name="e1" value="a"> Above</label><label><input type="radio" name="e1" value="b"> Below</label></fieldset>
+      <button class="checkaudit">Check self-check and open solution</button>
+    </div>
+    <div class="solution" hidden>
+      \[ \int_0^1 e^{i\pi t}dt=\frac{2i}{\pi},\qquad \Big|\tfrac{2i}{\pi}\Big|^2=\frac4{\pi^2},\qquad P(y_0)+P(y_1)=\frac{2}{Q^2\sin^2\!\big(\frac{\pi}{2Q}\big)}\ \ge\ \frac8{\pi^2}. \]
+      <p class="small muted">Check in the Lab: microscope, "Worst case", n = 7 gives 0.8106.</p>
+    </div>
+    <div class="mastery"></div>
+  </div>
+
+  <div class="drill" id="d-u7" data-id="u7">
+    <div class="hd"><h3>Eigenvectors of \(U_7\) mod 15</h3><span class="tag">L12</span></div>
+    <p>Find the orbit of 1 under multiplication by 7 mod 15, all eigenvectors \(|\psi_j\rangle\) with eigenvalues, and show \(|1\rangle=\frac12\sum_j|\psi_j\rangle\).</p>
+    <div class="ladder">
+      <div class="step" hidden><b class="k">Hint 1</b><p>On the orbit, \(U_7\) is a cyclic shift. Shifts are diagonalized by Fourier vectors.</p></div>
+      <button class="nexthint">Hint 1 of 1</button>
+    </div>
+    <div class="solution" hidden>
+      <p>Orbit \(1\to7\to4\to13\to1\), \(r=4\), \(\omega=i\). \(|\psi_j\rangle=\tfrac12(|1\rangle+i^{-j}|7\rangle+i^{-2j}|4\rangle+i^{-3j}|13\rangle)\), \(U_7|\psi_j\rangle=i^j|\psi_j\rangle\). Summing over \(j\) kills every term but \(|1\rangle\).</p>
+    </div>
+    <button class="ghost openSol">Open solution</button>
+    <div class="mastery"></div>
+  </div>
+
+  <div class="drill" id="d-qft8" data-id="qft8">
+    <div class="hd"><h3>QFT over \(\mathbb{Z}_8\) vs over \(\mathbb{Z}_2^3\)</h3><span class="tag">L10 → L13</span></div>
+    <p>From \(\mathrm{QFT}_{\mathbb{Z}_8}|x\rangle=\frac1{\sqrt8}(|0\rangle+\omega^{4x}|1\rangle)(|0\rangle+\omega^{2x}|1\rangle)(|0\rangle+\omega^{x}|1\rangle)\), \(\omega=e^{2\pi i/8}\), derive the gates on each wire. Then say which gates disappear for \(\mathbb{Z}_2^3\) and why.</p>
+    <div class="ladder">
+      <div class="step" hidden><b class="k">Hint 1</b><p>Write \(x=4x_1+2x_2+x_3\) and reduce each \(\omega^{kx}\) using \(\omega^8=1\).</p></div>
+      <div class="step" hidden><b class="k">Hint 2</b><p>A wire must still hold its bit while it controls a rotation, so its Hadamard comes after.</p></div>
+      <button class="nexthint">Hint 1 of 2</button>
+    </div>
+    <div class="audit">
+      <fieldset data-ans="a" data-why="The circuit produces the factors in reversed wire order; L10 reads outputs bottom to top, or you add a SWAP of wires 1 and 3."><legend>Does the H, CR₂, CR₃ / H, CR₂ / H circuit output the factors in the order written?</legend>
+        <label><input type="radio" name="q1" value="a"> No, bit-reversed unless you swap</label><label><input type="radio" name="q1" value="b"> Yes</label></fieldset>
+      <button class="checkaudit">Check self-check and open solution</button>
+    </div>
+    <div class="solution" hidden>
+      <p>\(\omega^{4x}=(-1)^{x_3}\); \(\omega^{2x}=(-1)^{x_2}i^{x_3}\); \(\omega^x=(-1)^{x_1}i^{x_2}\omega^{x_3}\). Wire 1: H, CR₂ (control 2), CR₃ (control 3). Wire 2: H, CR₂ (control 3). Wire 3: H. Then reverse wires. \(n(n-1)/2\) rotations total.</p>
+      <p>For \(\mathbb{Z}_2^3\) the characters are \((-1)^{y\cdot x}\): no carries between bits, so every controlled rotation drops out and \(\mathrm{QFT}_{\mathbb{Z}_2^3}=\mathsf{H}^{\otimes3}\).</p>
+    </div>
+    <div class="mastery"></div>
+  </div>
+
+  <div class="drill" id="d-f15" data-id="f15">
+    <div class="hd"><h3>Factor 15 three ways</h3><span class="tag">L11</span></div>
+    <p>Run the reduction with \(a=7\), \(a=11\), \(a=14\). Report \(r\), \(b=a^{r/2}\bmod15\), and \((\gcd(b-1,15),\gcd(b+1,15))\).</p>
+    <div class="solution" hidden>
+      <table><thead><tr><th>a</th><th>r</th><th>b</th><th>(gcd(b−1), gcd(b+1))</th></tr></thead><tbody>
+        <tr><td>7</td><td>4</td><td>4</td><td>(3, 5) ✓</td></tr><tr><td>11</td><td>2</td><td>11</td><td>(5, 3) ✓</td></tr><tr><td>14</td><td>2</td><td>14 ≡ −1</td><td>(1, 15) ✗ restart</td></tr></tbody></table>
+    </div>
+    <button class="ghost openSol">Open solution</button>
+    <div class="mastery"></div>
+  </div>
+  </div>
+</section>
+
+<!-- ============ SPEAK ============ -->
+<section class="view" id="v-speak" hidden>
+  <p>Pick a prompt, hit Start, explain out loud for 60 seconds with no notes. When you stop, the claims a full answer makes appear; tick the ones you actually said. Recording plays back locally if your browser allows the microphone. To have Claude grade you instead, dictate your answer into the terminal (Fn Fn).</p>
+  <div id="speakList" style="display:grid;gap:14px"></div>
+</section>
+</div>
+
+<script>
+(() => {
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const NS = 'http://www.w3.org/2000/svg';
+function S(tag, attrs = {}, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function typeset(el) { try { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([el]).catch(() => {}); } catch (e) {} }
+function load(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+const gcd = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a; };
+const mod = (a, m) => ((a % m) + m) % m;
+const powmod = (b, e, m) => { let r = 1; b = mod(b, m); while (e > 0) { if (e & 1) r = (r * b) % m; b = (b * b) % m; e >>= 1; } return r; };
+const order = (a, n) => { let x = a % n, r = 1; while (x !== 1) { x = (x * a) % n; r++; if (r > n) return null; } return r; };
+const fmt = (x, d = 3) => Number(x).toFixed(d);
+
+/* ---------------- routing ---------------- */
+const VIEWS = ['map', 'lab', 'board', 'speak'];
+function route() {
+  const h = (location.hash || '#map').slice(1);
+  let view = VIEWS.includes(h) ? h : null, target = null;
+  if (!view) { target = document.getElementById(h); const v = target && target.closest('section.view'); view = v ? v.id.slice(2) : 'map'; }
+  VIEWS.forEach(v => { $('#v-' + v).hidden = v !== view; });
+  $$('nav.tabs a').forEach(a => a.setAttribute('aria-current', a.getAttribute('href') === '#' + view ? 'page' : 'false'));
+  if (target) setTimeout(() => target.scrollIntoView({ block: 'start' }), 30);
+  if (view === 'lab') { drawHSP(); drawQPE(); drawShor(); }
+}
+window.addEventListener('hashchange', route);
+
+/* ---------------- concept map ---------------- */
+const N = {
+  kick: { t: ['Phase kickback'], lec: 'L7', x: 120, row: 0, eq: String.raw`C\text{-}U\,|1\rangle|\psi\rangle = e^{i\theta}\,|1\rangle|\psi\rangle`, b: 'An eigenvalue is a scalar, so it can be moved onto the control register. Phase oracles and phase estimation both run on this.', drill: 'd-kick' },
+  nosig: { t: ['No-signaling'], lec: 'L3', x: 330, row: 0, eq: String.raw`\text{ops on reg 2 after it stops interacting}\ \Rightarrow\ \text{reg 1 statistics unchanged}`, b: 'Lets you pretend the output register was measured (or not). Used in L12 for superpositions of eigenvectors and in L13 for coset states.' },
+  rev: { t: ['Reversible oracles'], lec: 'L4–6', x: 600, row: 0, eq: String.raw`O_f|x\rangle|y\rangle = |x\rangle|y\oplus f(x)\rangle`, b: 'Any efficient classical computation becomes an efficient quantum circuit via Toffoli gates. This is why a^x mod N is a usable oracle.' },
+  char: { t: ['Characters', '& the DFT'], lec: 'L8–10', x: 820, row: 0, eq: String.raw`\sum_{h\in H}\chi(h)=\begin{cases}|H| & \chi|_H\equiv1\\0 & \text{otherwise}\end{cases}`, b: 'Sums of roots of unity cancel unless every term is 1. This one fact drives Simon, period finding and the HSP.', lab: 'w-hsp' },
+  had: { t: ['𝖧⊗ⁿ', '(QFT over ℤ₂ⁿ)'], lec: 'L6–8', x: 200, row: 1, eq: String.raw`\mathsf{H}^{\otimes n}|x\rangle=\tfrac{1}{\sqrt{2^n}}\sum_y(-1)^{x\cdot y}|y\rangle`, b: 'The Fourier transform over ℤ₂ⁿ. No carries between bits, so no cross-wire gates.', drill: 'd-qft8', lab: 'w-hsp' },
+  qftc: { t: ['QFT over ℤ₂ⁿ', 'cyclic, O(n²)'], lec: 'L9–10', x: 430, row: 1, eq: String.raw`|x\rangle\mapsto\tfrac{1}{\sqrt N}\sum_y\omega_N^{xy}|y\rangle,\quad N=2^n`, b: 'The cyclic group of size N = 2ⁿ. Carries between bits are why it needs controlled rotations and is entangling.', drill: 'd-qft8' },
+  qftg: { t: ['QFT over any', 'abelian G'], lec: 'L13', x: 640, row: 1, eq: String.raw`\mathrm{QFT}_{G}=\bigotimes_j\mathrm{QFT}_{\mathbb{Z}_{N_j}},\quad G=\mathbb{Z}_{N_1}\times\cdots\times\mathbb{Z}_{N_k}`, b: 'One cyclic QFT per group factor. A tensor product over group factors, not over qubits.', lab: 'w-hsp' },
+  qpe: { t: ['Phase estimation'], lec: 'L12', x: 850, row: 1, eq: String.raw`|0^n\rangle|\psi\rangle\to|\widetilde{\theta/2\pi}\rangle|\psi\rangle,\quad \Pr\ge 8/\pi^2`, b: 'Learn an eigenphase of U with O(1/ε) uses of U: controlled powers U^{2^k}, then the inverse QFT.', lab: 'w-qpe', drill: 'd-81' },
+  dj: { t: ['Deutsch–Jozsa'], lec: 'L6–7', x: 80, row: 2, eq: String.raw`\Pr[0^n]=\Big|\tfrac{1}{2^n}\sum_x(-1)^{f(x)}\Big|^2`, b: 'Constant vs balanced in one query. Same 𝖧, O_f, 𝖧 template as Simon, but not an HSP.' },
+  bv: { t: ['Bernstein–', 'Vazirani'], lec: 'L7', x: 232, row: 2, eq: String.raw`f(x)=s\cdot x:\ \ \mathsf{H}^{\otimes n}\tfrac{1}{\sqrt{2^n}}\sum_x(-1)^{s\cdot x}|x\rangle=|s\rangle`, b: 'f is itself a character, so kickback prepares it directly: one deterministic query. A generic HSP run would give 0 or s with probability 1/2 each.' },
+  simon: { t: ['Simon'], lec: 'L8', x: 384, row: 2, eq: String.raw`G=\mathbb{Z}_2^n,\ H=\{0,s\},\ H^\perp=\{y: y\cdot s=0\}`, b: 'Each run gives a random y with y·s = 0 mod 2. About n runs, then linear algebra mod 2.', lab: 'w-hsp', drill: 'd-simon' },
+  period: { t: ['Period finding'], lec: 'L9–10', x: 540, row: 2, eq: String.raw`G=\mathbb{Z}_N,\ H=p\mathbb{Z}_N\ (p\mid N),\ H^\perp=\tfrac{N}{p}\mathbb{Z}_N`, b: 'A comb of spacing p transforms to a comb of spacing N/p. The offset only adds phases.', lab: 'w-hsp' },
+  order: { t: ['Order finding'], lec: 'L11–12', x: 700, row: 2, eq: String.raw`f(x)=a^x\bmod N,\quad f(x+r)=f(x)`, b: 'Period finding for a function you can compute. An HSP over ℤ with H = rℤ; exact on a finite register only if r divides it, otherwise you get y ≈ jQ/r and use continued fractions.', lab: 'w-shor', drill: 'd-u7' },
+  dlog: { t: ['Discrete log'], lec: 'L13', x: 870, row: 2, eq: String.raw`f(a,b)=g^ah^b,\ H=\langle(-s,1)\rangle,\ y_2\equiv s\,y_1\!\!\pmod r`, b: 'Find s with h = gˢ. Breaks Diffie–Hellman and elliptic-curve crypto. The arithmetic is mod r (the order of g), not mod p.', lab: 'w-hsp', drill: 'd-dlog' },
+  nahsp: { t: ['Non-abelian HSP'], lec: 'L13', x: 220, row: 3, eq: String.raw`S_{2n}\ (\text{graph iso, via disjoint union}),\quad D_N\ (\text{lattices})`, b: 'Few queries suffice (Ettinger–Høyer–Knill) and QFT over Sₙ is even efficient, but no efficient algorithm is known: irreducible representations are d×d matrices, so the coset shift is not just a phase that |·|² throws away.' },
+  ahsp: { t: ['Abelian HSP'], lec: 'L13', x: 480, row: 3, eq: String.raw`|g_0+H\rangle\ \xrightarrow{\ \mathrm{QFT}_G\ }\ \text{uniform } y\in H^\perp`, b: 'Thursday\'s hub. f is constant on cosets of H and distinct across cosets. Fourier sampling gives uniform elements of H⊥; O(log|G|) samples determine H with high probability.', lab: 'w-hsp', drill: 'd-coset' },
+  factor: { t: ['Factoring'], lec: 'L11', x: 800, row: 3, eq: String.raw`N=pq,\quad b=a^{r/2},\quad \gcd(b\pm1,N)`, b: 'Classical reduction to order finding. Restart if r is odd or b ≡ −1 mod N.', lab: 'w-shor', drill: 'd-f15' },
+  gauss: { t: ['Linear algebra', 'mod 2'], lec: 'L8', x: 290, row: 4, eq: String.raw`Ys\equiv 0\pmod 2`, b: 'Solve for s from n − 1 independent samples.' },
+  annih: { t: ['Recover H', 'from H⊥'], lec: 'L13', x: 500, row: 4, eq: String.raw`H=(H^\perp)^\perp,\quad |H|\cdot|H^\perp|=|G|`, b: 'The classical step of the HSP. Over a field it is Gaussian elimination; over ℤ_N it is linear algebra over a ring (gcds, Smith normal form), since zero divisors cannot be inverted.', drill: 'd-samples' },
+  euclid: { t: ['gcd & continued', 'fractions'], lec: 'L10–12', x: 720, row: 4, eq: String.raw`\gcd(y_1,y_2,\dots)=\tfrac Np,\qquad \tfrac yQ\approx\tfrac jr`, b: 'Turn samples near multiples of Q/r into the period r, and b ± 1 into factors.', lab: 'w-shor' },
+  grover: { t: ['Grover /', 'amplitude amp.'], lec: 'L14', x: 150, row: 5, fut: 1, eq: String.raw`O(\sqrt{N})\text{ queries}`, b: 'Coming in L14.' },
+  ampest: { t: ['Amplitude', 'estimation'], lec: 'L14', x: 380, row: 5, fut: 1, eq: String.raw`\text{QPE on the Grover iterate}`, b: 'Coming in L14: phase estimation applied to the Grover operator.' },
+  hamsim: { t: ['Hamiltonian sim', '/ LCU'], lec: 'L15', x: 610, row: 5, fut: 1, eq: String.raw`U=e^{-iHt}`, b: 'Coming in L15. Gives the U that phase estimation needs to estimate energies.' },
+  stab: { t: ['Stabilizer codes'], lec: 'L16–17', x: 840, row: 5, fut: 1, eq: String.raw`S\ \text{abelian subgroup of the Pauli group}`, b: 'Coming in L16–17. Another abelian-subgroup story; syndrome extraction is phase kickback on Pauli eigenvalues.' },
+};
+for (const k in N) if (['qftg', 'dlog', 'ahsp', 'nahsp', 'annih'].includes(k)) N[k].l13 = 1;
+// [from, to, type, label, addedInL13]
+const E = [
+  ['kick', 'dj', 'uses', 'phase oracle'], ['kick', 'bv', 'uses', 'phase oracle'], ['kick', 'qpe', 'uses', 'eigenphase moves to control'],
+  ['nosig', 'qpe', 'en', 'superposition acts like mixture'], ['nosig', 'ahsp', 'en', 'measuring output register optional', 1],
+  ['rev', 'order', 'uses', 'a^x mod N by repeated squaring'], ['char', 'qftc', 'uses', 'DFT matrix'], ['char', 'ahsp', 'uses', 'Σ χ(h) = 0 unless trivial on H', 1],
+  ['had', 'qftg', 'case', 'G = ℤ₂ⁿ', 1], ['qftc', 'qftg', 'case', 'one cyclic factor', 1], ['qftg', 'ahsp', 'uses', 'Fourier sampling', 1],
+  ['had', 'dj', 'uses', ''], ['had', 'bv', 'uses', ''], ['had', 'simon', 'uses', 'as Fourier sampling'],
+  ['qftc', 'period', 'uses', ''], ['qftc', 'qpe', 'uses', 'inverse QFT'],
+  ['simon', 'ahsp', 'case', 'G = ℤ₂ⁿ, H = {0,s}', 1], ['period', 'ahsp', 'case', 'G = ℤ_N, p | N', 1], ['order', 'period', 'case', 'period r'],
+  ['order', 'ahsp', 'case', 'over ℤ, H = rℤ', 1], ['order', 'qpe', 'eq', 'QPE of U_a on |1⟩'], ['dlog', 'ahsp', 'case', 'G = ℤ_r × ℤ_r', 1],
+  ['ahsp', 'nahsp', 'case', 'commutative case', 1], ['factor', 'order', 'uses', 'only quantum step'], ['factor', 'euclid', 'uses', 'gcd(b ± 1, N)'],
+  ['simon', 'gauss', 'uses', ''], ['period', 'euclid', 'uses', 'gcd of samples'], ['order', 'euclid', 'uses', 'continued fractions'],
+  ['ahsp', 'annih', 'uses', 'classical step', 1], ['gauss', 'annih', 'case', 'over 𝔽₂', 1], ['euclid', 'annih', 'case', 'cyclic case', 1],
+  ['qpe', 'ampest', 'en', ''], ['grover', 'ampest', 'en', ''], ['qpe', 'hamsim', 'en', 'energy estimation'], ['ahsp', 'stab', 'en', 'abelian subgroups again'],
+];
+const TYPE_TXT = { case: 'is a special case of', uses: 'uses', eq: 'same circuit as', en: 'leads to' };
+const NW = 138, NH = 46, rowY = r => 50 + r * 116;
+const svg = $('#mapsvg');
+const defs = S('defs', {}, svg);
+const mk = S('marker', { id: 'arr', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);
+S('path', { d: 'M0,0 L10,5 L0,10 z', class: 'mk' }, mk);
+const gE = S('g', {}, svg), gL = S('g', {}, svg), gN = S('g', {}, svg);
+const edgeEls = [];
+E.forEach(([a, b, type, label, l13]) => {
+  const A = N[a], B = N[b];
+  const ax = A.x, ay = rowY(A.row), bx = B.x, by = rowY(B.row);
+  let d, mx, my;
+  if (A.row === B.row) {
+    const dir = bx > ax ? 1 : -1, sx = ax + dir * NW / 2, tx = bx - dir * NW / 2, lift = 22 + Math.abs(tx - sx) * 0.12;
+    d = `M${sx},${ay - 8} C${sx + dir * 20},${ay - lift} ${tx - dir * 20},${by - lift} ${tx},${by - 8}`; mx = (sx + tx) / 2; my = ay - lift * 0.75;
+  } else {
+    const dn = by > ay ? 1 : -1, sy = ay + dn * NH / 2, ty = by - dn * NH / 2, cy = (sy + ty) / 2;
+    d = `M${ax},${sy} C${ax},${cy} ${bx},${cy} ${bx},${ty}`; mx = (ax + bx) / 2; my = cy;
+  }
+  const g = S('g', { class: 'edge e-' + type }, gE);
+  S('path', { d, class: 's', 'marker-end': type === 'eq' ? '' : 'url(#arr)' }, g);
+  if (type === 'eq') S('path', { d, class: 'k' }, g);
+  const t = S('text', { x: mx, y: my, class: 'elabel' }, gL); t.textContent = label || TYPE_TXT[type]; t.style.display = 'none';
+  edgeEls.push({ a, b, type, label, l13: !!l13, g, t });
+});
+const nodeEls = {};
+for (const k in N) {
+  const n = N[k], y = rowY(n.row);
+  const g = S('g', { class: 'node' + (n.fut ? ' future' : ''), tabindex: 0, role: 'button', 'aria-label': n.t.join(' ') + ', ' + n.lec }, gN);
+  S('rect', { x: n.x - NW / 2, y: y - NH / 2, width: NW, height: NH, rx: 6, class: 'o' }, g);
+  if (n.l13) S('rect', { x: n.x - NW / 2 + 3.5, y: y - NH / 2 + 3.5, width: NW - 7, height: NH - 7, rx: 4, class: 'i' }, g);
+  const lines = n.t, y0 = y - (lines.length - 1) * 7 + 1;
+  lines.forEach((ln, i) => { const t = S('text', { x: n.x, y: y0 + i * 14 }, g); t.textContent = ln; });
+  const lt = S('text', { x: n.x + NW / 2 - 4, y: y - NH / 2 - 4, class: 'lec', 'text-anchor': 'end' }, g); lt.textContent = n.lec; lt.style.textAnchor = 'end';
+  g.addEventListener('click', () => select(k));
+  g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(k); } });
+  nodeEls[k] = g;
+}
+let selKey = null, onlyL13 = false;
+function paint() {
+  const nb = new Set();
+  if (selKey) { nb.add(selKey); edgeEls.forEach(e => { if (e.a === selKey || e.b === selKey) { nb.add(e.a); nb.add(e.b); } }); }
+  edgeEls.forEach(e => {
+    const inc = selKey ? (e.a === selKey || e.b === selKey) : true;
+    const ok = inc && (!onlyL13 || e.l13);
+    e.g.classList.toggle('dim', !ok);
+    e.t.style.display = (selKey && inc && (!onlyL13 || e.l13)) || (!selKey && onlyL13 && e.l13) ? '' : 'none';
+  });
+  for (const k in nodeEls) {
+    const inN = selKey ? nb.has(k) : true, okL = !onlyL13 || N[k].l13 || edgeEls.some(e => e.l13 && (e.a === k || e.b === k));
+    nodeEls[k].classList.toggle('dimn', !(inN && okL));
+    nodeEls[k].classList.toggle('sel', k === selKey);
+  }
+}
+function select(k) {
+  selKey = k; paint();
+  const n = N[k], card = $('#nodecard');
+  const rel = edgeEls.filter(e => e.a === k || e.b === k).map(e => {
+    const other = e.a === k ? e.b : e.a, out = e.a === k;
+    const verb = e.type === 'eq' ? 'same circuit as' : out ? TYPE_TXT[e.type] : ({ case: 'has special case', uses: 'is used by', en: 'is enabled by' })[e.type];
+    return `<button data-k="${other}">${verb} <b>${N[other].t.join(' ')}</b>${e.label ? ' · ' + e.label : ''}${e.l13 ? ' · <i>L13</i>' : ''}</button>`;
+  }).join('');
+  card.innerHTML = `<span class="eyebrow">${n.lec}${n.l13 ? ' · new Thursday' : ''}</span><h3>${n.t.join(' ')}</h3>
+    <div>\\[${n.eq}\\]</div><p>${n.b}</p>
+    <div class="row">${n.lab ? `<a href="#${n.lab}">Try it in the Lab</a>` : ''}${n.drill ? `<a href="#${n.drill}">Whiteboard drill</a>` : ''}</div>
+    <span class="lbl">Connections</span><div class="rel">${rel}</div>`;
+  $$('button[data-k]', card).forEach(b => b.addEventListener('click', () => select(b.dataset.k)));
+  typeset(card);
+}
+$('#btnL13').addEventListener('click', e => { onlyL13 = !onlyL13; e.target.setAttribute('aria-pressed', onlyL13); e.target.textContent = onlyL13 ? 'Show everything' : 'Show only what L13 adds'; paint(); });
+$('#btnClear').addEventListener('click', () => { selKey = null; paint(); $('#nodecard').innerHTML = '<p class="muted">Select a node.</p>'; });
+
+/* ---------------- shared: phasor polygon ---------------- */
+function drawPolygon(el, angles, note) {
+  el.innerHTML = ''; const K = angles.length;
+  const pts = [[0, 0]]; let x = 0, y = 0;
+  angles.forEach(a => { x += Math.cos(a); y += Math.sin(a); pts.push([x, y]); });
+  let minx = 0, maxx = 0, miny = 0, maxy = 0; pts.forEach(([px, py]) => { minx = Math.min(minx, px); maxx = Math.max(maxx, px); miny = Math.min(miny, py); maxy = Math.max(maxy, py); });
+  const span = Math.max(maxx - minx, maxy - miny, 1e-9), sc = 170 / span, ox = 130 - (minx + maxx) / 2 * sc, oy = 100 + (miny + maxy) / 2 * sc;
+  const P = ([px, py]) => [ox + px * sc, oy - py * sc];
+  for (let i = 0; i < K; i++) { const [x1, y1] = P(pts[i]), [x2, y2] = P(pts[i + 1]); S('line', { x1, y1, x2, y2, class: 'vec' }, el); }
+  const [x0, y0] = P(pts[0]), [xe, ye] = P(pts[K]);
+  S('line', { x1: x0, y1: y0, x2: xe, y2: ye, class: 'res' }, el);
+  S('circle', { cx: x0, cy: y0, r: 3.5, class: 'orig' }, el);
+  return Math.hypot(x, y) / K;
+}
+
+/* ---------------- HSP widget ---------------- */
+const HG = {
+  simon: { name: 'Simon: ℤ₂³', mods: [2, 2, 2] },
+  z8: { name: 'Cyclic ℤ₈', mods: [8] },
+  z12: { name: 'Cyclic ℤ₁₂', mods: [12] },
+  dlog: { name: 'Discrete log: ℤ₆ × ℤ₆', mods: [6, 6] },
+};
+const hs = { g: 'z12', p: '3', off: 1, samples: [], tapped: null };
+const idxToEl = (i, mods) => { const out = []; for (let j = mods.length - 1; j >= 0; j--) { out[j] = i % mods[j]; i = Math.floor(i / mods[j]); } return out; };
+const elToIdx = (x, mods) => x.reduce((acc, v, j) => acc * mods[j] + v, 0);
+const elName = (x, g) => g === 'simon' ? x.join('') : x.length === 1 ? String(x[0]) : '(' + x.join(',') + ')';
+function closure(gens, mods) {
+  const zero = mods.map(() => 0), seen = new Set([elToIdx(zero, mods)]), q = [zero];
+  while (q.length) { const x = q.pop(); for (const g of gens) { const y = x.map((v, j) => (v + g[j]) % mods[j]), k = elToIdx(y, mods); if (!seen.has(k)) { seen.add(k); q.push(y); } } }
+  return [...seen].sort((a, b) => a - b);
+}
+const chiPhase = (y, x, mods) => 2 * Math.PI * y.reduce((s, v, j) => s + v * x[j] / mods[j], 0);
+function hspParamOpts() {
+  const g = hs.g, sel = $('#hspP'); sel.innerHTML = '';
+  let opts = [];
+  if (g === 'simon') for (let s = 1; s < 8; s++) { const b = idxToEl(s, [2, 2, 2]).join(''); opts.push([b, `H = {000, ${b}}  (s = ${b})`]); }
+  if (g === 'z8') opts = [['2', 'H = ⟨2⟩, period 2'], ['4', 'H = ⟨4⟩, period 4'], ['3', 'period 3 (3 ∤ 8: not a subgroup)']];
+  if (g === 'z12') opts = [['2', 'H = ⟨2⟩, period 2'], ['3', 'H = ⟨3⟩, period 3'], ['4', 'H = ⟨4⟩, period 4'], ['6', 'H = ⟨6⟩, period 6'], ['5', 'period 5 (5 ∤ 12: not a subgroup)']];
+  if (g === 'dlog') for (let s = 1; s < 6; s++) opts.push([String(s), `s = ${s}: H = ⟨(${mod(-s, 6)}, 1)⟩`]);
+  opts.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; sel.appendChild(o); });
+  if (!opts.some(o => o[0] === hs.p)) hs.p = opts[g === 'z12' ? 1 : 0][0];
+  sel.value = hs.p;
+}
+function hspModel() {
+  const G = HG[hs.g], mods = G.mods, size = mods.reduce((a, b) => a * b, 1);
+  let comb = false, Hidx = null, C = [];
+  if (hs.g === 'simon') Hidx = closure([hs.p.split('').map(Number)], mods);
+  else if (hs.g === 'dlog') { const s = +hs.p; Hidx = closure([[mod(-s, 6), 1]], mods); }
+  else { const p = +hs.p, n = mods[0]; if (n % p === 0) Hidx = closure([[p]], mods); else comb = p; }
+  let offMax;
+  if (comb) { offMax = comb - 1; hs.off = Math.min(hs.off, offMax); for (let x = hs.off; x < mods[0]; x += comb) C.push(x); }
+  else { offMax = size - 1; hs.off = Math.min(hs.off, offMax); const g0 = idxToEl(hs.off, mods); C = Hidx.map(h => elToIdx(idxToEl(h, mods).map((v, j) => (v + g0[j]) % mods[j]), mods)); }
+  const amps = [];
+  for (let yi = 0; yi < size; yi++) {
+    const y = idxToEl(yi, mods); let re = 0, im = 0;
+    C.forEach(ci => { const a = chiPhase(y, idxToEl(ci, mods), mods); re += Math.cos(a); im += Math.sin(a); });
+    const nrm = 1 / Math.sqrt(size * C.length); amps.push([re * nrm, im * nrm]);
+  }
+  return { mods, size, comb, Hidx, C, amps, offMax };
+}
+function phasor(el, cx, cy, R, re, im, maxA) {
+  const a = Math.hypot(re, im);
+  if (a < 1e-9) { S('circle', { cx, cy, r: 1.8, class: 'dot' }, el); return; }
+  const r = Math.max(3, R * a / maxA), th = Math.atan2(im, re);
+  S('circle', { cx, cy, r, class: 'ph' }, el);
+  S('line', { x1: cx, y1: cy, x2: cx + r * Math.cos(th), y2: cy - r * Math.sin(th), class: 'ndl' }, el);
+}
+function drawHSP() {
+  if ($('#v-lab').hidden) return;
+  const M = hspModel(), el = $('#hspSvg'); el.innerHTML = '';
+  $('#hspOff').max = M.offMax; $('#hspOff').value = hs.off;
+  const g0 = idxToEl(hs.off, M.mods);
+  $('#hspOffV').textContent = M.comb ? hs.off : elName(g0, hs.g);
+  const warn = $('#hspWarn');
+  if (M.comb) { warn.hidden = false; warn.textContent = `${M.comb} does not divide ${M.mods[0]}, so {x₀, x₀+${M.comb}, …} is not a subgroup of ℤ${M.mods[0]}. This is the real situation in Shor: no outcome has exactly zero amplitude, and probability leaks around the nearest bins to multiples of N/p = ${fmt(M.mods[0] / M.comb, 2)}.`; }
+  else warn.hidden = true;
+  const twoD = M.mods.length === 2, cols = twoD ? 6 : M.size, rows = twoD ? 6 : 1;
+  const W = 680, pad = 26, panelW = twoD ? 300 : W - 2 * pad, cs = Math.min(52, panelW / cols);
+  const H = twoD ? 40 + rows * cs + 30 : 2 * (cs + 54) + 20;
+  el.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const maxBefore = 1 / Math.sqrt(M.C.length), maxAfter = Math.max(...M.amps.map(([r, i]) => Math.hypot(r, i)));
+  const panels = twoD ? [[pad, 34, 'before'], [W / 2 + 14, 34, 'after']] : [[pad, 30, 'before'], [pad, 30 + cs + 54, 'after']];
+  panels.forEach(([px, py, kind]) => {
+    const t = S('text', { x: px, y: py - 12 }, el);
+    t.textContent = kind === 'before' ? (M.comb ? 'Before QFT: comb state (not a coset)' : 'Before QFT: coset state |g₀ + H⟩') : 'After QFT_G: tap an outcome y';
+    for (let i = 0; i < M.size; i++) {
+      const xx = idxToEl(i, M.mods), c = twoD ? xx[0] : i, r = twoD ? xx[1] : 0;
+      const cx = px + c * cs + cs / 2, cy = py + r * cs + cs / 2;
+      S('rect', { x: cx - cs / 2, y: cy - cs / 2, width: cs, height: cs, class: 'cell' }, el);
+      if (kind === 'before') { const on = M.C.includes(i); if (on) phasor(el, cx, cy, cs * 0.4, maxBefore, 0, maxBefore); else S('circle', { cx, cy, r: 1.8, class: 'dot' }, el); }
+      else {
+        const [re, im] = M.amps[i]; phasor(el, cx, cy, cs * 0.4, re, im, maxAfter);
+        if (hs.tapped === i) S('rect', { x: cx - cs / 2 + 2, y: cy - cs / 2 + 2, width: cs - 4, height: cs - 4, class: 'selc' }, el);
+        const hit = S('rect', { x: cx - cs / 2, y: cy - cs / 2, width: cs, height: cs, class: 'hit' }, el);
+        hit.addEventListener('click', () => { hs.tapped = i; drawHSP(); });
+      }
+      if (!twoD) { const lt = S('text', { x: cx, y: cy + cs / 2 + 13, 'text-anchor': 'middle' }, el); lt.textContent = elName(xx, hs.g); lt.style.textAnchor = 'middle'; }
+    }
+    if (twoD) {
+      for (let c = 0; c < 6; c++) { const t1 = S('text', { x: px + c * cs + cs / 2 - 3, y: py + rows * cs + 14 }, el); t1.textContent = c; }
+      for (let r = 0; r < 6; r++) { const t2 = S('text', { x: px - 12, y: py + r * cs + cs / 2 + 4 }, el); t2.textContent = r; }
+      const ax = S('text', { x: px, y: py + rows * cs + 28 }, el); ax.textContent = kind === 'before' ? 'a → (rows: b)' : 'y₁ → (rows: y₂)';
+    }
+  });
+  // polygon for tapped y
+  if (hs.tapped == null || hs.tapped >= M.size) hs.tapped = M.comb ? 1 : (M.size > 1 ? 1 : 0);
+  const y = idxToEl(hs.tapped, M.mods), angles = M.C.map(ci => chiPhase(y, idxToEl(ci, M.mods), M.mods));
+  const mag = drawPolygon($('#hspPoly'), angles);
+  const p = M.amps[hs.tapped][0] ** 2 + M.amps[hs.tapped][1] ** 2;
+  $('#hspPolyTxt').innerHTML = `y = <b>${elName(y, hs.g)}</b>: ${M.C.length} unit arrows χ_y(c), one per element c of the ${M.comb ? 'comb' : 'coset'}. |sum| / ${M.C.length} = <span class="num">${fmt(mag)}</span>, Pr[y] = <span class="num">${fmt(p)}</span>. ${mag < 1e-6 ? 'The arrows close into a polygon: total cancellation, y ∉ H⊥.' : mag > 0.999 ? 'All arrows point the same way: y is trivial on H, so y ∈ H⊥.' : 'Partial cancellation.'}`;
+  // recovery
+  const chips = $('#hspSamples'); chips.innerHTML = hs.samples.map(s => `<span class="chip">${elName(idxToEl(s, M.mods), hs.g)}</span>`).join('') || '<span class="small muted">No samples yet.</span>';
+  const rec = $('#hspRec');
+  if (M.comb) { rec.innerHTML = 'Not a subgroup, so exact recovery does not apply. See the Shor widget below for continued fractions.'; return; }
+  const Hperp = []; for (let i = 0; i < M.size; i++) if (Math.hypot(...M.amps[i]) > 1e-9) Hperp.push(i);
+  const K = closure(hs.samples.map(s => idxToEl(s, M.mods)), M.mods);
+  const Kperp = []; for (let i = 0; i < M.size; i++) { const x = idxToEl(i, M.mods); if (K.every(k => Math.abs(Math.cos(chiPhase(idxToEl(k, M.mods), x, M.mods)) - 1) < 1e-9)) Kperp.push(i); }
+  const done = Kperp.length === M.Hidx.length;
+  let extra = '';
+  if (hs.g === 'simon') { const cand = Kperp.filter(i => i !== 0).map(i => elName(idxToEl(i, M.mods), 'simon')); extra = `Candidates for s: {${cand.join(', ')}}`; }
+  if (hs.g === 'dlog') { const cand = []; for (let s = 0; s < 6; s++) if (hs.samples.every(si => { const [y1, y2] = idxToEl(si, M.mods); return mod(y2 - s * y1, 6) === 0; })) cand.push(s); extra = `Candidates for s (solve y₂ ≡ s·y₁ mod 6): {${cand.join(', ')}}`; }
+  if (hs.g === 'z8' || hs.g === 'z12') { const n = M.mods[0], gg = hs.samples.reduce((a, s) => gcd(a, s), n); extra = `gcd(N, samples) = ${gg} ⇒ period estimate N / gcd = ${n / gg}`; }
+  rec.innerHTML = `|H⊥| = ${Hperp.length}, each outcome has Pr = |H|/|G| = ${M.Hidx.length}/${M.size}.<br>Samples generate K with |K| = ${K.length}. Subgroups consistent with the data: K⊥ has ${Kperp.length} elements.<br>${extra}<br><b>${done ? '✓ K⊥ = H: hidden subgroup recovered.' : hs.samples.length ? '… not pinned down yet: draw more.' : ''}</b>`;
+}
+function hspSample(k = 1) {
+  const M = hspModel();
+  for (let t = 0; t < k; t++) { let u = Math.random(), acc = 0; for (let i = 0; i < M.size; i++) { acc += M.amps[i][0] ** 2 + M.amps[i][1] ** 2; if (u <= acc) { hs.samples.push(i); break; } } }
+  drawHSP();
+}
+Object.keys(HG).forEach(k => { const o = document.createElement('option'); o.value = k; o.textContent = HG[k].name; $('#hspG').appendChild(o); });
+$('#hspG').value = hs.g; hspParamOpts();
+$('#hspG').addEventListener('change', e => { hs.g = e.target.value; hs.p = ''; hs.samples = []; hs.tapped = null; hs.off = 1; hspParamOpts(); drawHSP(); });
+$('#hspP').addEventListener('change', e => { hs.p = e.target.value; hs.samples = []; hs.tapped = null; drawHSP(); });
+$('#hspOff').addEventListener('input', e => { hs.off = +e.target.value; drawHSP(); });
+$('#hspDraw').addEventListener('click', () => hspSample(1));
+$('#hspDraw5').addEventListener('click', () => hspSample(5));
+$('#hspReset').addEventListener('click', () => { hs.samples = []; drawHSP(); });
+
+/* ---------------- QPE widget ---------------- */
+const qs = { n: 4, t: 0.531, z: null, shots: null };
+function qpeProbs(n, t) { const Nn = 2 ** n, g = Nn * t, P = []; for (let z = 0; z < Nn; z++) { let re = 0, im = 0; for (let x = 0; x < Nn; x++) { const a = 2 * Math.PI * x * (g - z) / Nn; re += Math.cos(a); im += Math.sin(a); } P.push((re * re + im * im) / (Nn * Nn)); } return P; }
+function drawQPE() {
+  if ($('#v-lab').hidden) return;
+  const n = qs.n, Nn = 2 ** n, g = Nn * qs.t, P = qpeProbs(n, qs.t);
+  $('#qpeNV').textContent = n; $('#qpeTV').textContent = fmt(qs.t, 3); $('#qpeN').value = n; $('#qpeT').value = Math.round(qs.t * 1000);
+  const y0 = Math.floor(g) % Nn, y1 = (Math.floor(g) + 1) % Nn, exact = Math.abs(g - Math.round(g)) < 1e-9;
+  const el = $('#qpeSvg'); el.innerHTML = '';
+  const defs2 = S('defs', {}, el), pat = S('pattern', { id: 'hatch', width: 5, height: 5, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs2);
+  S('line', { x1: 0, y1: 0, x2: 0, y2: 5, class: 'hatchline' }, pat);
+  const L = 36, R = 664, T = 16, B = 200, bw = (R - L) / Nn;
+  S('line', { x1: L, y1: B, x2: R, y2: B, class: 'axis' }, el);
+  const fy = B - (B - T) * (4 / Math.PI ** 2);
+  [0, 0.5, 1].forEach(v => { const yy = B - (B - T) * v; S('line', { x1: L - 4, y1: yy, x2: L, y2: yy, class: 'axis' }, el); const t = S('text', { x: 4, y: yy + 4 }, el); t.textContent = v; });
+  S('line', { x1: L, y1: fy, x2: R, y2: fy, class: 'floor' }, el); const ft = S('text', { x: R - 70, y: fy - 5 }, el); ft.textContent = '4/π² per bin';
+  if (qs.z == null || qs.z >= Nn) qs.z = y0;
+  P.forEach((p, z) => {
+    const x = L + z * bw, h = (B - T) * p, near = !exact && (z === y0 || z === y1);
+    S('rect', { x: x + bw * 0.12, y: B - h, width: bw * 0.76, height: Math.max(h, 0.5), class: near ? 'barh' : 'bar' }, el);
+    if (z === qs.z) S('rect', { x: x + 1, y: T - 6, width: bw - 2, height: B - T + 6, class: 'selc' }, el);
+    const hit = S('rect', { x, y: T - 6, width: bw, height: B - T + 30, class: 'hit' }, el); hit.addEventListener('click', () => { qs.z = z; drawQPE(); });
+    if (Nn <= 32 || z % Math.ceil(Nn / 32) === 0) { const t = S('text', { x: x + bw / 2 - (z > 9 ? 6 : 3), y: B + 14 }, el); t.textContent = z; }
+  });
+  const gx = L + (g % Nn) * bw + bw / 2; S('line', { x1: gx, y1: T - 8, x2: gx, y2: B + 18, class: 'floor' }, el);
+  const gt = S('text', { x: Math.min(gx + 4, R - 60), y: B + 32 }, el); gt.textContent = 'γ = ' + fmt(g, 2);
+  let stat = exact ? `γ is an integer: the output is ${Math.round(g) % Nn} with probability ${fmt(P[Math.round(g) % Nn])}.` : `P(${y0}) + P(${y1}) = <b>${fmt(P[y0] + P[y1], 4)}</b> ≥ 8/π² = 0.8106. δ = γ − ${Math.floor(g)} = ${fmt(g - Math.floor(g), 2)}.`;
+  if (qs.shots) {
+    const est = qs.shots, mean = est.reduce((a, b) => a + b, 0) / est.length, srt = [...est].sort((a, b) => a - b), med = srt[Math.floor(srt.length / 2)];
+    [[mean, '▲ mean'], [med, '● median']].forEach(([v, lab], i) => { const xx = L + v * bw + bw / 2; const t = S('text', { x: xx - 4, y: B + 46 + i * 0 }, el); t.textContent = lab.slice(0, 1); });
+    el.setAttribute('viewBox', '0 0 680 260');
+    stat += `<br>25 shots: ${est.join(', ')}.<br>Mean ${fmt(mean, 2)} ▲, median ${med} ●. The tail drags the mean; the median sits on a nearest bin. Repeating boosts confidence, not precision: precision only improves with more qubits.`;
+  } else el.setAttribute('viewBox', '0 0 680 250');
+  $('#qpeStat').innerHTML = stat;
+  const angles = []; for (let x = 0; x < Nn; x++) angles.push(2 * Math.PI * x * (g - qs.z) / Nn);
+  const mag = drawPolygon($('#qpePoly'), angles);
+  $('#qpePolyTxt').innerHTML = `Bin z = <b>${qs.z}</b>: ${Nn} arrows e^{2πix(γ−z)/N}, turning ${fmt(Math.abs(g - qs.z), 2)} times around in total. |α_z| = <span class="num">${fmt(mag)}</span>. Far bins wrap many times and nearly close up.`;
+}
+$('#qpeN').addEventListener('input', e => { qs.n = +e.target.value; qs.shots = null; drawQPE(); });
+$('#qpeT').addEventListener('input', e => { qs.t = +e.target.value / 1000; qs.shots = null; drawQPE(); });
+$('#qpeMid').addEventListener('click', () => { const Nn = 2 ** qs.n; qs.t = (Math.floor(qs.t * Nn) + 0.5) / Nn; qs.shots = null; drawQPE(); });
+$('#qpeExact').addEventListener('click', () => { const Nn = 2 ** qs.n; qs.t = Math.round(qs.t * Nn) / Nn % 1; qs.shots = null; drawQPE(); });
+$('#qpeShots').addEventListener('click', () => { const P = qpeProbs(qs.n, qs.t), out = []; for (let s = 0; s < 25; s++) { let u = Math.random(), acc = 0; for (let z = 0; z < P.length; z++) { acc += P[z]; if (u <= acc) { out.push(z); break; } } } qs.shots = out; drawQPE(); });
+
+/* ---------------- Shor widget ---------------- */
+const sh = { N: 15, a: 7, q: 6, rs: [], log: [] };
+function shorAOpts() { const sel = $('#shA'); sel.innerHTML = ''; for (let a = 2; a < sh.N - 1; a++) if (gcd(a, sh.N) === 1) { const o = document.createElement('option'); o.value = a; o.textContent = `${a}  (order ${order(a, sh.N)})`; sel.appendChild(o); } if (gcd(sh.a, sh.N) !== 1 || sh.a >= sh.N - 1) sh.a = +sel.options[0].value; sel.value = sh.a; }
+function shorProbs() { const r = order(sh.a, sh.N), Q = 2 ** sh.q, P = []; for (let y = 0; y < Q; y++) { let p = 0; for (let j = 0; j < r; j++) { let re = 0, im = 0; for (let x = 0; x < Q; x++) { const a = 2 * Math.PI * x * (j / r - y / Q); re += Math.cos(a); im += Math.sin(a); } p += (re * re + im * im) / (Q * Q); } P.push(p / r); } return { P, r, Q }; }
+function convergents(num, den) { const cf = []; let a = num, b = den; while (b) { cf.push(Math.floor(a / b)); [a, b] = [b, a % b]; } const out = []; let h1 = 1, h0 = 0, k1 = 0, k0 = 1; for (const c of cf) { const h = c * h1 + h0, k = c * k1 + k0; out.push([h, k]); h0 = h1; h1 = h; k0 = k1; k1 = k; } return out; }
+function drawShor() {
+  if ($('#v-lab').hidden) return;
+  const { P, r, Q } = shorProbs(); $('#shQV').textContent = `${sh.q} (Q = ${Q})`;
+  const el = $('#shHist'); el.innerHTML = '';
+  const L = 30, R = 432, T = 14, B = 180, bw = (R - L) / Q, mx = Math.max(...P);
+  S('line', { x1: L, y1: B, x2: R, y2: B, class: 'axis' }, el);
+  P.forEach((p, y) => { const h = (B - T) * p / mx; S('rect', { x: L + y * bw, y: B - h, width: Math.max(bw * 0.8, 0.8), height: Math.max(h, 0.3), class: 'bar' }, el); });
+  for (let j = 0; j < r; j++) { const x = L + (j * Q / r) * bw + bw / 2; S('line', { x1: x, y1: B + 2, x2: x, y2: B + 10, class: 'axis' }, el); const t = S('text', { x: x - 8, y: B + 22 }, el); t.textContent = `${j}Q/${r}`; t.style.fontSize = '9px'; }
+  const tt = S('text', { x: L, y: B + 36 }, el); tt.textContent = `Pr[y], peaks at multiples of Q/r = ${fmt(Q / r, 2)}${Q % r ? '  (r ∤ Q: peaks spread)' : '  (r | Q: exact spikes)'}`;
+  // cycle
+  const c = $('#shCyc'); c.innerHTML = ''; const cx = 120, cy = 104, rad = 74;
+  const orb = []; for (let k = 0; k < r; k++) orb.push(powmod(sh.a, k, sh.N));
+  S('circle', { cx, cy, r: rad, class: 'cell' }, c);
+  orb.forEach((v, k) => { const th = -Math.PI / 2 + 2 * Math.PI * k / r, x = cx + rad * Math.cos(th), y = cy + rad * Math.sin(th); S('circle', { cx: x, cy: y, r: 13, class: 'ph', style: 'fill:var(--bg)' }, c); const t = S('text', { x: x - (v > 9 ? 7 : 3.5), y: y + 4 }, c); t.textContent = v; });
+  const t1 = S('text', { x: 8, y: 208 }, c); t1.textContent = `U_${sh.a}: shift along the orbit of 1, r = ${r}`;
+  const t2 = S('text', { x: cx - 32, y: cy + 4 }, c); t2.textContent = `×${sh.a} mod ${sh.N}`;
+  $('#shLog').innerHTML = sh.log.join('');
+}
+function shorRun() {
+  const { P, r, Q } = shorProbs(); let u = Math.random(), acc = 0, y = 0; for (let i = 0; i < Q; i++) { acc += P[i]; if (u <= acc) { y = i; break; } }
+  const cv = convergents(y, Q).filter(([h, k]) => k < sh.N);
+  const d = cv.length ? cv[cv.length - 1][1] : 1;
+  sh.rs.push(d); const lcm = sh.rs.reduce((a, b) => a * b / gcd(a, b), 1);
+  let line = `<div class="status">y = ${y}, y/Q = ${y}/${Q} ≈ ${fmt(y / Q, 4)}. Convergents: ${cv.map(([h, k]) => h + '/' + k).join(', ') || '0/1'}. Denominator ${d}; lcm of denominators so far = ${lcm}. `;
+  if (powmod(sh.a, lcm, sh.N) === 1 && lcm > 0) {
+    const rr = order(sh.a, sh.N); line += `${sh.a}^${lcm} ≡ 1 mod ${sh.N} ✓ r = ${rr}. `;
+    if (rr % 2) line += 'r is odd: restart with a new a.';
+    else { const b = powmod(sh.a, rr / 2, sh.N); line += b === sh.N - 1 ? `b = ${b} ≡ −1: restart with a new a.` : `b = ${sh.a}^${rr / 2} mod ${sh.N} = ${b}; gcd(b−1, N) = ${gcd(b - 1, sh.N)}, gcd(b+1, N) = ${gcd(b + 1, sh.N)}. <b>Factored.</b>`; }
+  } else line += y === 0 ? 'y = 0 carries no information (j = 0). Run again.' : `${sh.a}^${lcm} ≢ 1: j and r shared a factor, so this is only a divisor of r. Run again.`;
+  sh.log.unshift(line + '</div>'); drawShor();
+}
+shorAOpts();
+$('#shN').addEventListener('change', e => { sh.N = +e.target.value; sh.rs = []; sh.log = []; shorAOpts(); drawShor(); });
+$('#shA').addEventListener('change', e => { sh.a = +e.target.value; sh.rs = []; sh.log = []; drawShor(); });
+$('#shQ').addEventListener('input', e => { sh.q = +e.target.value; sh.rs = []; sh.log = []; drawShor(); });
+$('#shDraw').addEventListener('click', shorRun);
+$('#shReset').addEventListener('click', () => { sh.rs = []; sh.log = []; drawShor(); });
+
+/* ---------------- Board: ladders, audits, mastery ---------------- */
+const mastery = load('cs259q-mastery', {});
+$$('.drill').forEach(d => {
+  const steps = $$('.step', d), btn = $('.nexthint', d); let shown = 0;
+  if (btn) btn.addEventListener('click', () => { if (shown < steps.length) { steps[shown].hidden = false; typeset(steps[shown]); shown++; } btn.textContent = shown < steps.length ? `Hint ${shown + 1} of ${steps.length}` : 'All hints shown'; btn.disabled = shown >= steps.length; });
+  const ca = $('.checkaudit', d);
+  if (ca) ca.addEventListener('click', () => {
+    $$('fieldset', d).forEach(fs => { const pick = $('input:checked', fs), v = document.createElement('p'); v.className = 'verdict'; const old = $('.verdict', fs); if (old) old.remove(); v.textContent = !pick ? `Not answered. ${fs.dataset.why}` : pick.value === fs.dataset.ans ? `✓ ${fs.dataset.why}` : `✗ ${fs.dataset.why}`; fs.appendChild(v); });
+    const sol = $('.solution', d); sol.hidden = false; typeset(sol);
+  });
+  const os = $('.openSol', d); if (os) os.addEventListener('click', () => { const sol = $('.solution', d); sol.hidden = false; typeset(sol); os.hidden = true; });
+  const m = $('.mastery', d), id = d.dataset.id;
+  [['○', 'cold'], ['◐', 'hints'], ['●', 'clean']].forEach(([sym, v]) => { const b = document.createElement('button'); b.textContent = `${sym} ${v}`; b.setAttribute('aria-pressed', mastery[id] === v); b.addEventListener('click', () => { mastery[id] = v; save('cs259q-mastery', mastery); $$('button', m).forEach(x => x.setAttribute('aria-pressed', x === b)); }); m.appendChild(b); });
+});
+
+/* ---------------- Board: generator ---------------- */
+let cur = null;
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const parseList = s => s.split(/[\s,;{}()]+/).filter(Boolean);
+const setEq = (A, B) => A.length === B.length && [...A].sort().join() === [...B].sort().join();
+function genNew() {
+  const t = $('#genType').value; $('#genFb').innerHTML = ''; $('#genAns').value = '';
+  if (t === 'period') { const Nn = pick([8, 10, 12, 15, 16, 18, 20]); const ds = []; for (let p = 2; p < Nn; p++) if (Nn % p === 0) ds.push(p); const p = pick(ds), off = rnd(0, p - 1); const ans = []; for (let y = 0; y < Nn; y += Nn / p) ans.push(String(y)); cur = { t, Nn, p, ans, H: Array.from({ length: Nn / p }, (_, k) => String(k * p)) }; $('#genQ').innerHTML = `<p>f on ℤ<sub>${Nn}</sub> has period ${p} (distinct on each coset). The measured coset is ${off} + H. List every outcome with nonzero probability after QFT<sub>ℤ${Nn}</sub>, comma-separated.</p>`; }
+  if (t === 'simon') { const n = pick([3, 4]); const s = rnd(1, 2 ** n - 1); const ans = []; for (let y = 0; y < 2 ** n; y++) { let b = y & s, c = 0; while (b) { c ^= b & 1; b >>= 1; } if (!c) ans.push(y.toString(2).padStart(n, '0')); } cur = { t, n, s: s.toString(2).padStart(n, '0'), ans }; $('#genQ').innerHTML = `<p>Simon on ℤ<sub>2</sub><sup>${n}</sup> with hidden s = <code>${cur.s}</code>. List all of H⊥ as bitstrings.</p>`; }
+  if (t === 'dlog') { const p = pick([7, 11, 13]), r = p - 1; let g = 2; while (order(g, p) !== r) g++; const s = rnd(1, r - 1), h = powmod(g, s, p); const nonInv = []; const inv = []; for (let y = 1; y < r; y++) (gcd(y, r) > 1 ? nonInv : inv).push(y); const y1s = Math.random() < 0.6 ? [pick(nonInv)] : [pick(nonInv), pick(inv)]; const samples = y1s.map(y => [y, mod(s * y, r)]); const ans = []; for (let c = 0; c < r; c++) if (samples.every(([a, b]) => mod(b - c * a, r) === 0)) ans.push(String(c)); const wrong = []; for (let c = 0; c < p; c++) if (samples.every(([a, b]) => mod(b - c * a, p) === 0)) wrong.push(String(c)); cur = { t, p, r, g, h, s, samples, ans, wrong }; $('#genQ').innerHTML = `<p>In ℤ<sub>${p}</sub><sup>*</sup>, g = ${g} has order ${r}, and h = ${h} = g<sup>s</sup>. Fourier sampling returned ${samples.map(([a, b]) => `(${a}, ${b})`).join(' and ')}. List every s in {0,…,${r - 1}} consistent with these samples.</p>`; }
+  if (t === 'factor') { const Nn = pick([15, 21, 33, 35, 39]); const as = []; for (let a = 2; a < Nn - 1; a++) if (gcd(a, Nn) === 1) as.push(a); const a = pick(as), r = order(a, Nn); let out = 'fail'; if (r % 2 === 0) { const b = powmod(a, r / 2, Nn); if (b !== Nn - 1) out = [gcd(b - 1, Nn), gcd(b + 1, Nn)].sort((x, y) => x - y).join(','); } cur = { t, Nn, a, r, out }; $('#genQ').innerHTML = `<p>Factor N = ${Nn} with a = ${a}. Answer as <code>r; p,q</code> (smaller factor first) or <code>r; fail</code> if the reduction must restart.</p>`; }
+}
+function genCheck() {
+  if (!cur) return; const raw = $('#genAns').value.trim(), fb = $('#genFb'); let msg = '';
+  if (cur.t === 'period' || cur.t === 'simon') {
+    const got = parseList(raw).map(x => cur.t === 'period' ? String(+x) : x);
+    if (setEq(got, cur.ans)) msg = '✓ Correct. ' + (cur.t === 'period' ? `These are the multiples of N/p = ${cur.Nn / cur.p}; |H⊥| = |G|/|H| = ${cur.ans.length}.` : `|H⊥| = 2ⁿ⁻¹ = ${cur.ans.length}.`);
+    else if (cur.t === 'period' && setEq(got, cur.H)) msg = `✗ That is H (multiples of p = ${cur.p}), not H⊥. H⊥ is the multiples of N/p.`;
+    else { const miss = cur.ans.filter(x => !got.includes(x)), extra = got.filter(x => !cur.ans.includes(x)); msg = `✗ ${miss.length ? 'Missing: ' + miss.join(', ') + '. ' : ''}${extra.length ? 'Not in H⊥: ' + extra.join(', ') + '. ' : ''}${miss.includes('0') || miss.includes('0'.repeat(cur.n || 1)) ? 'Zero is always in H⊥. ' : ''}${cur.t === 'simon' ? 'Test: y·s must be 0 mod 2.' : `Test: y·p ≡ 0 mod ${cur.Nn}.`}`; }
+  }
+  if (cur.t === 'dlog') {
+    const got = parseList(raw).map(x => String(+x));
+    if (setEq(got, cur.ans)) msg = `✓ Correct. ${cur.ans.length > 1 ? `Not unique yet: a sample with y₁ coprime to ${cur.r} (or another non-invertible one) would pin it down.` : 'Unique.'} (True s = ${cur.s}.)`;
+    else if (setEq(got, cur.wrong)) msg = `✗ You solved mod p = ${cur.p}. Exponents live mod the order r = ${cur.r}.`;
+    else msg = `✗ Solve y₂ ≡ s·y₁ (mod ${cur.r}) for each sample, then intersect. ${cur.samples.some(([a]) => gcd(a, cur.r) > 1) ? `When gcd(y₁, ${cur.r}) > 1 there are several solutions; keep all of them.` : ''}`;
+  }
+  if (cur.t === 'factor') {
+    const [rs, fs] = raw.split(';').map(x => (x || '').trim()); const rr = +rs;
+    if (rr !== cur.r) msg = `✗ Order is wrong. List ${cur.a}^k mod ${cur.Nn} for k = 1, 2, … until you hit 1.`;
+    else { const want = cur.out, got = (fs || '').replace(/\s/g, '').split(',').map(Number).sort((x, y) => x - y).join(','); if (want === 'fail') msg = (fs || '').toLowerCase().startsWith('fail') ? '✓ Correct: ' + (cur.r % 2 ? 'r is odd.' : 'b ≡ −1 mod N.') + ' Restart with a new a.' : `✗ r = ${cur.r} ${cur.r % 2 ? 'is odd' : `is even but b = ${powmod(cur.a, cur.r / 2, cur.Nn)} ≡ −1`}, so this a fails.`; else msg = got === want ? '✓ Correct.' : `✗ r is right. Compute b = ${cur.a}^${cur.r / 2} mod ${cur.Nn}, then gcd(b − 1, N) and gcd(b + 1, N).`; }
+  }
+  fb.innerHTML = msg;
+}
+$('#genNew').addEventListener('click', genNew); $('#genCheck').addEventListener('click', genCheck);
+$('#genAns').addEventListener('keydown', e => { if (e.key === 'Enter') genCheck(); });
+$('#genShow').addEventListener('click', () => { if (!cur) return; const a = cur.t === 'factor' ? `${cur.r}; ${cur.out}` : cur.ans.join(', '); $('#genFb').innerHTML = `Answer: <code>${a}</code>`; });
+$('#genType').addEventListener('change', genNew); genNew();
+
+/* ---------------- Speak ---------------- */
+const PROMPTS = [
+  ['Why does the second register stay unentangled in phase estimation, and when does it not?', ['When the input is an eigenvector, U^x only multiplies it by a scalar e^{iθx}.', 'A scalar can be moved onto the first register (phase kickback), so the state factors.', 'With a superposition of eigenvectors, each component kicks back its own phase and the registers become entangled.', 'That entanglement is what makes Shor output a random j/r.']],
+  ['What does repeating phase estimation buy you, and what does it not?', ['Each run outputs a nearest bin with probability at least 8/π², otherwise anything.', 'Failures are not unbiased noise, so averaging is wrong; the median of repeated runs is right.', 'Repetition boosts confidence to 1 − δ, not precision.', 'Precision ε ≈ 2⁻ⁿ improves only by adding qubits (higher powers of U).']],
+  ['Why does the coset offset not change the output distribution?', ['After the QFT, the offset contributes the factor χ_y(g₀).', 'It has modulus 1, so it disappears in |·|².', 'It is a relative phase across outcomes, not a global phase.', 'Same as L10: shifting a function does not change its frequency content.']],
+  ['State the hidden subgroup problem and map Simon and period finding onto it.', ['G is a finite abelian group; f is constant on cosets of H and distinct across cosets.', 'Simon: G = ℤ₂ⁿ, H = {0, s}.', 'Period finding: G = ℤ_N, H = multiples of p, with p | N.', 'Goal: find generators of H in poly(log |G|) time.']],
+  ['Why does Fourier sampling output only elements of H⊥?', ['The amplitude on y is proportional to the sum of χ_y(h) over h in H.', 'χ_y restricted to H is a character of H.', 'A nontrivial character sums to zero (re-index by h → h + h′).', 'So only y with χ_y ≡ 1 on H survive, each with probability |H|/|G|.']],
+  ['Walk through the factoring reduction and say where each failure comes from.', ['Pick random a; if gcd(a, N) > 1 you are done already.', 'Find the order r quantumly; restart if r is odd.', 'b = a^{r/2} satisfies (b − 1)(b + 1) ≡ 0 mod N, and b ≢ 1 by minimality of r.', 'Restart if b ≡ −1; otherwise gcd(b ± 1, N) are the factors.']],
+  ['How is Shor\'s algorithm phase estimation in disguise?', ['Shor\'s oracle with second register |1⟩ is controlled powers of U_a, by repeated squaring.', 'On the orbit of 1, U_a is a cyclic shift with eigenphases 2πj/r.', '|1⟩ is a uniform superposition of those eigenvectors.', 'So the output is an estimate of a uniformly random j/r; continued fractions give r.']],
+  ['Why is the non-abelian HSP hard if few queries suffice?', ['Ettinger–Høyer–Knill: O(log |G|) queries carry enough information.', 'Extracting it needs a joint measurement on many coset states with no known efficient circuit.', 'Irreducible representations are d×d matrices, so the coset shift is not just a phase.', 'Instances: graph isomorphism via S_{2n}; dihedral HSP connects to lattice problems.']],
+];
+const rated = load('cs259q-speak', {});
+const list = $('#speakList');
+PROMPTS.forEach(([q, claims], i) => {
+  const d = document.createElement('div'); d.className = 'card';
+  d.innerHTML = `<div class="hd row" style="justify-content:space-between"><h3>${i + 1}. ${q}</h3></div>
+    <div class="row"><button class="go">Start 60 s</button><button class="rec ghost">Record</button><span class="num t">60</span><audio controls hidden></audio></div>
+    <div class="claims" hidden><span class="lbl">Tick what you actually said</span>${claims.map((c, j) => `<label style="display:flex;gap:8px;align-items:baseline"><input type="checkbox" id="sp${i}_${j}" ${rated[i] && rated[i][j] ? 'checked' : ''}> <span>${c}</span></label>`).join('')}<p class="small score"></p></div>`;
+  list.appendChild(d);
+  const go = $('.go', d), tEl = $('.t', d), cl = $('.claims', d); let timer = null, left = 60;
+  const stop = () => { clearInterval(timer); timer = null; go.textContent = 'Start 60 s'; cl.hidden = false; };
+  go.addEventListener('click', () => { if (timer) { stop(); return; } left = 60; tEl.textContent = left; go.textContent = 'Stop'; timer = setInterval(() => { left--; tEl.textContent = left; if (left <= 0) stop(); }, 1000); });
+  const upd = () => { const v = claims.map((_, j) => $(`#sp${i}_${j}`).checked); rated[i] = v; save('cs259q-speak', rated); const n = v.filter(Boolean).length; $('.score', d).textContent = `${n} of ${claims.length} claims${n === claims.length ? ': clean.' : '. Say the missing ones out loud once, then retry tomorrow.'}`; };
+  $$('input', cl).forEach(x => x.addEventListener('change', upd)); upd();
+  const rec = $('.rec', d), au = $('audio', d); let mr = null, chunks = [];
+  rec.addEventListener('click', async () => {
+    if (mr && mr.state === 'recording') { mr.stop(); return; }
+    try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); mr = new MediaRecorder(stream); chunks = []; mr.ondataavailable = e => chunks.push(e.data); mr.onstop = () => { au.src = URL.createObjectURL(new Blob(chunks)); au.hidden = false; rec.textContent = 'Record'; stream.getTracks().forEach(t => t.stop()); }; mr.start(); rec.textContent = 'Stop recording'; if (!timer) go.click(); }
+    catch (e) { rec.textContent = 'Mic unavailable here'; rec.disabled = true; }
+  });
+});
+
+route();
+select('ahsp');
+})();
+</script>
