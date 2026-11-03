@@ -1,0 +1,516 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hidden Subgroup Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: lab notebook. Narrow margin column of section marks, wide working column, every figure hairline monochrome. */
+:root {
+  --bg: #f3f4f5; --paper: #fbfbfc; --ink: #15171a; --muted: #5b616a; --rule: #c4c9cf; --fill: #e3e6ea;
+  --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #101214; --paper: #16191c; --ink: #e6e8eb; --muted: #9aa1a9; --rule: #3a4047; --fill: #23272c; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #101214; --paper: #16191c; --ink: #e6e8eb; --muted: #9aa1a9; --rule: #3a4047; --fill: #23272c; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 17px/1.55 var(--serif);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 80px; }
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 56px; }
+header h1 { font: 600 clamp(34px, 6vw, 58px)/1.02 var(--serif); letter-spacing: -0.02em; margin: 0 0 12px; text-wrap: balance; }
+header p { max-width: 64ch; margin: 0; color: var(--muted); }
+.ladder { display: flex; flex-wrap: wrap; gap: 6px 0; margin-top: 20px; font: 12px/1 var(--mono); color: var(--muted); }
+.ladder a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); padding: 4px 0; }
+.ladder a:hover, .ladder a:focus-visible { border-color: var(--ink); }
+.ladder span { padding: 4px 10px; }
+
+section { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 24px; border-top: 1px solid var(--rule); padding-top: 20px; }
+.mark { font: 12px/1.4 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.mark b { display: block; font: 500 26px/1 var(--mono); color: var(--ink); letter-spacing: 0; margin-bottom: 6px; }
+.body { min-width: 0; display: grid; gap: 16px; }
+h2 { font: 600 28px/1.15 var(--serif); margin: 0; text-wrap: balance; }
+h3 { font: 600 19px/1.2 var(--serif); margin: 8px 0 0; }
+p { margin: 0; max-width: 68ch; }
+.note { color: var(--muted); font-size: 15px; }
+a { color: inherit; }
+.eq { overflow-x: auto; padding: 4px 0; }
+
+.panel { background: var(--paper); border: 1px solid var(--rule); padding: 16px; display: grid; gap: 14px; min-width: 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: end; }
+label i.u { text-transform: none; font-style: normal; }
+label { white-space: nowrap; display: grid; gap: 4px; font: 11px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+input, select { font: 15px/1.2 var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--rule); padding: 7px 8px; width: 9ch; border-radius: 0; }
+input.wide { width: 14ch; }
+button { font: 500 13px/1 var(--mono); color: var(--bg); background: var(--ink); border: 1px solid var(--ink); padding: 9px 14px; cursor: pointer; border-radius: 0; }
+button.ghost { background: transparent; color: var(--ink); }
+button:hover { opacity: .85; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.readout { display: flex; flex-wrap: wrap; gap: 6px 22px; font: 14px/1.4 var(--mono); font-variant-numeric: tabular-nums; }
+.readout span { color: var(--muted); }
+.readout b { font-weight: 500; color: var(--ink); }
+canvas { width: 100%; display: block; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; font: 13px/1.4 var(--mono); font-variant-numeric: tabular-nums; width: 100%; }
+th { text-align: left; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-size: 11px; border-bottom: 1px solid var(--ink); padding: 6px 10px 6px 0; }
+td { border-bottom: 1px solid var(--rule); padding: 7px 10px 7px 0; vertical-align: top; }
+td.serif { font: 15px/1.4 var(--serif); }
+.log { font: 13px/1.5 var(--mono); max-height: 220px; overflow: auto; border-top: 1px solid var(--rule); padding-top: 8px; white-space: pre-wrap; }
+.verdict { font: 500 14px/1.4 var(--mono); padding: 8px 10px; border: 1px solid var(--ink); }
+.verdict.fail { border-style: dashed; color: var(--muted); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.tag { font: 11px/1 var(--mono); border: 1px solid var(--rule); padding: 3px 6px; white-space: nowrap; }
+ol.actions { margin: 0; padding-left: 22px; display: grid; gap: 10px; max-width: 70ch; }
+ol.actions li span { display: block; font: 13px/1.4 var(--mono); color: var(--muted); }
+svg text { font-family: var(--mono); }
+@media (max-width: 700px) { section { grid-template-columns: 1fr; gap: 10px; } .mark b { display: inline; margin-right: 8px; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<script>
+window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] }, svg: { fontCache: "global" }, startup: { typeset: true } };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+<script src="core.js"></script>
+
+<div class="wrap">
+<header>
+  <h1>Hidden Subgroup Lab</h1>
+  <p>From group theory to the 2026 resource estimates for breaking RSA and elliptic curves. The quantum labs run live in your browser, as a gate-level state-vector simulation or an analytic formula evaluated numerically, so you can change the inputs and check the math yourself. Hardware numbers come from the cited papers or a labeled textbook model.</p>
+  <nav class="ladder" aria-label="Sections">
+    <a href="#hsp">1 HSP</a><span>/</span><a href="#period">2 period</a><span>/</span><a href="#qft">3 QFT circuit</a><span>/</span><a href="#shor">4 Shor</a><span>/</span><a href="#simon">5 Simon</a><span>/</span><a href="#regev">6 Regev</a><span>/</span><a href="#ftqc">7 error correction</a><span>/</span><a href="#frontier">8 2026 frontier</a><span>/</span><a href="#github">9 GitHub</a><span>/</span><a href="#next">10 next</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="hsp">
+  <div class="mark"><b>1</b>The problem</div>
+  <div class="body">
+    <h2>One problem behind Simon, Shor and discrete log</h2>
+    <p>You get a group \(G\) and a black-box function \(f : G \to S\). Someone promises there is a subgroup \(H \le G\) such that \(f\) is constant on each coset of \(H\) and takes different values on different cosets:</p>
+    <div class="eq">\[ f(g_1) = f(g_2) \iff g_1 H = g_2 H . \]</div>
+    <p>The task is to find \(H\), for example a generating set. For finite abelian \(G\), given efficient group operations and an efficient circuit for \(f\), a quantum computer solves this with \(\mathrm{poly}(\log |G|)\) oracle queries and gates. The recipe is always the same three moves:</p>
+    <div class="eq">\[ \frac{1}{\sqrt{|G|}} \sum_{g \in G} |g\rangle|f(g)\rangle \;\xrightarrow{\ \text{measure } f\ }\; \frac{1}{\sqrt{|H|}} \sum_{h \in H} |g_0 h\rangle \;\xrightarrow{\ \mathcal{F}_G\ }\; \text{uniform over } H^{\perp} = \{\chi : \chi(h) = 1 \ \forall h \in H\}. \]</div>
+    <p>Each sample is a random character that is trivial on \(H\). \(O(\log |G| + \log(1/\delta))\) samples generate \(H^\perp\) with failure probability at most \(\delta\), and \(H = (H^\perp)^\perp\). The random coset shift \(g_0\) only adds a phase \(\chi(g_0)\), which vanishes when you measure. That is why the Fourier transform is the whole trick.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Instance</th><th>Group \(G\)</th><th>Hidden \(H\)</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="serif">Bernstein-Vazirani</td><td>\(\mathbb{Z}_2^n\)</td><td>kernel of \(x \mapsto s\cdot x\)</td><td>coset sampling: 2 queries expected; phase kickback on \(f(x) = s \cdot x\): 1 query</td></tr>
+        <tr><td class="serif">Simon (§5)</td><td>\(\mathbb{Z}_2^n\)</td><td>\(\{0, s\}\)</td><td>\(O(n)\) quantum vs \(\Omega(2^{n/2})\) classical</td></tr>
+        <tr><td class="serif">Order finding, Shor factoring (§4)</td><td>\(\mathbb{Z}\), sampled with a finite register and \(\mathcal{F}_{\mathbb{Z}_Q}\) (approximate unless \(r \mid Q\))</td><td>\(r\mathbb{Z}\), \(r = \mathrm{ord}_N(a)\)</td><td>poly time</td></tr>
+        <tr><td class="serif">Discrete log, ECDLP (Bitcoin, P-256)</td><td>\(\mathbb{Z}_r \times \mathbb{Z}_r\)</td><td>\(\langle (s, 1) \rangle\) for \(f(a,b) = g^{a} h^{-b}\), \(h = g^s\)</td><td>poly time</td></tr>
+        <tr><td class="serif">Pell equation, class groups (Hallgren)</td><td>\(\mathbb{R}\), \(\mathbb{R}^k\)</td><td>regulator lattice</td><td>poly time</td></tr>
+        <tr><td class="serif">Unique shortest vector, some lattice crypto</td><td>dihedral \(D_N\)</td><td>\(\{(0,0), (d,1)\}\)</td><td>open; Kuperberg gives \(2^{O(\sqrt{\log N})}\)</td></tr>
+        <tr><td class="serif">Graph isomorphism</td><td>\(S_{2n}\) (or \(S_n \wr \mathbb{Z}_2\))</td><td>automorphisms of \(G_1 \sqcup G_2\)</td><td>open; single-register strong Fourier sampling is insufficient (Moore, Russell, Schulman)</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">The abelian rows are why RSA and elliptic-curve crypto fall. Lattice schemes (ML-KEM, ML-DSA) rest on their own lattice assumptions, not on HSP hardness, but one link exists: Regev (2002) showed a fast dihedral-HSP algorithm of a certain kind would solve unique-SVP. No such algorithm is known.</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="period">
+  <div class="mark"><b>2</b>Classical side</div>
+  <div class="body">
+    <h2>Factoring reduces to finding a period</h2>
+    <p>Pick \(a\) with \(\gcd(a, N) = 1\). The function \(f(x) = a^x \bmod N\) is periodic with period \(r = \mathrm{ord}_N(a)\). If \(r\) is even and \(a^{r/2} \not\equiv -1 \pmod N\), then \(N \mid (a^{r/2}-1)(a^{r/2}+1)\) but divides neither factor, so</p>
+    <div class="eq">\[ p = \gcd\!\left(a^{r/2} - 1,\ N\right) \quad\text{is a nontrivial factor.} \]</div>
+    <p>For random \(a\) this works with probability at least \(1/2\) when \(N\) is odd and not a prime power. The hard part is finding \(r\): classically that is as hard as factoring. Change \(N\) and \(a\) and watch the period.</p>
+    <div class="panel">
+      <div class="controls">
+        <label for="pN">N<input id="pN" type="number" value="21" min="6" max="4095"></label>
+        <label for="pA">a<input id="pA" type="number" value="2" min="2"></label>
+        <button id="pGo">Compute</button><button class="ghost" id="pRand">Random a</button>
+      </div>
+      <canvas id="pCanvas" height="220" aria-label="Plot of a to the x mod N"></canvas>
+      <div class="readout" id="pOut"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="qft">
+  <div class="mark"><b>3</b>Fourier</div>
+  <div class="body">
+    <h2>The quantum Fourier transform as gates</h2>
+    <p>On \(n\) qubits with \(Q = 2^n\), the QFT is the unitary DFT matrix:</p>
+    <div class="eq">\[ \mathrm{QFT}\,|x\rangle = \frac{1}{\sqrt{Q}} \sum_{y=0}^{Q-1} e^{2\pi i\, x y / Q}\, |y\rangle = \bigotimes_{\ell=1}^{n} \frac{|0\rangle + e^{2\pi i\, x / 2^{\ell}}|1\rangle}{\sqrt 2}. \]</div>
+    <p>The product form on the right is why it is cheap: each output qubit only needs a Hadamard plus controlled phases \(R_k = \mathrm{diag}(1, e^{2\pi i/2^k})\). That is \(n(n-1)/2\) controlled phases and \(\lfloor n/2 \rfloor\) swaps, so \(O(n^2)\) gates, against \(O(n 2^n)\) for a classical FFT on the full vector. The simulator below runs the actual gate list on a state vector and compares the result with the DFT matrix entry by entry.</p>
+    <div class="panel">
+      <div class="controls">
+        <label for="qN">qubits n<select id="qN"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></label>
+        <label for="qX">input x<input id="qX" type="number" value="3" min="0"></label>
+        <button id="qGo">Run circuit</button>
+      </div>
+      <div class="scroll" id="qCircuit"></div>
+      <canvas id="qCanvas" height="200" aria-label="Output amplitudes, bar height is magnitude, tick shows phase"></canvas>
+      <div class="readout" id="qOut"></div>
+      <p class="note">Bars: \(|\langle y|\mathrm{QFT}|x\rangle|^2\). The needle on each bar is the phase \(\arg \langle y|\mathrm{QFT}|x\rangle = 2\pi x y/Q\), drawn as a clock hand. Basis input gives flat magnitudes, so all the information is in the phases. Shor's trick is to feed in a periodic superposition so the phases interfere into peaks.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="shor">
+  <div class="mark"><b>4</b>Shor 1994</div>
+  <div class="body">
+    <h2>Run Shor's algorithm</h2>
+    <p>Use a register of \(n\) qubits with \(N^2 \le Q = 2^n &lt; 2N^2\). After computing \(f\) and applying the QFT, the probability of measuring \(y\) is exact and has a closed form. With \(M_{x_0} = \lceil (Q - x_0)/r \rceil\) points in each coset,</p>
+    <div class="eq">\[ P(y) = \frac{1}{Q^2} \sum_{x_0=0}^{r-1} \left| \sum_{k=0}^{M_{x_0}-1} e^{2\pi i\, y r k / Q} \right|^2 = \frac{1}{Q^2} \sum_{x_0=0}^{r-1} \frac{\sin^2(\pi\, y r M_{x_0}/Q)}{\sin^2(\pi\, y r / Q)} . \]</div>
+    <p>At points where \(yr/Q\) is an integer (including \(y = 0\)) the ratio is a removable singularity and each term equals \(M_{x_0}^2\). The distribution peaks at \(y \approx jQ/r\). If \(y\) is a nearest integer to some \(jQ/r\), then \(y/Q\) is within \(1/(2Q) \le 1/(2N^2)\) of \(j/r\), and Legendre's theorem says the reduced fraction \(j/r\) is then a continued-fraction convergent of \(y/Q\). Its denominator is \(r\), or a divisor of it when \(\gcd(j, r) > 1\). Other outcomes can fail, so you sample again and check each candidate with \(a^k \equiv 1\). This simulator skips the trivial convergent \(0/1\), tries multiples \(mk\) with \(m \le \lceil \log_2 N \rceil\), and reduces to the minimal order. Off-peak samples and unlucky \(\gcd(j, r)\) fail, as they should, and you measure again.</p>
+    <div class="panel">
+      <div class="controls">
+        <label for="sN">N (≤ 255)<input id="sN" type="number" value="21" min="15" max="255"></label>
+        <label for="sA">a<input id="sA" type="number" value="2" min="2"></label>
+        <button id="sGo">Prepare</button><button id="sShot">Measure once</button><button class="ghost" id="sRand">Random a</button>
+      </div>
+      <div class="readout" id="sOut"></div>
+      <canvas id="sCanvas" height="240" aria-label="Measurement distribution P of y, dashed lines at multiples of Q over r"></canvas>
+      <div id="sCF"></div>
+      <div id="sVerdict"></div>
+      <div class="log" id="sLog" aria-live="polite"></div>
+    </div>
+    <p class="note">What a real machine adds: the modular exponentiation \(|x\rangle|0\rangle \mapsto |x\rangle|a^x \bmod N\rangle\) dominates the cost. For RSA-2048 it is billions of Toffoli gates, and every 2019 to 2026 paper in §8 is mostly about doing that arithmetic with fewer qubits and fewer Toffolis, then protecting it with error correction (§7).</p>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="simon">
+  <div class="mark"><b>5</b>Simon 1994</div>
+  <div class="body">
+    <h2>Simon's algorithm: the cleanest HSP</h2>
+    <p>Here \(G = \mathbb{Z}_2^n\), \(H = \{0, s\}\) and \(f(x) = f(x \oplus s)\). The Fourier transform over \(\mathbb{Z}_2^n\) is just \(H^{\otimes n}\), and each run returns a uniform \(y\) with</p>
+    <div class="eq">\[ y \cdot s \equiv 0 \pmod 2 . \]</div>
+    <p>Once you hold \(n-1\) linearly independent \(y\)'s over \(\mathrm{GF}(2)\), Gaussian elimination gives \(s\). That takes a little more than \(n\) runs on average. A classical algorithm needs about \(2^{n/2}\) queries to find a collision. Shor read this paper and generalized it from \(\mathbb{Z}_2^n\) to \(\mathbb{Z}_Q\).</p>
+    <div class="panel">
+      <div class="controls">
+        <label for="mN">n bits<input id="mN" type="number" value="6" min="2" max="16"></label>
+        <label for="mS">secret s ≠ 0 (binary)<input id="mS" class="wide" type="text" value="101101"></label>
+        <button id="mReset">Reset</button><button id="mRun">Query once</button><button class="ghost" id="mAll">Run to solution</button>
+      </div>
+      <div class="readout" id="mOut"></div>
+      <div class="scroll" id="mTable"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="regev">
+  <div class="mark"><b>6</b>Regev 2023</div>
+  <div class="body">
+    <h2>Regev: a multidimensional period</h2>
+    <p>Regev (2023) moved factoring from a 1-dimensional HSP over \(\mathbb{Z}\) to a \(d\)-dimensional one over \(\mathbb{Z}^d\) with \(d \approx \sqrt{n}\). Take small primes \(b_1, \dots, b_d\), set \(a_i = b_i^2\), and define</p>
+    <div class="eq">\[ f(z_1, \dots, z_d) = \prod_{i=1}^{d} a_i^{\,z_i} \bmod N, \qquad L = \{ z \in \mathbb{Z}^d : f(z) = 1 \}. \]</div>
+    <p>The hidden subgroup is the lattice \(L\). The total exponent length is still about \(n\) bits (\(\sqrt n\) exponents of \(\sqrt n\) bits), so that alone saves nothing. The saving comes from the bases being tiny: with simultaneous square-and-multiply, \(f(z) = \prod_j \big(\prod_i a_i^{z_{i,j}}\big)^{2^j}\), all \(d\) bases share only \(O(\sqrt n)\) full \(n\)-bit squarings, and each inner product of small numbers is cheap via a product tree. So one run costs \(\tilde O(n^{3/2})\) gates instead of \(\tilde O(n^2)\). The improvement is per run: you need \(\sqrt{n} + 4\) independent runs, so the total gate count is still about \(\tilde O(n^2)\). The win is a smaller circuit per run, which matters on noisy hardware. Afterward, a classical lattice-reduction step finds a short vector in \(L\) that gives a nontrivial square root of 1 mod N. Pilatte (2024, revised 2026) proved a version of the number-theory conjecture Regev assumed, using zero-density estimates, which gives unconditional correctness for Regev's algorithm and its variants in the form his paper analyzes. Read the paper for exactly how his statement differs from Regev's.</p>
+    <div class="panel">
+      <div class="controls"><label for="rN">key bits n<input id="rN" type="number" value="2048" min="64"></label></div>
+      <div class="scroll" id="rTable"></div>
+      <p class="note">Leading-order scaling only, constants dropped, so compare the shape not the numbers. Regev's original version needed far more qubits; Ragavan and Vaikuntanathan (J. Cryptology 2026) brought it to \(O(n \log n)\), and Van Kirk and Gidney (Oct 2026) to about \(4n\). The best Shor variants (Chevignard, Fouque, Schrottenloher 2025) use about \(n/2\) logical qubits, so for RSA-2048 Shor still wins on qubits.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="ftqc">
+  <div class="mark"><b>7</b>Hardware</div>
+  <div class="body">
+    <h2>From logical qubits to physical qubits</h2>
+    <p>A useful heuristic for the surface code at physical error rate \(p\) below threshold \(p_{\mathrm{th}} \approx 10^{-2}\) and code distance \(d\):</p>
+    <div class="eq">\[ p_L(d) \approx 0.1 \left( \frac{p}{p_{\mathrm{th}}} \right)^{(d+1)/2}, \qquad \text{physical per logical} \approx 2 d^2 . \]</div>
+    <p>If \(p_L\) is the error per logical qubit per round, a union bound says \(p_L \cdot (\#\text{logical qubits}) \cdot (\#\text{rounds}) \le \varepsilon\) keeps memory faults under \(\varepsilon\). That is a sufficient budget in a simplified model; real estimates also budget gate, magic-state and decoding failures. Distance grows only logarithmically with run length, but qubits grow as \(d^2\). That \(d^2\) is the target of the 2024 to 2026 papers: qLDPC codes pack many logical qubits into one block, which is the main lever in both the Pinnacle and the Oratomic neutral-atom estimates.</p>
+    <div class="panel">
+      <div class="controls">
+        <label for="fP">physical <i class="u">p</i><input id="fP" type="number" value="0.001" step="0.0001" min="0.00001"></label>
+        <label for="fL">logical qubits<input id="fL" type="number" value="1400" min="1"></label>
+        <label for="fT">runtime (days)<input id="fT" type="number" value="7" min="0.001" step="0.5"></label>
+        <label for="fC">cycle <i class="u">(µs)</i><input id="fC" type="number" value="1" min="0.01" step="0.1"></label>
+        <label for="fE">failure <i class="u">ε</i><input id="fE" type="number" value="0.01" step="0.01" min="0.0001"></label>
+      </div>
+      <div class="readout" id="fOut"></div>
+      <canvas id="fCanvas" height="200" aria-label="Physical qubits per logical qubit versus physical error rate"></canvas>
+      <p class="note">This is the textbook estimate with no tricks. With the defaults (1,400 logical qubits, \(p = 10^{-3}\), 1 µs cycles, 1 week) it lands in the low millions. Gidney's May 2025 paper gets RSA-2048 under one million physical qubits at the same hardware assumptions by storing idle qubits in denser yoked surface codes, making T states by magic state cultivation, and using approximate residue arithmetic. The logical qubit count here is an input you choose, not a number taken from that paper. Pure surface code only; for a qLDPC comparison, IBM's gross code \([\![144, 12, 12]\!]\) uses 288 physical qubits (data plus checks) for 12 logical, so 24 per logical at distance 12.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section id="frontier">
+  <div class="mark"><b>8</b>2019 to 2026</div>
+  <div class="body">
+    <h2>Where the frontier is in November 2026</h2>
+    <canvas id="tCanvas" height="300" aria-label="Published physical-qubit estimates for RSA-2048 over time, log scale"></canvas>
+    <p class="note">Physical qubits claimed for RSA-2048 (filled squares) on a log scale. Open circles are not RSA-2048 numbers: Google's ECDLP-256 estimate and the Oratomic neutral-atom headline. Each estimate assumes different hardware, so treat this as a trend, not a race chart. None of the 2026 estimates is peer reviewed yet, and no one has factored anything bigger than toy numbers on real hardware with Shor's algorithm.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Date</th><th>Paper</th><th>What it changed</th></tr></thead>
+      <tbody>
+        <tr><td>1994</td><td class="serif">Shor, Algorithms for quantum computation: discrete logarithms and factoring (FOCS 1994); expanded as <a href="https://arxiv.org/abs/quant-ph/9508027">Polynomial-time algorithms for prime factorization and discrete logarithms on a quantum computer</a> (SIAM J. Comput. 1997)</td><td class="serif">Order finding via QFT. The start of everything here.</td></tr>
+        <tr><td>1995</td><td class="serif">Kitaev, <a href="https://arxiv.org/abs/quant-ph/9511026">Quantum measurements and the Abelian stabilizer problem</a></td><td class="serif">Phase estimation, and the general abelian HSP framing.</td></tr>
+        <tr><td>2003</td><td class="serif">Kuperberg, <a href="https://arxiv.org/abs/quant-ph/0302112">A subexponential-time quantum algorithm for the dihedral HSP</a></td><td class="serif">\(2^{O(\sqrt{\log N})}\) for the dihedral HSP. Via Regev's 2002 reduction from unique-SVP, \(\log N = \Theta(n^2)\), so this is still \(2^{\Theta(n)}\) in lattice dimension and does not threaten lattice crypto.</td></tr>
+        <tr><td>2019</td><td class="serif">Gidney, Ekerå, <a href="https://arxiv.org/abs/1905.09749">How to factor 2048 bit RSA integers in 8 hours using 20 million noisy qubits</a></td><td class="serif">The reference point for five years.</td></tr>
+        <tr><td>Aug 2023</td><td class="serif">Regev, <a href="https://arxiv.org/abs/2308.06572">An efficient quantum factoring algorithm</a></td><td class="serif">First asymptotic improvement in per-run circuit size over Shor in 30 years (§6).</td></tr>
+        <tr><td>Sep 2024</td><td class="serif">Gidney, Shutty, Jones, <a href="https://arxiv.org/abs/2409.17595">Magic state cultivation</a></td><td class="serif">T states nearly as cheap as CNOTs. Demonstrated on Willow, Science, Oct 15 2026: 99.99% fidelity, about 40x lower error than without cultivation, at the cost of discarding most attempts.</td></tr>
+        <tr><td>May 2025</td><td class="serif">Gidney, <a href="https://arxiv.org/abs/2505.15917">How to factor 2048 bit RSA integers with less than a million noisy qubits</a></td><td class="serif">20x fewer qubits than 2019, under a week of runtime, same hardware assumptions (\(p = 10^{-3}\), 1 µs cycle).</td></tr>
+        <tr><td>Feb 2026</td><td class="serif">Iceberg Quantum, <a href="https://arxiv.org/abs/2602.11457">The Pinnacle Architecture</a></td><td class="serif">Generalized bicycle qLDPC codes instead of surface code: under 100,000 physical qubits for RSA-2048 at \(p = 10^{-3}\), 1 µs cycle, 10 µs reaction time.</td></tr>
+        <tr><td>Mar 30 2026</td><td class="serif">Babbush, Zalcman, Gidney, … Boneh (Google), <a href="https://arxiv.org/abs/2603.28846">Securing elliptic curve cryptocurrencies against quantum vulnerabilities</a></td><td class="serif">ECDLP-256 in under 1,200 logical qubits and 90M Toffolis (or 1,450 and 70M); under 500,000 physical qubits, minutes of runtime. Circuits withheld, published as a zero-knowledge proof.</td></tr>
+        <tr><td>Mar 30 2026</td><td class="serif">Cain, Xu, King, Picard, Levine, Endres, Preskill, Huang, Bluvstein (Oratomic, Caltech), <a href="https://arxiv.org/abs/2603.28627">Shor's algorithm is possible with as few as 10,000 reconfigurable atomic qubits</a></td><td class="serif">High-rate qLDPC codes on movable atoms. P-256 discrete log in a few days at 26,000 physical qubits; RSA-2048 one to two orders of magnitude slower. The 1 ms stabilizer cycle it assumes is a target, not yet demonstrated.</td></tr>
+        <tr><td>Jun 2026</td><td class="serif">Schrottenloher, <a href="https://arxiv.org/abs/2606.02235">Optimized point addition circuits for elliptic curve discrete logarithms</a></td><td class="serif">An open circuit matching Google's withheld one on secp256k1: about 1.5% more qubits and 6.5 to 10% fewer Toffolis.</td></tr>
+        <tr><td>Oct 2026</td><td class="serif">Van Kirk, Gidney, <a href="https://arxiv.org/abs/2610.06733">Streaming Regev's quantum factoring algorithm</a></td><td class="serif">Regev in about \(4n\) qubits with Fibonacci-power phase estimation. Still more than Shor's \(n/2\).</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section id="github">
+  <div class="mark"><b>9</b>Code</div>
+  <div class="body">
+    <h2>What people are building on GitHub</h2>
+    <p>Searched November 2, 2026. Most Shor repos are textbook Qiskit demos for \(N = 15\). The ones below are worth reading because they reproduce or extend real papers. Dates are last push.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Repo</th><th>Pushed</th><th>Why read it</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://github.com/Strilanc/quantum-factor-2025-code">Strilanc/quantum-factor-2025-code</a></td><td>2026-04</td><td class="serif">Gidney's simulations and plots for the under-a-million-qubits RSA paper. The primary source for §7 and §8.</td></tr>
+        <tr><td><a href="https://github.com/Strilanc/magic-state-cultivation">Strilanc/magic-state-cultivation</a></td><td>2024-09</td><td class="serif">Stim circuits for cultivation, the technique Willow demonstrated in October.</td></tr>
+        <tr><td><a href="https://github.com/Strilanc/yoked-surface-codes">Strilanc/yoked-surface-codes</a></td><td>2023-12</td><td class="serif">The dense idle-qubit storage used in the 2025 RSA estimate.</td></tr>
+        <tr><td><a href="https://github.com/katherinevankirk/streaming-regev">katherinevankirk/streaming-regev</a></td><td>2026-10</td><td class="serif">Simulation code for the October 2026 streaming Regev paper.</td></tr>
+        <tr><td><a href="https://github.com/ekera/quaspy">ekera/quaspy</a></td><td>2026-05</td><td class="serif">Ekerå's library for simulating Shor and Ekerå-Håstad output distributions and post-processing at RSA scale, without a quantum simulator.</td></tr>
+        <tr><td><a href="https://github.com/ekera/regevnum">ekera/regevnum</a></td><td>2024-10</td><td class="serif">Sage simulator for Regev's algorithm including the lattice step.</td></tr>
+        <tr><td><a href="https://github.com/DexterJie/regev-factoring-experiments">DexterJie/regev-factoring-experiments</a></td><td>2026-10</td><td class="serif">Recent independent classical checks of Regev's algorithm. Small, unreviewed.</td></tr>
+        <tr><td><a href="https://github.com/IBM/gauging_clifford_measurement">IBM/gauging_clifford_measurement</a></td><td>2026-10</td><td class="serif">IBM's constant-depth variant of magic state cultivation.</td></tr>
+        <tr><td><a href="https://github.com/kase1111-hash/qldpc-scheduling-atlas">kase1111-hash/qldpc-scheduling-atlas</a></td><td>2026-03</td><td class="serif">Syndrome-extraction scheduling for qLDPC codes on reconfigurable neutral atoms, the Oratomic hardware model. Low stars, verify before trusting.</td></tr>
+        <tr><td><a href="https://github.com/XanaduAI/Fourier-sampling">XanaduAI/Fourier-sampling</a></td><td>2023-05</td><td class="serif">Clear notes on Fourier sampling and the general HSP. Old but still the best repo on the abstract side.</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">Gap: there is no public open-source circuit for the Google ECDLP estimate (by design), and no public code release for the Oratomic paper that I could find. Those are the two places a reproduction would be new.</p>
+  </div>
+</section>
+
+<!-- 10 -->
+<section id="next">
+  <div class="mark"><b>10</b>Actions</div>
+  <div class="body">
+    <h2>Next steps, ranked</h2>
+    <ol class="actions">
+      <li>On a whiteboard, derive \(P(y)\) in §4 from the state after measuring \(f\), then check it against the plot for \(N = 21\), \(a = 2\).<span>Done when: you can predict the peak positions \(jQ/r\) before pressing Prepare.</span></li>
+      <li>Prove the HSP recipe in §1 for \(G = \mathbb{Z}_2^n\), and see that it is exactly Simon's algorithm.<span>Done when: you can explain why \(g_0\) drops out.</span></li>
+      <li>Install quaspy and sample the Shor output distribution for a real 2048-bit modulus.<span>Done when: you have recovered \(r\) from a simulated 2048-bit sample.</span></li>
+      <li>Read Gidney 2025 §2 to §3 with his code repo open, and rebuild the §7 estimate from his assumptions.<span>Done when: you can say which trick saves the most qubits relative to the 2 \(d^2\) baseline.</span></li>
+      <li>Read the Oratomic paper's qLDPC section next to the gross-code paper, then ask Q-FARM groups about neutral-atom cycle times.<span>Done when: you know how far today's stabilizer cycle is from their 1 ms target.</span></li>
+    </ol>
+  </div>
+</section>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const fmt = (x) => x.toLocaleString("en-US");
+  const typeset = (el) => window.MathJax && MathJax.typesetPromise ? MathJax.typesetPromise([el]).catch(() => {}) : null;
+
+  function setupCanvas(cv) {
+    const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.height / (cv._dpr || 1);
+    cv._dpr = dpr; cv.width = w * dpr; cv.height = h * dpr; cv.style.height = h + "px";
+    const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { g, w, h, ink: css("--ink"), muted: css("--muted"), rule: css("--rule"), fill: css("--fill"), mono: "11px " + css("--mono") };
+  }
+  function axes(c, L, R, T, B) {
+    const { g, w, h } = c; g.strokeStyle = c.ink; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(L, T); g.lineTo(L, h - B); g.lineTo(w - R, h - B); g.stroke();
+  }
+
+  // ---------- 2: period ----------
+  function drawPeriod() {
+    const N = Math.max(6, Math.min(4095, +$("pN").value | 0)); let a = +$("pA").value | 0;
+    const c = setupCanvas($("pCanvas")), { g, w, h } = c, L = 40, R = 10, T = 10, B = 26;
+    g.clearRect(0, 0, w, h);
+    const d = Q.gcd(a, N), out = $("pOut");
+    if (d !== 1) { out.innerHTML = `<span>gcd(a, N) =</span> <b>${d}</b> <span>lucky: that is already a factor. Pick another a.</span>`; return; }
+    const r = Q.order(a, N), X = Math.min(Math.max(3 * r, 24), 200);
+    axes(c, L, R, T, B);
+    g.fillStyle = c.muted; g.font = c.mono; g.fillText("N−1", 4, T + 8); g.fillText("0", 26, h - B); g.fillText("x →", w - R - 26, h - 8);
+    const sx = (x) => L + (x / X) * (w - L - R), sy = (v) => h - B - (v / (N - 1)) * (h - T - B);
+    g.setLineDash([3, 3]); g.strokeStyle = c.rule;
+    for (let k = r; k <= X; k += r) { g.beginPath(); g.moveTo(sx(k), T); g.lineTo(sx(k), h - B); g.stroke(); }
+    g.setLineDash([]); g.strokeStyle = c.ink; g.fillStyle = c.ink; g.lineWidth = 1;
+    g.beginPath(); for (let x = 0; x <= X; x++) { const v = Q.modpow(a, x, N); x ? g.lineTo(sx(x), sy(v)) : g.moveTo(sx(x), sy(v)); } g.stroke();
+    for (let x = 0; x <= X; x++) { const v = Q.modpow(a, x, N); g.beginPath(); g.arc(sx(x), sy(v), 2, 0, 7); g.fill(); }
+    const sp = Q.splitFromPeriod(a, r, N);
+    out.innerHTML = `<span>period r =</span> <b>${r}</b> <span>a^(r/2) mod N =</span> <b>${r % 2 ? "n/a" : Q.modpow(a, r / 2, N)}</b> ` +
+      (sp.ok ? `<span>factors:</span> <b>${sp.p} × ${sp.q}</b>` : `<span>fails:</span> <b>${sp.reason}</b>`) +
+      `<span>dashed lines at multiples of r</span>`;
+  }
+  $("pGo").onclick = drawPeriod;
+  $("pRand").onclick = () => { const N = +$("pN").value | 0; let a; do { a = 2 + Math.floor(Math.random() * (N - 3)); } while (Q.gcd(a, N) !== 1 && N > 4); $("pA").value = a; drawPeriod(); };
+
+  // ---------- 3: QFT circuit ----------
+  function circuitSVG(n, gates) {
+    const col = 34, rowH = 34, left = 40, top = 18, cols = [];
+    // pack gates into columns sequentially (one gate per column keeps it readable)
+    gates.forEach((gt, i) => cols.push(i));
+    const W = left + gates.length * col + 30, H = top + n * rowH;
+    const y = (q) => top + (n - 1 - q) * rowH; // most significant qubit on top
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="QFT circuit on ${n} qubits" style="color:var(--ink)">`;
+    for (let q = 0; q < n; q++) s += `<line x1="${left - 6}" x2="${W - 10}" y1="${y(q)}" y2="${y(q)}" stroke="currentColor" stroke-width="1"/><text x="2" y="${y(q) + 4}" font-size="11" fill="currentColor">q${q}</text>`;
+    gates.forEach((gt, i) => {
+      const x = left + i * col + col / 2;
+      if (gt.op === "H") s += `<rect x="${x - 11}" y="${y(gt.q) - 11}" width="22" height="22" fill="var(--paper)" stroke="currentColor"/><text x="${x}" y="${y(gt.q) + 4}" font-size="12" text-anchor="middle" fill="currentColor">H</text>`;
+      if (gt.op === "CP") s += `<line x1="${x}" x2="${x}" y1="${y(gt.c)}" y2="${y(gt.t)}" stroke="currentColor"/><circle cx="${x}" cy="${y(gt.c)}" r="3.5" fill="currentColor"/><rect x="${x - 12}" y="${y(gt.t) - 11}" width="24" height="22" fill="var(--paper)" stroke="currentColor"/><text x="${x}" y="${y(gt.t) + 4}" font-size="10" text-anchor="middle" fill="currentColor">R${gt.k}</text>`;
+      if (gt.op === "SWAP") { s += `<line x1="${x}" x2="${x}" y1="${y(gt.a)}" y2="${y(gt.b)}" stroke="currentColor"/>`; for (const q of [gt.a, gt.b]) s += `<path d="M${x - 5} ${y(q) - 5}L${x + 5} ${y(q) + 5}M${x + 5} ${y(q) - 5}L${x - 5} ${y(q) + 5}" stroke="currentColor" fill="none"/>`; }
+    });
+    return s + "</svg>";
+  }
+  function runQFT() {
+    const n = +$("qN").value, QQ = 1 << n; let x = Math.max(0, Math.min(QQ - 1, +$("qX").value | 0)); $("qX").value = x; $("qX").max = QQ - 1;
+    const gates = Q.qftCircuit(n), st = Q.run(Q.State.basis(n, x), gates);
+    $("qCircuit").innerHTML = circuitSVG(n, gates);
+    const c = setupCanvas($("qCanvas")), { g, w, h } = c, L = 30, R = 10, T = 14, B = 24; g.clearRect(0, 0, w, h); axes(c, L, R, T, B);
+    const bw = (w - L - R) / QQ; let err = 0;
+    for (let y = 0; y < QQ; y++) {
+      const re = st.re[y], im = st.im[y], p = re * re + im * im, ang = Math.atan2(im, re);
+      const ex = 2 * Math.PI * x * y / QQ; err = Math.max(err, Math.hypot(re - Math.cos(ex) / Math.sqrt(QQ), im - Math.sin(ex) / Math.sqrt(QQ)));
+      const bx = L + y * bw;
+      const top = h - B - Math.min(h - T - B, p * QQ * 0.8 * (h - T - B));
+      g.strokeStyle = c.ink; g.fillStyle = c.fill; g.fillRect(bx + 1, top, Math.max(1, bw - 2), h - B - top); g.strokeRect(bx + 1, top, Math.max(1, bw - 2), h - B - top);
+      const cx = bx + bw / 2, rr = Math.min(9, bw / 2 - 1);
+      if (rr > 2) { g.beginPath(); g.arc(cx, top + rr + 3, rr, 0, 7); g.strokeStyle = c.muted; g.stroke(); g.beginPath(); g.moveTo(cx, top + rr + 3); g.lineTo(cx + rr * Math.cos(-ang), top + rr + 3 + rr * Math.sin(-ang)); g.strokeStyle = c.ink; g.lineWidth = 1.5; g.stroke(); g.lineWidth = 1; }
+      if (QQ <= 32) { g.fillStyle = c.muted; g.font = c.mono; g.textAlign = "center"; g.fillText(y, cx, h - 8); g.textAlign = "start"; }
+    }
+    const nCP = gates.filter(t => t.op === "CP").length, nS = gates.filter(t => t.op === "SWAP").length;
+    $("qOut").innerHTML = `<span>gates:</span> <b>${n} H, ${nCP} controlled-R, ${nS} swap</b> <span>max |circuit − DFT| =</span> <b>${err.toExponential(1)}</b>`;
+  }
+  $("qGo").onclick = runQFT; $("qN").onchange = runQFT;
+
+  // ---------- 4: Shor ----------
+  let S = null;
+  function prepShor() {
+    const N = +$("sN").value | 0, a = +$("sA").value | 0, out = $("sOut");
+    $("sCF").innerHTML = ""; $("sVerdict").innerHTML = ""; $("sLog").textContent = "";
+    if (N < 15 || N > 255) { out.innerHTML = "<b>Choose N between 15 and 255 so the simulation stays at 16 qubits or fewer.</b>"; S = null; return; }
+    if (N % 2 === 0) { out.innerHTML = `<b>N is even: 2 is a factor. Shor needs odd N.</b>`; S = null; return; }
+    if (Q.isPrime(N)) { out.innerHTML = `<b>${N} is prime. Pick a composite.</b>`; S = null; return; }
+    const pp = Q.isPrimePower(N); if (pp) { out.innerHTML = `<b>${N} is a power of ${pp}; classical root-finding factors it. Pick another N.</b>`; S = null; return; }
+    const d = Q.gcd(a, N); if (d !== 1) { out.innerHTML = `<b>gcd(${a}, ${N}) = ${d}, a factor already. Pick a coprime a.</b>`; S = null; return; }
+    const n = Q.registerSize(N), QQ = 1 << n, r = Q.order(a, N), P = Q.shorDistribution(r, QQ);
+    S = { N, a, n, QQ, r, P, shots: 0 };
+    out.innerHTML = `<span>register</span> <b>n = ${n}, Q = ${fmt(QQ)}</b> <span>true period</span> <b>r = ${r}</b> <span>peaks near jQ/r =</span> <b>${(QQ / r).toFixed(2)} · j</b>`;
+    drawShor();
+  }
+  function drawShor(mark) {
+    if (!S) return;
+    const c = setupCanvas($("sCanvas")), { g, w, h } = c, L = 46, R = 10, T = 12, B = 26, { P, QQ, r } = S;
+    g.clearRect(0, 0, w, h); axes(c, L, R, T, B);
+    const px = w - L - R, bins = Math.min(QQ, Math.floor(px)), per = QQ / bins, mx = new Float64Array(bins);
+    let pmax = 0; for (let i = 0; i < QQ; i++) { const b = Math.floor(i / per); if (P[i] > mx[b]) mx[b] = P[i]; if (P[i] > pmax) pmax = P[i]; }
+    const sy = (v) => h - B - (v / pmax) * (h - T - B);
+    g.setLineDash([3, 3]); g.strokeStyle = c.rule;
+    for (let j = 0; j < r; j++) { const x = L + (j * QQ / r) / QQ * px; g.beginPath(); g.moveTo(x, T); g.lineTo(x, h - B); g.stroke(); }
+    g.setLineDash([]); g.strokeStyle = c.ink; g.beginPath();
+    for (let b = 0; b < bins; b++) { const x = L + (b + 0.5) / bins * px; g.moveTo(x, h - B); g.lineTo(x, sy(mx[b])); } g.stroke();
+    g.fillStyle = c.muted; g.font = c.mono; g.fillText(pmax.toFixed(3), 2, T + 8); g.fillText("0", 34, h - B); g.fillText("y = 0", L, h - 8); g.textAlign = "right"; g.fillText(`Q−1 = ${QQ - 1}`, w - R, h - 8); g.textAlign = "start";
+    if (mark != null) { const x = L + (mark + 0.5) / QQ * px; g.fillStyle = c.ink; g.fillText(`y = ${mark}`, Math.min(x + 6, w - R - 70), T + 10); g.strokeStyle = c.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(x, T); g.lineTo(x, h - B); g.stroke(); g.lineWidth = 1; }
+  }
+  function shot() {
+    if (!S) prepShor(); if (!S) return;
+    const { N, a, QQ, r, P } = S, y = Q.sample(P), rec = Q.recoverPeriod(y, QQ, a, N); S.shots++;
+    drawShor(y);
+    let tex = `<div class="scroll"><table><thead><tr><th>step</th><th>partial quotient \\(a_i\\)</th><th>convergent \\(h_i/k_i\\)</th><th>\\(a^{k_i} \\bmod N\\)</th></tr></thead><tbody>`;
+    rec.steps.forEach((s, i) => { if (s.k < 4 * N) tex += `<tr><td>${i}</td><td>\\(${s.a}\\)</td><td>\\(${s.h}/${s.k}\\)</td><td>${s.k < N ? Q.modpow(a, s.k, N) : "k ≥ N, stop"}</td></tr>`; });
+    tex += `</tbody></table></div>`;
+    $("sCF").innerHTML = `<p>Measured \\(y = ${y}\\), so \\(y/Q = ${y}/${QQ} = ${(y / QQ).toFixed(6)}\\). Continued fraction:</p>` + tex;
+    let line, ver;
+    if (!rec.r) { ver = `<div class="verdict fail">No period from this shot (${rec.reason}). Measure again.</div>`; line = `shot ${S.shots}: y=${y} → no period`; }
+    else {
+      const sp = Q.splitFromPeriod(a, rec.r, N), exact = rec.r === r;
+      if (sp.ok) { ver = `<div class="verdict">r = ${rec.r}${exact ? "" : ` (multiple of true r = ${r})`}. a^(r/2) mod N = ${sp.h}. gcd(${sp.h} ± 1, ${N}) gives ${N} = ${sp.p} × ${sp.q}.</div>`; line = `shot ${S.shots}: y=${y} → r=${rec.r} → ${sp.p} × ${sp.q}`; }
+      else { ver = `<div class="verdict fail">Found r = ${rec.r}, but ${sp.reason}. Pick a new a.</div>`; line = `shot ${S.shots}: y=${y} → r=${rec.r} → ${sp.reason}`; }
+    }
+    $("sVerdict").innerHTML = ver; $("sLog").textContent = line + "\n" + $("sLog").textContent;
+    typeset($("sCF"));
+  }
+  $("sGo").onclick = prepShor; $("sShot").onclick = shot;
+  $("sRand").onclick = () => { const N = +$("sN").value | 0; let a, t = 0; do { a = 2 + Math.floor(Math.random() * (N - 3)); } while (Q.gcd(a, N) !== 1 && ++t < 200); $("sA").value = a; prepShor(); };
+
+  // ---------- 5: Simon ----------
+  let M = null;
+  function simonReset() {
+    let n = Math.max(2, Math.min(16, +$("mN").value | 0)); $("mN").value = n;
+    let sStr = ($("mS").value || "").replace(/[^01]/g, "");
+    if (sStr.length !== n || !/1/.test(sStr)) { sStr = ""; for (let i = 0; i < n; i++) sStr += Math.random() < .5 ? "1" : "0"; if (!/1/.test(sStr)) sStr = "1" + sStr.slice(1); $("mS").value = sStr; }
+    M = { n, s: parseInt(sStr, 2), ys: [], solved: null }; simonRender();
+  }
+  const bin = (v, n) => v.toString(2).padStart(n, "0");
+  function simonQuery() {
+    if (!M) simonReset(); if (M.solved !== null) return;
+    M.ys.push(Q.simonSample(M.n, M.s)); M.solved = Q.gf2NullVector(M.ys, M.n); simonRender();
+  }
+  function simonRender() {
+    const { n, s, ys, solved } = M, rank = Q.gf2Reduce(ys, n).rank;
+    $("mOut").innerHTML = `<span>queries</span> <b>${ys.length}</b> <span>rank over GF(2)</span> <b>${rank} / ${n - 1}</b> ` +
+      (solved !== null ? `<span>recovered s =</span> <b>${bin(solved, n)}</b> <b>${solved === s ? "matches" : "MISMATCH"}</b>` : `<span>classical collision search needs about</span> <b>${fmt(Math.round(Math.pow(2, n / 2)))}</b> <span>queries</span>`);
+    let t = `<table><thead><tr><th>#</th><th>y (measured)</th><th>y · s mod 2</th><th>new rank</th></tr></thead><tbody>`;
+    const acc = []; ys.forEach((y, i) => { const before = Q.gf2Reduce(acc, n).rank; acc.push(y); const after = Q.gf2Reduce(acc, n).rank; t += `<tr><td>${i + 1}</td><td>${bin(y, n)}</td><td>${Q.dot2(y, s)}</td><td>${after}${after > before ? "" : " (dependent)"}</td></tr>`; });
+    $("mTable").innerHTML = ys.length ? t + "</tbody></table>" : `<p class="note">Press Query once. Each row is one run of the circuit \\(H^{\\otimes n} \\to U_f \\to H^{\\otimes n}\\).</p>`;
+    if (!ys.length) typeset($("mTable"));
+  }
+  $("mReset").onclick = simonReset; $("mRun").onclick = simonQuery;
+  $("mAll").onclick = () => { if (!M) simonReset(); let k = 0; while (M.solved === null && k++ < 500) { M.ys.push(Q.simonSample(M.n, M.s)); M.solved = Q.gf2NullVector(M.ys, M.n); } simonRender(); };
+  $("mN").onchange = () => { $("mS").value = ""; simonReset(); };
+
+  // ---------- 6: Regev scaling ----------
+  function regev() {
+    const n = Math.max(64, +$("rN").value | 0), lg = Math.log2(n);
+    const rows = [
+      ["Shor, schoolbook multiplication", "\\(n^3\\)", n ** 3, 1, "\\(2n + 3\\) (Beauregard 2003)"],
+      ["Shor, fast multiplication", "\\(n^2 \\log n\\)", n * n * lg, 1, "\\(\\approx n/2\\) (CFS 2025)"],
+      ["Regev, per run", "\\(n^{3/2} \\log n\\)", n ** 1.5 * lg, Math.ceil(Math.sqrt(n)) + 4, "\\(\\approx 4n\\) (Van Kirk-Gidney 2026)"],
+    ];
+    let t = `<table><thead><tr><th>Algorithm</th><th>gates per run</th><th>at n = ${fmt(n)}</th><th>runs</th><th>logical qubits</th></tr></thead><tbody>`;
+    for (const r of rows) t += `<tr><td class="serif">${r[0]}</td><td>${r[1]}</td><td>${r[2].toExponential(2)}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`;
+    $("rTable").innerHTML = t + `</tbody></table>`; typeset($("rTable"));
+  }
+  $("rN").oninput = regev;
+
+  // ---------- 7: error correction ----------
+  function ftqc() {
+    const p = +$("fP").value, Lq = Math.max(1, +$("fL").value), days = +$("fT").value, cyc = +$("fC").value * 1e-6, eps = +$("fE").value;
+    const rounds = days * 86400 / cyc, budget = eps / (Lq * rounds), d = Q.surfaceDistanceFor(p, budget);
+    const out = $("fOut");
+    if (!d) out.innerHTML = `<b>${p >= 0.01 ? "p is at or above threshold (1e-2): no distance helps." : "Needs distance above 200; lower p."}</b>`;
+    else { const per = 2 * d * d; out.innerHTML = `<span>rounds</span> <b>${rounds.toExponential(2)}</b> <span>needed p_L</span> <b>${budget.toExponential(1)}</b> <span>distance</span> <b>d = ${d}</b> <span>physical / logical</span> <b>${fmt(per)}</b> <span>total physical</span> <b>${fmt(per * Lq)}</b>`; }
+    const c = setupCanvas($("fCanvas")), { g, w, h } = c, L = 50, R = 12, T = 12, B = 28; g.clearRect(0, 0, w, h); axes(c, L, R, T, B);
+    const lp0 = -4, lp1 = Math.log10(0.009), yMax = 10000;
+    const sx = (lp) => L + (lp - lp0) / (lp1 - lp0) * (w - L - R), sy = (v) => h - B - Math.log10(v) / Math.log10(yMax) * (h - T - B);
+    g.fillStyle = c.muted; g.font = c.mono;
+    for (const e of [-4, -3, -2.5]) { g.fillText(`1e${e}`.replace("1e-2.5", "3e-3"), sx(e) - 12, h - 8); }
+    for (const v of [10, 100, 1000, 10000]) { g.fillText(fmt(v), 4, sy(v) + 4); g.strokeStyle = c.rule; g.beginPath(); g.moveTo(L, sy(v)); g.lineTo(w - R, sy(v)); g.stroke(); }
+    g.strokeStyle = c.ink; g.lineWidth = 1.25; g.beginPath(); let first = true;
+    for (let lp = lp0; lp <= lp1; lp += 0.01) { const dd = Q.surfaceDistanceFor(10 ** lp, budget); if (!dd) continue; const v = Math.min(yMax, 2 * dd * dd); const X = sx(lp), Y = sy(v); first ? g.moveTo(X, Y) : g.lineTo(X, Y); first = false; }
+    g.stroke(); g.lineWidth = 1;
+    g.setLineDash([4, 3]); g.beginPath(); g.moveTo(L, sy(24)); g.lineTo(w - R, sy(24)); g.stroke(); g.setLineDash([]);
+    g.fillStyle = c.ink; g.fillText("gross qLDPC code: 24 / logical", L + 6, sy(24) - 5); g.fillText("surface code, your ε and run length", L + 6, T + 10);
+    if (d && p > 1e-4 && p < 0.009) { g.beginPath(); g.arc(sx(Math.log10(p)), sy(2 * d * d), 4, 0, 7); g.fill(); }
+  }
+  ["fP", "fL", "fT", "fC", "fE"].forEach(id => $(id).oninput = ftqc);
+
+  // ---------- 8: timeline ----------
+  function timeline() {
+    const c = setupCanvas($("tCanvas")), { g, w, h } = c, L = 62, R = 16, T = 16, B = 30; g.clearRect(0, 0, w, h); axes(c, L, R, T, B);
+    const y0 = 2018.5, y1 = 2027.05, sx = (t) => L + (t - y0) / (y1 - y0) * (w - L - R), sy = (v) => h - B - (Math.log10(v) - 3.5) / (8 - 3.5) * (h - T - B);
+    g.font = c.mono; g.fillStyle = c.muted;
+    for (const v of [1e4, 1e5, 1e6, 1e7, 1e8]) { g.strokeStyle = c.rule; g.beginPath(); g.moveTo(L, sy(v)); g.lineTo(w - R, sy(v)); g.stroke(); g.fillText(v >= 1e6 ? (v / 1e6) + "M" : (v / 1e3) + "k", 8, sy(v) + 4); }
+    for (const yr of [2019, 2021, 2023, 2025, 2026]) g.fillText(yr, sx(yr) - 14, h - 10);
+    const rsa = [[2019.4, 2e7, "Gidney-Ekerå 20M"], [2025.4, 1e6, "Gidney <1M"], [2026.12, 1e5, "Pinnacle <100k"]];
+    g.strokeStyle = c.ink; g.lineWidth = 1.25; g.beginPath(); rsa.forEach(([t, v], i) => i ? g.lineTo(sx(t), sy(v)) : g.moveTo(sx(t), sy(v))); g.stroke(); g.lineWidth = 1;
+    const halo = (s, x, y, al) => { g.textAlign = al; g.lineWidth = 4; g.strokeStyle = css("--bg"); g.strokeText(s, x, y); g.fillStyle = c.ink; g.fillText(s, x, y); g.lineWidth = 1; g.textAlign = "start"; };
+    rsa.forEach(([t, v]) => { g.fillStyle = c.ink; g.fillRect(sx(t) - 4, sy(v) - 4, 8, 8); });
+    halo(rsa[0][2], sx(rsa[0][0]) + 8, sy(rsa[0][1]) - 8, "start"); halo(rsa[1][2], sx(rsa[1][0]) - 10, sy(rsa[1][1]) - 8, "right"); halo(rsa[2][2], sx(rsa[2][0]) - 10, sy(rsa[2][1]) + 16, "right");
+    const other = [[2026.6, 5e5, "Google ECDLP-256 <500k", -1], [2026.6, 2.6e4, "Oratomic P-256, 26k atoms", -1]];
+    other.forEach(([t, v, s, side]) => { g.strokeStyle = c.ink; g.fillStyle = c.paper || css("--paper"); g.beginPath(); g.arc(sx(t), sy(v), 4.5, 0, 7); g.fill(); g.stroke(); halo(s, sx(t) - 9, sy(v) + 18, "right"); });
+  }
+
+  function all() { drawPeriod(); runQFT(); drawShor(); regev(); ftqc(); timeline(); }
+  prepShor(); simonReset(); all();
+  window.addEventListener("resize", () => { clearTimeout(window._rz); window._rz = setTimeout(all, 120); });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", all);
+  new MutationObserver(all).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+})();
+</script>
