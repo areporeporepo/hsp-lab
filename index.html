@@ -1,4 +1,9 @@
-<title>CS259Q Atlas</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HSP Lab</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <script>
@@ -18,6 +23,10 @@ window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]
 :root[data-theme="dark"] { --bg: #131416; --fg: #e8e8e5; --muted: #9b9da2; --faint: #45474b; --rule: #323438; --panel: #1c1d20; --ink: #fff; color-scheme: dark }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+.wrap, section.view, #drills, .drill, .card, .solution, .step, .ladder, .audit, fieldset { grid-template-columns: minmax(0, 1fr); }
+.wrap > *, section.view > *, #drills > *, .drill > *, .card > *, .solution > *, .step > *, .ladder > * { min-width: 0; }
+.drill p, .step p, .solution p { overflow-x: auto; overflow-y: hidden; }
 body { background: var(--bg); color: var(--fg); font: 15.5px/1.6 var(--body); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 80px; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
 .wrap { max-width: 60rem; margin: 0 auto; display: grid; gap: 28px; }
@@ -38,7 +47,7 @@ section.view { display: grid; gap: 22px; min-width: 0; }
 .card { border: 1px solid var(--rule); background: var(--panel); border-radius: 5px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
 .scroll { overflow-x: auto; min-width: 0; }
 button, select, input[type=text] { font: 500 14px var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--fg); border-radius: 4px; padding: 6px 12px; }
-button { cursor: pointer; }
+button { cursor: pointer; touch-action: manipulation; min-height: 36px; }
 button:hover { background: var(--panel); }
 button[disabled] { opacity: .45; cursor: default; }
 button.ghost { border-color: var(--faint); }
@@ -46,7 +55,7 @@ input[type=text] { font-family: var(--mono); min-width: 0; width: 100%; max-widt
 input[type=range] { width: 100%; accent-color: var(--fg); }
 .row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
 .ctrl { display: grid; gap: 4px; min-width: 0; flex: 1 1 180px; }
-.ctrl label, .lbl { font: 500 12px var(--mono); letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
+.ctrl label, .lbl { font: 500 12.5px var(--mono); letter-spacing: .02em; color: var(--muted); }
 .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 table { border-collapse: collapse; width: 100%; font-size: 14px; }
 th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
@@ -122,16 +131,18 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
 .notedge li::before { content: "✗ "; font-family: var(--mono); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
+</head>
+<body>
 
 <div class="wrap">
 <header class="top">
   <span class="eyebrow">CS259Q · prep for Thu Nov 5, 2026 · Lecture 13</span>
-  <h1>CS259Q Atlas</h1>
+  <h1>HSP Lab</h1>
   <p class="muted">Every algorithm so far as one connected map, plus small simulators, whiteboard drills and speak-aloud drills. Lecture 13 (Hidden Subgroup Problem) content is predicted from the schedule; your L10 to L12 notes are the source for the rest. Brainstormed with Gemini and Astra; math cross-checked by both.</p>
 </header>
 
 <nav class="tabs" aria-label="Views">
-  <a href="#map">Map</a><a href="#lab">Lab</a><a href="#board">Board</a><a href="#speak">Speak</a>
+  <a href="#map">Map</a><a href="#frames">Frames</a><a href="#lab">Lab</a><a href="#board">Board</a><a href="#speak">Speak</a>
 </nav>
 
 <!-- ============ MAP ============ -->
@@ -154,12 +165,14 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
   <div class="card">
     <h3>Connections that look right but are wrong</h3>
     <ul class="notedge">
-      <li><b>Deutsch–Jozsa is not an HSP.</b> A balanced function need not be constant on the cosets of any subgroup. It only shares the 𝖧, O<sub>f</sub>, 𝖧 template.</li>
-      <li><b>Bernstein–Vazirani is not a standard HSP run.</b> There H = ker f and H<sup>⊥</sup> = {0, s}, so Fourier sampling would output 0 or s with probability 1/2 each. BV gets s deterministically in one query because f is itself a character and phase kickback prepares that character directly.</li>
+      <li><b>Deutsch–Jozsa is not an HSP.</b> A balanced function need not be constant on the cosets of any subgroup. It only shares the \(\mathsf{H}^{\otimes n}, O_f, \mathsf{H}^{\otimes n}\) template.</li>
+      <li><b>Bernstein–Vazirani is not a standard HSP run.</b> There \(H=\ker f\) and \(H^\perp=\{0,s\}\), so Fourier sampling would output \(0\) or \(s\) with probability \(\tfrac12\) each. BV gets \(s\) deterministically in one query because \(f\) is itself a character and phase kickback prepares that character directly.</li>
       <li><b>\(\mathsf{H}^{\otimes n}\) is not the QFT over \(\mathbb{Z}_{2^n}\).</b> It is the QFT over \(\mathbb{Z}_2^n\). The cyclic group has carries between bits, which is why it needs controlled rotations.</li>
-      <li><b>Order finding is not an exact HSP over \(\mathbb{Z}_{2^n}\)</b> unless r divides 2ⁿ. It is an HSP over ℤ with H = rℤ, sampled through a finite window, which is why continued fractions are needed.</li>
+      <li><b>Order finding is not an exact HSP over \(\mathbb{Z}_{2^n}\)</b> unless \(r \mid 2^n\). It is an HSP over \(\mathbb{Z}\) with \(H=r\mathbb{Z}\), sampled through a finite window, which is why continued fractions are needed.</li>
       <li><b>Phase estimation and HSP: neither contains the other.</b> Phase estimation handles arbitrary real phases; HSP handles arbitrary finite abelian groups. Order finding sits in both.</li>
-      <li><b>H ∩ H<sup>⊥</sup> need not be {0}.</b> In ℤ₂³ with s = 110, the element 110 is in both H and H<sup>⊥</sup>. What always holds: |H|·|H<sup>⊥</sup>| = |G| and (H<sup>⊥</sup>)<sup>⊥</sup> = H.</li>
+      <li><b>\(H\cap H^\perp\) need not be \(\{0\}\).</b> In \(\mathbb{Z}_2^3\) with \(s=110\), the element \(110\) is in both \(H\) and \(H^\perp\). What always holds: \(|H|\cdot|H^\perp|=|G|\) and \((H^\perp)^\perp=H\).</li>
+      <li><b>“Non-abelian is hard because there is no QFT” is wrong.</b> Efficient QFT circuits exist for \(S_n\) (Beals 1997) and \(D_N\). The bottleneck is turning the measurement “clues” into \(H\).</li>
+      <li><b>Measuring the output register does not cause the interference.</b> Skip it and the first register is a mixture of coset states with the same output statistics.</li>
     </ul>
   </div>
 </section>
@@ -169,7 +182,7 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
   <!-- HSP sampler -->
   <div class="card" id="w-hsp">
     <span class="eyebrow">L13 · Abelian HSP</span>
-    <h2>Coset state to H<sup>⊥</sup></h2>
+    <h2>Coset state to \(H^\perp\)</h2>
     <p>Pick a group and a hidden subgroup. The offset is the random coset you got when the output register was measured. Each circle is an amplitude: radius is its size, needle is its phase. <b>Move the offset and watch which thing changes.</b></p>
     <div class="row">
       <div class="ctrl"><label for="hspG">Group</label><select id="hspG"></select></div>
@@ -218,7 +231,7 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
   <div class="card" id="w-shor">
     <span class="eyebrow">L11–12 · Shor as phase estimation</span>
     <h2>Two views of Shor</h2>
-    <p>U<sub>a</sub> multiplies by a mod N, so on the orbit of 1 it is a cyclic shift. Its eigenphases are j/r. Feeding |1⟩ (a uniform mix of eigenvectors) into phase estimation outputs y ≈ jQ/r for a random j. Continued fractions turn y/Q into r; then the gcd step factors N.</p>
+    <p>\(U_a|y\rangle=|ay \bmod N\rangle\) is a cyclic shift on the orbit of \(1\), with eigenphases \(2\pi j/r\). Feeding \(|1\rangle=\frac{1}{\sqrt r}\sum_j|\psi_j\rangle\) into phase estimation outputs \(y\approx jQ/r\) for a uniformly random \(j\). Continued fractions turn \(y/Q\) into \(r\); then \(\gcd(a^{r/2}\pm1,N)\) factors \(N\).</p>
     <div class="row">
       <div class="ctrl"><label for="shN">N</label><select id="shN"><option>15</option><option>21</option><option>33</option><option>35</option></select></div>
       <div class="ctrl"><label for="shA">a</label><select id="shA"></select></div>
@@ -243,7 +256,7 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
     <p class="small muted">New instance every click. Type what you got on paper; the checker names the specific mistake.</p>
     <div class="row">
       <div class="ctrl"><label for="genType">Problem</label>
-        <select id="genType"><option value="period">Period finding: find H⊥ in ℤ_N</option><option value="simon">Simon: find H⊥ in ℤ₂ⁿ</option><option value="dlog">Discrete log: which s fit the samples?</option><option value="factor">Factoring: run the reduction</option></select></div>
+        <select id="genType"><option value="period">Period finding: find H⊥ in a cyclic group</option><option value="simon">Simon: find H⊥ in ℤ₂ⁿ</option><option value="dlog">Discrete log: which s fit the samples?</option><option value="factor">Factoring: run the reduction</option></select></div>
       <button id="genNew">New numbers</button>
     </div>
     <div id="genQ"></div>
@@ -254,19 +267,19 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
   <div id="drills" style="display:grid;gap:18px">
 
   <div class="drill" id="d-coset" data-id="coset">
-    <div class="hd"><h3>Coset state to H<sup>⊥</sup>, from scratch</h3><span class="tag">L13 · hub</span></div>
+    <div class="hd"><h3>Coset state to \(H^\perp\), from scratch</h3><span class="tag">L13 · hub</span></div>
     <p>Let \(G\) be finite abelian, \(H\le G\), and \(\mathrm{QFT}_G|x\rangle = \frac{1}{\sqrt{|G|}}\sum_{y\in G}\chi_y(x)|y\rangle\). Compute the probability of measuring \(y\) after applying \(\mathrm{QFT}_G\) to \(|g_0+H\rangle = \frac{1}{\sqrt{|H|}}\sum_{h\in H}|g_0+h\rangle\).</p>
     <div class="ladder">
       <div class="step" hidden><b class="k">Hint 1 · setup</b><p>Write \(\langle y|\mathrm{QFT}_G|g_0+H\rangle\) with both normalizations. Use \(\chi_y(g_0+h)=\chi_y(g_0)\chi_y(h)\).</p></div>
       <div class="step" hidden><b class="k">Hint 2 · key trick</b><p>If \(\chi_y(h')\ne1\) for some \(h'\in H\), re-index the sum by \(h\mapsto h+h'\). The sum is unchanged but also multiplied by \(\chi_y(h')\).</p></div>
-      <div class="step" hidden><b class="k">Hint 3 · finish</b><p>So the sum is \(|H|\) or \(0\). Square, then check the probabilities over \(H^\perp\) add to 1 using \(|H^\perp| = |G|/|H|\).</p></div>
+      <div class="step" hidden><b class="k">Hint 3 · finish</b><p>So the sum is \(|H|\) or \(0\). Take \(|\cdot|^2\), then check the probabilities over \(H^\perp\) add to 1 using \(|H^\perp| = |G|/|H|\).</p></div>
       <button class="nexthint">Hint 1 of 3</button>
     </div>
     <div class="audit">
       <fieldset data-ans="b" data-why="One 1/√|G| from the QFT and one 1/√|H| from the coset state."><legend>Prefactor in front of \(\sum_{h}\chi_y(h)\)?</legend>
         <label><input type="radio" name="c1" value="a"> \(1/|G|\)</label><label><input type="radio" name="c1" value="b"> \(\chi_y(g_0)/\sqrt{|G||H|}\)</label><label><input type="radio" name="c1" value="c"> \(1/\sqrt{|G|}\)</label></fieldset>
       <fieldset data-ans="c" data-why="It is a unit-modulus factor, so it disappears under |·|². It is a relative phase across different y, not a global phase."><legend>Where does the offset \(g_0\) appear in \(\Pr[y]\)?</legend>
-        <label><input type="radio" name="c2" value="a"> In which y have nonzero probability</label><label><input type="radio" name="c2" value="b"> In the normalization</label><label><input type="radio" name="c2" value="c"> Nowhere</label></fieldset>
+        <label><input type="radio" name="c2" value="a"> In which \(y\) have nonzero probability</label><label><input type="radio" name="c2" value="b"> In the normalization</label><label><input type="radio" name="c2" value="c"> Nowhere</label></fieldset>
       <button class="checkaudit">Check self-check and open solution</button>
     </div>
     <div class="solution" hidden>
@@ -277,7 +290,7 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
   </div>
 
   <div class="drill" id="d-samples" data-id="samples">
-    <div class="hd"><h3>Why O(log |G|) samples are enough</h3><span class="tag">L13</span></div>
+    <div class="hd"><h3>Why \(O(\log|G|)\) samples are enough</h3><span class="tag">L13</span></div>
     <p>Let \(K\) be the subgroup generated by the samples so far. Show that while \(K\ne H^\perp\), each new sample has probability at least 1/2 of growing \(K\), and that \(K\) can grow at most \(\log_2|G|\) times.</p>
     <div class="ladder">
       <div class="step" hidden><b class="k">Hint 1</b><p>\(K\) is a proper subgroup of \(H^\perp\). What does Lagrange's theorem say about \(|K|\)?</p></div>
@@ -286,20 +299,20 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
       <button class="nexthint">Hint 1 of 3</button>
     </div>
     <div class="audit">
-      <fieldset data-ans="b" data-why="It is a probabilistic guarantee: O(log|G| + log(1/δ)) samples succeed with probability 1 − δ."><legend>Do \(\log_2|G|\) samples <i>always</i> generate \(H^\perp\)?</legend>
+      <fieldset data-ans="b" data-why="It is a probabilistic guarantee: \(O(\log|G|+\log(1/\delta))\) samples succeed with probability \(1-\delta\)."><legend>Do \(\log_2|G|\) samples <i>always</i> generate \(H^\perp\)?</legend>
         <label><input type="radio" name="s1" value="a"> Yes</label><label><input type="radio" name="s1" value="b"> No, only with high probability given a few more</label></fieldset>
       <button class="checkaudit">Check self-check and open solution</button>
     </div>
     <div class="solution" hidden>
       <p>\(|K|\) divides \(|H^\perp|\) and \(K\ne H^\perp\), so \(|K|\le|H^\perp|/2\). Each sample escapes \(K\) with probability \(\ge 1/2\), and each escape at least doubles \(|K|\). Since \(|H^\perp|\le|G|\), at most \(\log_2|G|\) escapes are needed; with \(O(\log|G|+\log(1/\delta))\) samples all of them happen with probability \(\ge 1-\delta\).</p>
-      <p class="small muted">Contrast: cyclic ℤ_N needs only about 2 samples (H⊥ is cyclic, and two random multiples are coprime with probability ≈ 6/π²). Simon needs about n because H⊥ has rank n − 1.</p>
+      <p class="small muted">Contrast: cyclic \(\mathbb{Z}_N\) usually needs only 2 samples: \(H^\perp\) is cyclic, and \(y_i=c_i N/p\) with \(\gcd(c_1,c_2)=1\) with probability at least \(6/\pi^2\), in which case \(\gcd(y_1,y_2,N)=N/p\). Simon needs about \(n\) because \(H^\perp\) has rank \(n-1\).</p>
     </div>
     <div class="mastery"></div>
   </div>
 
   <div class="drill" id="d-simon" data-id="simon">
     <div class="hd"><h3>Simon as an HSP</h3><span class="tag">L8 → L13</span></div>
-    <p>\(G=\mathbb{Z}_2^3\), \(s=110\). List \(H\) and \(H^\perp\). Is \(H\cap H^\perp=\{0\}\)?</p>
+    <p>\(G=\mathbb{Z}_2^3\), \(s=110\). List \(H\) and \(H^\perp\). Is \(H\cap H^\perp=\{000\}\)?</p>
     <div class="ladder">
       <div class="step" hidden><b class="k">Hint 1</b><p>Characters of \(\mathbb{Z}_2^3\): \(\chi_y(x)=(-1)^{y\cdot x}\). So \(y\in H^\perp\iff y\cdot s\equiv 0\pmod 2\).</p></div>
       <button class="nexthint">Hint 1 of 1</button>
@@ -395,12 +408,12 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
       <button class="nexthint">Hint 1 of 2</button>
     </div>
     <div class="audit">
-      <fieldset data-ans="a" data-why="The circuit produces the factors in reversed wire order; L10 reads outputs bottom to top, or you add a SWAP of wires 1 and 3."><legend>Does the H, CR₂, CR₃ / H, CR₂ / H circuit output the factors in the order written?</legend>
+      <fieldset data-ans="a" data-why="The circuit produces the factors in reversed wire order; L10 reads outputs bottom to top, or you add a SWAP of wires 1 and 3."><legend>Does the circuit \(\mathsf{H}, CR_2, CR_3 \,/\, \mathsf{H}, CR_2 \,/\, \mathsf{H}\) output the factors in the order written?</legend>
         <label><input type="radio" name="q1" value="a"> No, bit-reversed unless you swap</label><label><input type="radio" name="q1" value="b"> Yes</label></fieldset>
       <button class="checkaudit">Check self-check and open solution</button>
     </div>
     <div class="solution" hidden>
-      <p>\(\omega^{4x}=(-1)^{x_3}\); \(\omega^{2x}=(-1)^{x_2}i^{x_3}\); \(\omega^x=(-1)^{x_1}i^{x_2}\omega^{x_3}\). Wire 1: H, CR₂ (control 2), CR₃ (control 3). Wire 2: H, CR₂ (control 3). Wire 3: H. Then reverse wires. \(n(n-1)/2\) rotations total.</p>
+      <p>\(\omega^{4x}=(-1)^{x_3}\); \(\omega^{2x}=(-1)^{x_2}i^{x_3}\); \(\omega^x=(-1)^{x_1}i^{x_2}\omega^{x_3}\). Wire 1: \(\mathsf{H}\), \(CR_2\) (control 2), \(CR_3\) (control 3). Wire 2: \(\mathsf{H}\), \(CR_2\) (control 3). Wire 3: \(\mathsf{H}\). Then reverse the wires. \(n(n-1)/2\) rotations total.</p>
       <p>For \(\mathbb{Z}_2^3\) the characters are \((-1)^{y\cdot x}\): no carries between bits, so every controlled rotation drops out and \(\mathrm{QFT}_{\mathbb{Z}_2^3}=\mathsf{H}^{\otimes3}\).</p>
     </div>
     <div class="mastery"></div>
@@ -419,6 +432,96 @@ fieldset label { display: flex; gap: 8px; align-items: baseline; }
   </div>
 </section>
 
+<!-- ============ FRAMES ============ -->
+<section class="view" id="v-frames" hidden>
+  <p>One algorithm, several ways to see it. Each frame below is a different mental picture of the same math, ordered as a whiteboard story: every frame answers the objection a sharp classmate would raise after the previous one. For each: watch the timestamp, play with the linked widget, then do the whiteboard prompt with no notes.</p>
+
+  <div class="card">
+    <span class="eyebrow">Abelian HSP · lead frame</span>
+    <h3>1. A random shift becomes an invisible phase</h3>
+    <p>Measuring the output register leaves a random coset \(|g_0+H\rangle\). The QFT turns the shift by \(g_0\) into the phase \(\chi_y(g_0)\), and \(|\chi_y(g_0)|^2=1\). So the randomness you cannot control has no effect on what you measure.</p>
+    \[ \mathrm{QFT}_G\,|g_0+H\rangle = \sum_{y} \chi_y(g_0)\,\Big(\tfrac{1}{\sqrt{|G||H|}}\textstyle\sum_{h\in H}\chi_y(h)\Big)\,|y\rangle \]
+    <p class="small"><b>Watch:</b> <a href="https://www.youtube.com/watch?v=x8i6qs8uAog&t=4080s">O'Donnell 1:08–1:11</a> (coset state). <b>Play:</b> <a href="#w-hsp">HSP simulator</a>, drag the offset: needles spin, circle sizes stay put. <b>Whiteboard:</b> write \(\mathrm{QFT}_G|g_0+H\rangle\) and factor out \(\chi_y(g_0)\) in one line.</p>
+    <p class="small muted">Hides: why the surviving \(y\) are exactly \(H^\perp\). Frame 3 answers that.</p>
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">Abelian HSP</span>
+    <h3>2. f paints each coset one color</h3>
+    <p>The promise "constant on cosets, distinct across cosets" means \(f\) colors \(G\) in blocks: every coset gets its own color. Measuring \(f\) picks a color, which picks a coset. Equivalently \(f(x)=f(y)\iff x-y\in H\).</p>
+    <p class="small"><b>Watch:</b> <a href="https://www.youtube.com/watch?v=x8i6qs8uAog&t=600s">O'Donnell 0:10–0:13</a> (\(\mathbb{Z}_{24}\), \(H=\langle4\rangle\)) and <a href="https://www.youtube.com/watch?v=x8i6qs8uAog&t=3420s">0:57–1:02</a>. <b>Whiteboard:</b> in \(\mathbb{Z}_{24}\) with \(H=\langle 4\rangle\), list the four cosets and color them. Then find \(H^\perp\) and check \(|H|\cdot|H^\perp|=24\).</p>
+    <details><summary>Check your board</summary><div><p>\(H=\{0,4,8,12,16,20\}\); cosets \(H,\ 1+H,\ 2+H,\ 3+H\). \(H^\perp=\{y: 4y\equiv0 \pmod{24}\}=\{0,6,12,18\}\). \(6\cdot4=24\) ✓.</p></div></details>
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">Abelian HSP</span>
+    <h3>3. Wrong outcomes close into polygons</h3>
+    <p>The amplitude on \(y\) is a sum of \(|H|\) unit arrows \(\chi_y(h)\). If \(\chi_y\) is trivial on \(H\), they all point the same way. If not, multiplying by \(\chi_y(h')\ne1\) rotates the whole picture onto itself, so the arrows must close into a polygon and sum to zero.</p>
+    <p class="small"><b>Play:</b> <a href="#w-hsp">HSP simulator</a>, \(\mathbb{Z}_{12}\), \(H=\langle3\rangle\): tap \(y=1\) (a square) and \(y=4\) (a straight line). <b>Whiteboard:</b> draw the four arrows for \(y=1,2,3,4\) by hand, then prove the "rotates onto itself" argument in two lines.</p>
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">Abelian HSP</span>
+    <h3>4. A comb transforms to the dual comb</h3>
+    <p>A subgroup of \(\mathbb{Z}_N\) is a comb of spacing \(p\); its Fourier transform is a comb of spacing \(N/p\). Big \(H\) means small \(H^\perp\): \(|H|\cdot|H^\perp|=|G|\). This is L10 §10.2 in group language.</p>
+    <p class="small"><b>Play:</b> <a href="#w-hsp">HSP simulator</a>, \(\mathbb{Z}_{12}\), choose "period 5" to see what breaks when \(p\nmid N\) (the real Shor situation). <b>Whiteboard:</b> sketch \(H\) and \(H^\perp\) for \(\mathbb{Z}_{12}\) with \(p=2,3,4,6\) in one table.</p>
+    <p class="small muted">Hides: Simon's \(\{0,s\}\) has no "spacing" on a line; there the dual is bitwise orthogonality \(y\cdot s=0\).</p>
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">Abelian HSP</span>
+    <h3>5. Each run is one clue: a linear constraint</h3>
+    <p>Every measurement gives one random \(y\in H^\perp\), i.e. one equation that \(H\) must satisfy. Simon: \(y\cdot s\equiv0\). Period finding: a random multiple of \(N/p\), finish with a gcd. Discrete log: \(y_2\equiv s\,y_1 \pmod r\). Enough clues pin down \(H\).</p>
+    <p class="small"><b>Watch:</b> <a href="https://www.youtube.com/watch?v=x8i6qs8uAog&t=4440s">O'Donnell 1:14–1:16</a> ("clues"). <b>Play:</b> <a href="#w-hsp">HSP simulator</a>, "Draw a sample" until \(K^\perp=H\). <b>Whiteboard:</b> Simon in \(\mathbb{Z}_2^3\) returned \(010\) and \(111\). Solve for \(s\).</p>
+    <details><summary>Check your board</summary><div><p>\(010\cdot s=0\Rightarrow s_2=0\). \(111\cdot s=0\Rightarrow s_1+s_3=0\Rightarrow s_1=s_3\). Nonzero solution: \(s=101\).</p></div></details>
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">Abelian HSP · the hinge to non-abelian</span>
+    <h3>6. Characters are the eigenbasis of shifts</h3>
+    <p>Let \(T_g|x\rangle=|x+g\rangle\). The character states \(|\hat y\rangle=\frac{1}{\sqrt{|G|}}\sum_x\chi_y(x)|x\rangle\) are simultaneous eigenvectors of every shift:</p>
+    \[ T_g|\hat y\rangle = \overline{\chi_y(g)}\,|\hat y\rangle . \]
+    <p>The coset state \(|H\rangle\) is unchanged by every \(T_h\), \(h\in H\), so it can only have weight on \(|\hat y\rangle\) with \(\chi_y(h)=1\) for all \(h\in H\): that is \(H^\perp\). Measuring in this basis is what QFT-then-measure does (up to relabeling \(y\mapsto -y\)). <b>This is why the QFT is the right basis, not a trick.</b></p>
+    <p class="small"><b>Whiteboard:</b> verify \(T_g|\hat y\rangle=\overline{\chi_y(g)}|\hat y\rangle\) by substituting \(x'=x+g\). Then say out loud what goes wrong when shifts do not commute. <b>Read:</b> <a href="https://www.cs.umd.edu/~amchilds/teaching/w13/l08.pdf">Childs, UMD lecture notes</a>.</p>
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">Non-abelian HSP</span>
+    <h3>7. The information is there; we cannot read it out</h3>
+    <p>Skip the QFT and think statistics: each query produces a copy of the mixed state \(\rho_H\), and you must tell which of the possible subgroups it came from. There are at most \(|G|^{\log_2|G|}\) subgroups (each has at most \(\log_2|G|\) generators), so polynomially many copies distinguish them in principle. Ettinger, Høyer and Knill (2004) prove \(\mathrm{poly}(\log|G|)\) queries suffice, but their measurement takes exponential time.</p>
+    <p class="small"><b>Watch:</b> <a href="https://www.youtube.com/watch?v=x8i6qs8uAog&t=4620s">O'Donnell 1:17–1:23</a> (hypothesis testing). His counting gives about \(\log^2|G|\) copies; the paper's abstract only claims "polynomial in \(\log|G|\)". <span class="muted">Unresolved: Gemini claims the bound is \(O(\log|G|)\); I have not confirmed the exponent.</span></p>
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">Non-abelian HSP</span>
+    <h3>8. Phases become matrices</h3>
+    <p>In frame 1 the shift became a scalar \(\chi_y(g_0)\) that \(|\cdot|^2\) erased. For non-abelian \(G\), the Fourier transform is built from irreducible representations \(\rho\) that are \(d_\rho\times d_\rho\) matrices, and the shift becomes the matrix \(\rho(g_0)\). Measuring only the label \(\rho\) ("weak Fourier sampling") cannot tell the \(N\) reflection subgroups of \(D_N\) apart at all.</p>
+    <p class="small"><b>Watch:</b> <a href="https://www.youtube.com/watch?v=x8i6qs8uAog&t=2640s">O'Donnell 0:44–0:46</a> (what \(D_N\) is) and <a href="https://www.youtube.com/watch?v=x8i6qs8uAog&t=3900s">1:05–1:07</a>. <span class="muted">Caution: his picture colors the \(N\) vertices of the cycle; a real coset partition is of the \(2N\) group elements. A \(D_4\) widget is coming.</span></p>
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">Non-abelian HSP</span>
+    <h3>9. Kuperberg: combine phase qubits like a sieve</h3>
+    <p>For \(D_N\), strong Fourier sampling yields qubits \(\tfrac{1}{\sqrt2}(|0\rangle+e^{2\pi i k s/N}|1\rangle)\) with a random known \(k\). Pairing two of them with a CNOT and measuring gives label \(k_1\pm k_2\), randomly. Kuperberg repeatedly cancels low bits until \(k=N/2\), which reveals a bit of \(s\). Time \(2^{O(\sqrt{\log N})}\): subexponential, not polynomial.</p>
+    <p class="small"><b>Read:</b> <a href="https://www.cs.umd.edu/~amchilds/teaching/w13/l08.pdf">Childs, Lecture 8</a>; <a href="https://arxiv.org/abs/quant-ph/0302112">Kuperberg 2003</a>. No good video of this algorithm exists that I could find.</p>
+  </div>
+
+  <div class="card">
+    <h3>Watch list (about 57 minutes)</h3>
+    <div class="scroll"><table>
+      <thead><tr><th>#</th><th>Segment</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><a href="https://www.youtube.com/watch?v=x8i6qs8uAog&t=420s">O'Donnell 0:07–0:13</a></td><td>Groups unify Simon and Shor; \(\mathbb{Z}_{24}\) coset example</td></tr>
+        <tr><td>2</td><td><a href="https://www.youtube.com/watch?v=x8i6qs8uAog&t=1140s">O'Donnell 0:19–0:31</a></td><td>Group → application table (discrete log, Pell, \(D_N\) → lattices, \(S_n\) → graph isomorphism)</td></tr>
+        <tr><td>3</td><td><a href="https://www.youtube.com/watch?v=3BApoZN9yX4&t=540s">Mulherkar 9:00–15:00</a></td><td>Discrete log as an HSP, derived on the board. Note his \(H=\langle(a,1)\rangle\) sign and use \(\mathbb{Z}_r\times\mathbb{Z}_r\), not \(\mathbb{Z}_n\times\mathbb{Z}_n\)</td></tr>
+        <tr><td>4</td><td><a href="https://www.youtube.com/watch?v=x8i6qs8uAog&t=3900s">O'Donnell 1:05–1:23</a></td><td>Dihedral setup, coset states, mixed state \(\rho_H\), where non-abelian stalls, EHK as hypothesis testing</td></tr>
+        <tr><td>5</td><td><a href="https://www.youtube.com/watch?v=xD1BMZrAcBI&t=900s">Kuperberg 0:15–0:25</a> (optional)</td><td>"Let the janitor measure it": the output register can be discarded; dual of a lattice as dots on a torus</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small muted">Skip for now: <a href="https://www.youtube.com/watch?v=_EX__fsec0s">Gogioso</a> (ZX diagrams; also overstates that the dihedral HSP solves NP-hard SVP, while Regev's reduction is to poly-unique SVP) and <a href="https://www.youtube.com/watch?v=u5iRaxCDAvM">USF IV.1</a> (requires \(H\) normal, which is not the standard definition). Transcripts pulled with yt-dlp on 2026-11-02; frames cross-checked by Gemini.</p>
+  </div>
+</section>
+
 <!-- ============ SPEAK ============ -->
 <section class="view" id="v-speak" hidden>
   <p>Pick a prompt, hit Start, explain out loud for 60 seconds with no notes. When you stop, the claims a full answer makes appear; tick the ones you actually said. Recording plays back locally if your browser allows the microphone. To have Claude grade you instead, dictate your answer into the terminal (Fn Fn).</p>
@@ -432,7 +535,8 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const NS = 'http://www.w3.org/2000/svg';
 function S(tag, attrs = {}, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
-function typeset(el) { try { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([el]).catch(() => {}); } catch (e) {} }
+let mjQueue = Promise.resolve();
+function typeset(el) { if (!el) return; mjQueue = mjQueue.then(() => { if (window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetClear([el]); } catch (e) {} return MathJax.typesetPromise([el]); } }).catch(() => {}); }
 function load(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
 function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 const gcd = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a; };
@@ -442,7 +546,7 @@ const order = (a, n) => { let x = a % n, r = 1; while (x !== 1) { x = (x * a) % 
 const fmt = (x, d = 3) => Number(x).toFixed(d);
 
 /* ---------------- routing ---------------- */
-const VIEWS = ['map', 'lab', 'board', 'speak'];
+const VIEWS = ['map', 'frames', 'lab', 'board', 'speak'];
 function route() {
   const h = (location.hash || '#map').slice(1);
   let view = VIEWS.includes(h) ? h : null, target = null;
@@ -450,6 +554,7 @@ function route() {
   VIEWS.forEach(v => { $('#v-' + v).hidden = v !== view; });
   $$('nav.tabs a').forEach(a => a.setAttribute('aria-current', a.getAttribute('href') === '#' + view ? 'page' : 'false'));
   if (target) setTimeout(() => target.scrollIntoView({ block: 'start' }), 30);
+  typeset($('#v-' + view));
   if (view === 'lab') { drawHSP(); drawQPE(); drawShor(); }
 }
 window.addEventListener('hashchange', route);
@@ -460,21 +565,21 @@ const N = {
   nosig: { t: ['No-signaling'], lec: 'L3', x: 330, row: 0, eq: String.raw`\text{ops on reg 2 after it stops interacting}\ \Rightarrow\ \text{reg 1 statistics unchanged}`, b: 'Lets you pretend the output register was measured (or not). Used in L12 for superpositions of eigenvectors and in L13 for coset states.' },
   rev: { t: ['Reversible oracles'], lec: 'L4–6', x: 600, row: 0, eq: String.raw`O_f|x\rangle|y\rangle = |x\rangle|y\oplus f(x)\rangle`, b: 'Any efficient classical computation becomes an efficient quantum circuit via Toffoli gates. This is why a^x mod N is a usable oracle.' },
   char: { t: ['Characters', '& the DFT'], lec: 'L8–10', x: 820, row: 0, eq: String.raw`\sum_{h\in H}\chi(h)=\begin{cases}|H| & \chi|_H\equiv1\\0 & \text{otherwise}\end{cases}`, b: 'Sums of roots of unity cancel unless every term is 1. This one fact drives Simon, period finding and the HSP.', lab: 'w-hsp' },
-  had: { t: ['𝖧⊗ⁿ', '(QFT over ℤ₂ⁿ)'], lec: 'L6–8', x: 200, row: 1, eq: String.raw`\mathsf{H}^{\otimes n}|x\rangle=\tfrac{1}{\sqrt{2^n}}\sum_y(-1)^{x\cdot y}|y\rangle`, b: 'The Fourier transform over ℤ₂ⁿ. No carries between bits, so no cross-wire gates.', drill: 'd-qft8', lab: 'w-hsp' },
-  qftc: { t: ['QFT over ℤ₂ⁿ', 'cyclic, O(n²)'], lec: 'L9–10', x: 430, row: 1, eq: String.raw`|x\rangle\mapsto\tfrac{1}{\sqrt N}\sum_y\omega_N^{xy}|y\rangle,\quad N=2^n`, b: 'The cyclic group of size N = 2ⁿ. Carries between bits are why it needs controlled rotations and is entangling.', drill: 'd-qft8' },
+  had: { t: ['𝖧⊗ⁿ = QFT over', 'ℤ₂ × ⋯ × ℤ₂'], lec: 'L6–8', x: 200, row: 1, eq: String.raw`\mathsf{H}^{\otimes n}|x\rangle=\tfrac{1}{\sqrt{2^n}}\sum_y(-1)^{x\cdot y}|y\rangle`, b: 'The Fourier transform over ℤ₂ⁿ. No carries between bits, so no cross-wire gates.', drill: 'd-qft8', lab: 'w-hsp' },
+  qftc: { t: ['QFT mod 2ⁿ', '(cyclic), O(n²)'], lec: 'L9–10', x: 430, row: 1, eq: String.raw`|x\rangle\mapsto\tfrac{1}{\sqrt N}\sum_y\omega_N^{xy}|y\rangle,\quad N=2^n`, b: 'The cyclic group of size N = 2ⁿ. Carries between bits are why it needs controlled rotations and is entangling.', drill: 'd-qft8' },
   qftg: { t: ['QFT over any', 'abelian G'], lec: 'L13', x: 640, row: 1, eq: String.raw`\mathrm{QFT}_{G}=\bigotimes_j\mathrm{QFT}_{\mathbb{Z}_{N_j}},\quad G=\mathbb{Z}_{N_1}\times\cdots\times\mathbb{Z}_{N_k}`, b: 'One cyclic QFT per group factor. A tensor product over group factors, not over qubits.', lab: 'w-hsp' },
-  qpe: { t: ['Phase estimation'], lec: 'L12', x: 850, row: 1, eq: String.raw`|0^n\rangle|\psi\rangle\to|\widetilde{\theta/2\pi}\rangle|\psi\rangle,\quad \Pr\ge 8/\pi^2`, b: 'Learn an eigenphase of U with O(1/ε) uses of U: controlled powers U^{2^k}, then the inverse QFT.', lab: 'w-qpe', drill: 'd-81' },
+  qpe: { t: ['Phase estimation'], lec: 'L12', x: 850, row: 1, eq: String.raw`|0^n\rangle|\psi\rangle\to|\widetilde{\theta/2\pi}\rangle|\psi\rangle,\quad \Pr\ge 8/\pi^2`, b: String.raw`Learn an eigenphase of \(U\) with \(O(1/\varepsilon)\) uses of \(U\): controlled powers \(U^{2^k}\), then the inverse QFT.`, lab: 'w-qpe', drill: 'd-81' },
   dj: { t: ['Deutsch–Jozsa'], lec: 'L6–7', x: 80, row: 2, eq: String.raw`\Pr[0^n]=\Big|\tfrac{1}{2^n}\sum_x(-1)^{f(x)}\Big|^2`, b: 'Constant vs balanced in one query. Same 𝖧, O_f, 𝖧 template as Simon, but not an HSP.' },
   bv: { t: ['Bernstein–', 'Vazirani'], lec: 'L7', x: 232, row: 2, eq: String.raw`f(x)=s\cdot x:\ \ \mathsf{H}^{\otimes n}\tfrac{1}{\sqrt{2^n}}\sum_x(-1)^{s\cdot x}|x\rangle=|s\rangle`, b: 'f is itself a character, so kickback prepares it directly: one deterministic query. A generic HSP run would give 0 or s with probability 1/2 each.' },
   simon: { t: ['Simon'], lec: 'L8', x: 384, row: 2, eq: String.raw`G=\mathbb{Z}_2^n,\ H=\{0,s\},\ H^\perp=\{y: y\cdot s=0\}`, b: 'Each run gives a random y with y·s = 0 mod 2. About n runs, then linear algebra mod 2.', lab: 'w-hsp', drill: 'd-simon' },
   period: { t: ['Period finding'], lec: 'L9–10', x: 540, row: 2, eq: String.raw`G=\mathbb{Z}_N,\ H=p\mathbb{Z}_N\ (p\mid N),\ H^\perp=\tfrac{N}{p}\mathbb{Z}_N`, b: 'A comb of spacing p transforms to a comb of spacing N/p. The offset only adds phases.', lab: 'w-hsp' },
   order: { t: ['Order finding'], lec: 'L11–12', x: 700, row: 2, eq: String.raw`f(x)=a^x\bmod N,\quad f(x+r)=f(x)`, b: 'Period finding for a function you can compute. An HSP over ℤ with H = rℤ; exact on a finite register only if r divides it, otherwise you get y ≈ jQ/r and use continued fractions.', lab: 'w-shor', drill: 'd-u7' },
-  dlog: { t: ['Discrete log'], lec: 'L13', x: 870, row: 2, eq: String.raw`f(a,b)=g^ah^b,\ H=\langle(-s,1)\rangle,\ y_2\equiv s\,y_1\!\!\pmod r`, b: 'Find s with h = gˢ. Breaks Diffie–Hellman and elliptic-curve crypto. The arithmetic is mod r (the order of g), not mod p.', lab: 'w-hsp', drill: 'd-dlog' },
-  nahsp: { t: ['Non-abelian HSP'], lec: 'L13', x: 220, row: 3, eq: String.raw`S_{2n}\ (\text{graph iso, via disjoint union}),\quad D_N\ (\text{lattices})`, b: 'Few queries suffice (Ettinger–Høyer–Knill) and QFT over Sₙ is even efficient, but no efficient algorithm is known: irreducible representations are d×d matrices, so the coset shift is not just a phase that |·|² throws away.' },
-  ahsp: { t: ['Abelian HSP'], lec: 'L13', x: 480, row: 3, eq: String.raw`|g_0+H\rangle\ \xrightarrow{\ \mathrm{QFT}_G\ }\ \text{uniform } y\in H^\perp`, b: 'Thursday\'s hub. f is constant on cosets of H and distinct across cosets. Fourier sampling gives uniform elements of H⊥; O(log|G|) samples determine H with high probability.', lab: 'w-hsp', drill: 'd-coset' },
+  dlog: { t: ['Discrete log'], lec: 'L13', x: 870, row: 2, eq: String.raw`f(a,b)=g^ah^b,\ H=\langle(-s,1)\rangle,\ y_2\equiv s\,y_1\!\!\pmod r`, b: String.raw`Find \(s\) with \(h=g^s\). Breaks Diffie–Hellman and elliptic-curve crypto. The arithmetic is mod \(r\) (the order of \(g\)), not mod \(p\). Some lectures use \(f(x,y)=g^x h^{-y}\), giving \(H=\langle(s,1)\rangle\): same problem, opposite sign.`, lab: 'w-hsp', drill: 'd-dlog' },
+  nahsp: { t: ['Non-abelian HSP'], lec: 'L13', x: 220, row: 3, eq: String.raw`S_{2n}\ (\text{graph iso, via disjoint union}),\quad D_N\ (\text{lattices})`, b: String.raw`\(\mathrm{poly}(\log|G|)\) queries carry enough information (Ettinger–Høyer–Knill 2004) and the QFT over \(S_n\) is efficient (Beals 1997), yet no efficient algorithm is known: irreducible representations are \(d\times d\) matrices, so the coset shift is not a phase that \(|\cdot|^2\) throws away.` },
+  ahsp: { t: ['Abelian HSP'], lec: 'L13', x: 480, row: 3, eq: String.raw`|g_0+H\rangle\ \xrightarrow{\ \mathrm{QFT}_G\ }\ \text{uniform } y\in H^\perp`, b: String.raw`Thursday's hub. \(f\) is constant on cosets of \(H\) and distinct across cosets. Fourier sampling gives uniform elements of \(H^\perp\); \(O(\log|G|)\) samples determine \(H\) with high probability.`, lab: 'w-hsp', drill: 'd-coset' },
   factor: { t: ['Factoring'], lec: 'L11', x: 800, row: 3, eq: String.raw`N=pq,\quad b=a^{r/2},\quad \gcd(b\pm1,N)`, b: 'Classical reduction to order finding. Restart if r is odd or b ≡ −1 mod N.', lab: 'w-shor', drill: 'd-f15' },
   gauss: { t: ['Linear algebra', 'mod 2'], lec: 'L8', x: 290, row: 4, eq: String.raw`Ys\equiv 0\pmod 2`, b: 'Solve for s from n − 1 independent samples.' },
-  annih: { t: ['Recover H', 'from H⊥'], lec: 'L13', x: 500, row: 4, eq: String.raw`H=(H^\perp)^\perp,\quad |H|\cdot|H^\perp|=|G|`, b: 'The classical step of the HSP. Over a field it is Gaussian elimination; over ℤ_N it is linear algebra over a ring (gcds, Smith normal form), since zero divisors cannot be inverted.', drill: 'd-samples' },
+  annih: { t: ['Recover H', 'from H⊥'], lec: 'L13', x: 500, row: 4, eq: String.raw`H=(H^\perp)^\perp,\quad |H|\cdot|H^\perp|=|G|`, b: String.raw`The classical step of the HSP. Over a field it is Gaussian elimination; over \(\mathbb{Z}_N\) it is linear algebra over a ring (gcds, Smith normal form), since zero divisors cannot be inverted.`, drill: 'd-samples' },
   euclid: { t: ['gcd & continued', 'fractions'], lec: 'L10–12', x: 720, row: 4, eq: String.raw`\gcd(y_1,y_2,\dots)=\tfrac Np,\qquad \tfrac yQ\approx\tfrac jr`, b: 'Turn samples near multiples of Q/r into the period r, and b ± 1 into factors.', lab: 'w-shor' },
   grover: { t: ['Grover /', 'amplitude amp.'], lec: 'L14', x: 150, row: 5, fut: 1, eq: String.raw`O(\sqrt{N})\text{ queries}`, b: 'Coming in L14.' },
   ampest: { t: ['Amplitude', 'estimation'], lec: 'L14', x: 380, row: 5, fut: 1, eq: String.raw`\text{QPE on the Grover iterate}`, b: 'Coming in L14: phase estimation applied to the Grover operator.' },
@@ -643,7 +748,7 @@ function drawHSP() {
   const g0 = idxToEl(hs.off, M.mods);
   $('#hspOffV').textContent = M.comb ? hs.off : elName(g0, hs.g);
   const warn = $('#hspWarn');
-  if (M.comb) { warn.hidden = false; warn.textContent = `${M.comb} does not divide ${M.mods[0]}, so {x₀, x₀+${M.comb}, …} is not a subgroup of ℤ${M.mods[0]}. This is the real situation in Shor: no outcome has exactly zero amplitude, and probability leaks around the nearest bins to multiples of N/p = ${fmt(M.mods[0] / M.comb, 2)}.`; }
+  if (M.comb) { warn.hidden = false; warn.innerHTML = `\\(${M.comb}\\nmid ${M.mods[0]}\\), so \\(\\{x_0, x_0+${M.comb}, \\dots\\}\\) is not a coset of any subgroup of \\(\\mathbb{Z}_{${M.mods[0]}}\\). This is the real situation in Shor: almost no outcome has exactly zero amplitude, and probability spreads around the bins nearest to multiples of \\(N/p = ${fmt(M.mods[0] / M.comb, 2)}\\).`; }
   else warn.hidden = true;
   const twoD = M.mods.length === 2, cols = twoD ? 6 : M.size, rows = twoD ? 6 : 1;
   const W = 680, pad = 26, panelW = twoD ? 300 : W - 2 * pad, cs = Math.min(52, panelW / cols);
@@ -678,20 +783,22 @@ function drawHSP() {
   const y = idxToEl(hs.tapped, M.mods), angles = M.C.map(ci => chiPhase(y, idxToEl(ci, M.mods), M.mods));
   const mag = drawPolygon($('#hspPoly'), angles);
   const p = M.amps[hs.tapped][0] ** 2 + M.amps[hs.tapped][1] ** 2;
-  $('#hspPolyTxt').innerHTML = `y = <b>${elName(y, hs.g)}</b>: ${M.C.length} unit arrows χ_y(c), one per element c of the ${M.comb ? 'comb' : 'coset'}. |sum| / ${M.C.length} = <span class="num">${fmt(mag)}</span>, Pr[y] = <span class="num">${fmt(p)}</span>. ${mag < 1e-6 ? 'The arrows close into a polygon: total cancellation, y ∉ H⊥.' : mag > 0.999 ? 'All arrows point the same way: y is trivial on H, so y ∈ H⊥.' : 'Partial cancellation.'}`;
+  $('#hspPolyTxt').innerHTML = `y = <b>${elName(y, hs.g)}</b>: ${M.C.length} unit arrows \\(\\chi_y(c)\\), one per element \\(c\\) of the ${M.comb ? 'comb' : 'coset'}. \\(|\\text{sum}|/${M.C.length} = ${fmt(mag)}\\), \\(\\Pr[y] = ${fmt(p)}\\). ${mag < 1e-6 ? 'The arrows close into a polygon: total cancellation, so \\(y\\notin H^\\perp\\).' : mag > 0.999 ? 'All arrows point the same way: \\(\\chi_y\\) is trivial on \\(H\\), so \\(y\\in H^\\perp\\).' : 'Partial cancellation.'}`;
+  typeset($('#hspPolyTxt'));
   // recovery
   const chips = $('#hspSamples'); chips.innerHTML = hs.samples.map(s => `<span class="chip">${elName(idxToEl(s, M.mods), hs.g)}</span>`).join('') || '<span class="small muted">No samples yet.</span>';
   const rec = $('#hspRec');
-  if (M.comb) { rec.innerHTML = 'Not a subgroup, so exact recovery does not apply. See the Shor widget below for continued fractions.'; return; }
+  if (M.comb) { rec.innerHTML = 'Not a subgroup, so exact recovery does not apply. See the Shor widget below for continued fractions.'; typeset($('#hspWarn')); return; }
   const Hperp = []; for (let i = 0; i < M.size; i++) if (Math.hypot(...M.amps[i]) > 1e-9) Hperp.push(i);
   const K = closure(hs.samples.map(s => idxToEl(s, M.mods)), M.mods);
   const Kperp = []; for (let i = 0; i < M.size; i++) { const x = idxToEl(i, M.mods); if (K.every(k => Math.abs(Math.cos(chiPhase(idxToEl(k, M.mods), x, M.mods)) - 1) < 1e-9)) Kperp.push(i); }
   const done = Kperp.length === M.Hidx.length;
   let extra = '';
-  if (hs.g === 'simon') { const cand = Kperp.filter(i => i !== 0).map(i => elName(idxToEl(i, M.mods), 'simon')); extra = `Candidates for s: {${cand.join(', ')}}`; }
-  if (hs.g === 'dlog') { const cand = []; for (let s = 0; s < 6; s++) if (hs.samples.every(si => { const [y1, y2] = idxToEl(si, M.mods); return mod(y2 - s * y1, 6) === 0; })) cand.push(s); extra = `Candidates for s (solve y₂ ≡ s·y₁ mod 6): {${cand.join(', ')}}`; }
-  if (hs.g === 'z8' || hs.g === 'z12') { const n = M.mods[0], gg = hs.samples.reduce((a, s) => gcd(a, s), n); extra = `gcd(N, samples) = ${gg} ⇒ period estimate N / gcd = ${n / gg}`; }
-  rec.innerHTML = `|H⊥| = ${Hperp.length}, each outcome has Pr = |H|/|G| = ${M.Hidx.length}/${M.size}.<br>Samples generate K with |K| = ${K.length}. Subgroups consistent with the data: K⊥ has ${Kperp.length} elements.<br>${extra}<br><b>${done ? '✓ K⊥ = H: hidden subgroup recovered.' : hs.samples.length ? '… not pinned down yet: draw more.' : ''}</b>`;
+  if (hs.g === 'simon') { const cand = Kperp.filter(i => i !== 0).map(i => elName(idxToEl(i, M.mods), 'simon')); extra = `Candidates for \\(s\\): \\(\\{${cand.join(',\\,')}\\}\\)`; }
+  if (hs.g === 'dlog') { const cand = []; for (let s = 0; s < 6; s++) if (hs.samples.every(si => { const [y1, y2] = idxToEl(si, M.mods); return mod(y2 - s * y1, 6) === 0; })) cand.push(s); extra = `Candidates for \\(s\\) (solve \\(y_2\\equiv s\\,y_1 \\pmod 6\\)): \\(\\{${cand.join(',\\,')}\\}\\)`; }
+  if (hs.g === 'z8' || hs.g === 'z12') { const n = M.mods[0], gg = hs.samples.reduce((a, s) => gcd(a, s), n); extra = `\\(\\gcd(N,\\text{samples}) = ${gg}\\ \\Rightarrow\\ \\) period estimate \\(N/\\gcd = ${n / gg}\\)`; }
+  rec.innerHTML = `\\(|H^\\perp| = ${Hperp.length}\\), each outcome with probability \\(|H|/|G| = ${M.Hidx.length}/${M.size}\\).<br>The samples generate \\(K\\) with \\(|K| = ${K.length}\\). Every subgroup consistent with the data lies inside \\(K^\\perp\\), which has ${Kperp.length} elements.<br>${extra}<br><b>${done ? '✓ \\(K^\\perp = H\\): hidden subgroup recovered.' : hs.samples.length ? 'Not pinned down yet: draw more.' : ''}</b>`;
+  typeset(rec);
 }
 function hspSample(k = 1) {
   const M = hspModel();
@@ -733,17 +840,18 @@ function drawQPE() {
   });
   const gx = L + (g % Nn) * bw + bw / 2; S('line', { x1: gx, y1: T - 8, x2: gx, y2: B + 18, class: 'floor' }, el);
   const gt = S('text', { x: Math.min(gx + 4, R - 60), y: B + 32 }, el); gt.textContent = 'γ = ' + fmt(g, 2);
-  let stat = exact ? `γ is an integer: the output is ${Math.round(g) % Nn} with probability ${fmt(P[Math.round(g) % Nn])}.` : `P(${y0}) + P(${y1}) = <b>${fmt(P[y0] + P[y1], 4)}</b> ≥ 8/π² = 0.8106. δ = γ − ${Math.floor(g)} = ${fmt(g - Math.floor(g), 2)}.`;
+  let stat = exact ? `\\(\\gamma\\) is an integer: the output is \\(${Math.round(g) % Nn}\\) with probability \\(${fmt(P[Math.round(g) % Nn])}\\).` : `\\(P(${y0}) + P(${y1}) = \\mathbf{${fmt(P[y0] + P[y1], 4)}} \\ge 8/\\pi^2 \\approx 0.8106\\), with \\(\\delta = \\gamma - ${Math.floor(g)} = ${fmt(g - Math.floor(g), 2)}\\).`;
   if (qs.shots) {
     const est = qs.shots, mean = est.reduce((a, b) => a + b, 0) / est.length, srt = [...est].sort((a, b) => a - b), med = srt[Math.floor(srt.length / 2)];
     [[mean, '▲ mean'], [med, '● median']].forEach(([v, lab], i) => { const xx = L + v * bw + bw / 2; const t = S('text', { x: xx - 4, y: B + 46 + i * 0 }, el); t.textContent = lab.slice(0, 1); });
     el.setAttribute('viewBox', '0 0 680 260');
-    stat += `<br>25 shots: ${est.join(', ')}.<br>Mean ${fmt(mean, 2)} ▲, median ${med} ●. The tail drags the mean; the median sits on a nearest bin. Repeating boosts confidence, not precision: precision only improves with more qubits.`;
+    stat += `<br>25 shots: ${est.join(', ')}.<br>Mean \\(${fmt(mean, 2)}\\) ▲, median \\(${med}\\) ●. The tail drags the mean; the median sits on a nearest bin. Repeating boosts confidence, not precision: precision \\(\\varepsilon\\approx 2^{-n}\\) only improves with more qubits.`;
   } else el.setAttribute('viewBox', '0 0 680 250');
   $('#qpeStat').innerHTML = stat;
   const angles = []; for (let x = 0; x < Nn; x++) angles.push(2 * Math.PI * x * (g - qs.z) / Nn);
   const mag = drawPolygon($('#qpePoly'), angles);
-  $('#qpePolyTxt').innerHTML = `Bin z = <b>${qs.z}</b>: ${Nn} arrows e^{2πix(γ−z)/N}, turning ${fmt(Math.abs(g - qs.z), 2)} times around in total. |α_z| = <span class="num">${fmt(mag)}</span>. Far bins wrap many times and nearly close up.`;
+  $('#qpePolyTxt').innerHTML = `Bin \\(z = ${qs.z}\\): ${Nn} arrows \\(e^{2\\pi i x(\\gamma-z)/N}\\), turning \\(${fmt(Math.abs(g - qs.z), 2)}\\) times around in total. \\(|\\alpha_z| = ${fmt(mag)}\\). Far bins wrap many times and nearly close up.`;
+  typeset($('#qpePolyTxt')); typeset($('#qpeStat'));
 }
 $('#qpeN').addEventListener('input', e => { qs.n = +e.target.value; qs.shots = null; drawQPE(); });
 $('#qpeT').addEventListener('input', e => { qs.t = +e.target.value / 1000; qs.shots = null; drawQPE(); });
@@ -772,19 +880,28 @@ function drawShor() {
   orb.forEach((v, k) => { const th = -Math.PI / 2 + 2 * Math.PI * k / r, x = cx + rad * Math.cos(th), y = cy + rad * Math.sin(th); S('circle', { cx: x, cy: y, r: 13, class: 'ph', style: 'fill:var(--bg)' }, c); const t = S('text', { x: x - (v > 9 ? 7 : 3.5), y: y + 4 }, c); t.textContent = v; });
   const t1 = S('text', { x: 8, y: 208 }, c); t1.textContent = `U_${sh.a}: shift along the orbit of 1, r = ${r}`;
   const t2 = S('text', { x: cx - 32, y: cy + 4 }, c); t2.textContent = `×${sh.a} mod ${sh.N}`;
-  $('#shLog').innerHTML = sh.log.join('');
+  $('#shLog').innerHTML = sh.log.join(''); typeset($('#shLog'));
 }
 function shorRun() {
   const { P, r, Q } = shorProbs(); let u = Math.random(), acc = 0, y = 0; for (let i = 0; i < Q; i++) { acc += P[i]; if (u <= acc) { y = i; break; } }
-  const cv = convergents(y, Q).filter(([h, k]) => k < sh.N);
-  const d = cv.length ? cv[cv.length - 1][1] : 1;
-  sh.rs.push(d); const lcm = sh.rs.reduce((a, b) => a * b / gcd(a, b), 1);
-  let line = `<div class="status">y = ${y}, y/Q = ${y}/${Q} ≈ ${fmt(y / Q, 4)}. Convergents: ${cv.map(([h, k]) => h + '/' + k).join(', ') || '0/1'}. Denominator ${d}; lcm of denominators so far = ${lcm}. `;
-  if (powmod(sh.a, lcm, sh.N) === 1 && lcm > 0) {
-    const rr = order(sh.a, sh.N); line += `${sh.a}^${lcm} ≡ 1 mod ${sh.N} ✓ r = ${rr}. `;
-    if (rr % 2) line += 'r is odd: restart with a new a.';
-    else { const b = powmod(sh.a, rr / 2, sh.N); line += b === sh.N - 1 ? `b = ${b} ≡ −1: restart with a new a.` : `b = ${sh.a}^${rr / 2} mod ${sh.N} = ${b}; gcd(b−1, N) = ${gcd(b - 1, sh.N)}, gcd(b+1, N) = ${gcd(b + 1, sh.N)}. <b>Factored.</b>`; }
-  } else line += y === 0 ? 'y = 0 carries no information (j = 0). Run again.' : `${sh.a}^${lcm} ≢ 1: j and r shared a factor, so this is only a divisor of r. Run again.`;
+  const all = convergents(y, Q).filter(([h, k]) => k < sh.N);
+  const good = all.filter(([h, k]) => Math.abs(y / Q - h / k) <= 1 / (2 * Q));
+  const cvTex = all.map(([h, k]) => '\\tfrac{' + h + '}{' + k + '}').join(',\\ ') || '0';
+  let line = `<div class="status">\\(y = ${y}\\), \\(y/Q = ${y}/${Q} \\approx ${fmt(y / Q, 4)}\\). Convergents with denominator \\(< N\\): \\(${cvTex}\\). `;
+  if (y === 0) line += '\\(y = 0\\) carries no information (\\(j = 0\\)). Run again.';
+  else if (!good.length) line += `None is within \\(\\tfrac{1}{2Q}\\) of \\(y/Q\\): this sample landed off the peaks. Discard it and run again.`;
+  else {
+    const d = good[good.length - 1][1]; sh.rs.push(d);
+    const L = sh.rs.reduce((x, z) => x * z / gcd(x, z), 1);
+    line += `Closest convergent has denominator \\(${d}\\); lcm of accepted denominators \\(= ${L}\\). `;
+    if (powmod(sh.a, L, sh.N) !== 1) line += `\\(${sh.a}^{${L}} \\not\\equiv 1\\): \\(j\\) and \\(r\\) shared a factor, so this is only a divisor of \\(r\\). Run again.`;
+    else {
+      let rr = L; for (let dd = 1; dd <= L; dd++) if (L % dd === 0 && powmod(sh.a, dd, sh.N) === 1) { rr = dd; break; }
+      line += `\\(${sh.a}^{${L}} \\equiv 1 \\pmod{${sh.N}}\\), so \\(r \\mid ${L}\\); the smallest divisor that works is \\(r = ${rr}\\). `;
+      if (rr % 2) line += 'r is odd: restart with a new \\(a\\).';
+      else { const bb = powmod(sh.a, rr / 2, sh.N); line += bb === sh.N - 1 ? `\\(b = ${bb} \\equiv -1\\): restart with a new \\(a\\).` : `\\(b = ${sh.a}^{${rr / 2}} \\bmod ${sh.N} = ${bb}\\); \\(\\gcd(b-1, N) = ${gcd(bb - 1, sh.N)}\\), \\(\\gcd(b+1, N) = ${gcd(bb + 1, sh.N)}\\). <b>Factored.</b>`; }
+    }
+  }
   sh.log.unshift(line + '</div>'); drawShor();
 }
 shorAOpts();
@@ -801,7 +918,7 @@ $$('.drill').forEach(d => {
   if (btn) btn.addEventListener('click', () => { if (shown < steps.length) { steps[shown].hidden = false; typeset(steps[shown]); shown++; } btn.textContent = shown < steps.length ? `Hint ${shown + 1} of ${steps.length}` : 'All hints shown'; btn.disabled = shown >= steps.length; });
   const ca = $('.checkaudit', d);
   if (ca) ca.addEventListener('click', () => {
-    $$('fieldset', d).forEach(fs => { const pick = $('input:checked', fs), v = document.createElement('p'); v.className = 'verdict'; const old = $('.verdict', fs); if (old) old.remove(); v.textContent = !pick ? `Not answered. ${fs.dataset.why}` : pick.value === fs.dataset.ans ? `✓ ${fs.dataset.why}` : `✗ ${fs.dataset.why}`; fs.appendChild(v); });
+    $$('fieldset', d).forEach(fs => { const pick = $('input:checked', fs), v = document.createElement('p'); v.className = 'verdict'; const old = $('.verdict', fs); if (old) old.remove(); v.innerHTML = (!pick ? 'Not answered. ' : pick.value === fs.dataset.ans ? '✓ ' : '✗ ') + fs.dataset.why; fs.appendChild(v); typeset(v); });
     const sol = $('.solution', d); sol.hidden = false; typeset(sol);
   });
   const os = $('.openSol', d); if (os) os.addEventListener('click', () => { const sol = $('.solution', d); sol.hidden = false; typeset(sol); os.hidden = true; });
@@ -817,31 +934,32 @@ const parseList = s => s.split(/[\s,;{}()]+/).filter(Boolean);
 const setEq = (A, B) => A.length === B.length && [...A].sort().join() === [...B].sort().join();
 function genNew() {
   const t = $('#genType').value; $('#genFb').innerHTML = ''; $('#genAns').value = '';
-  if (t === 'period') { const Nn = pick([8, 10, 12, 15, 16, 18, 20]); const ds = []; for (let p = 2; p < Nn; p++) if (Nn % p === 0) ds.push(p); const p = pick(ds), off = rnd(0, p - 1); const ans = []; for (let y = 0; y < Nn; y += Nn / p) ans.push(String(y)); cur = { t, Nn, p, ans, H: Array.from({ length: Nn / p }, (_, k) => String(k * p)) }; $('#genQ').innerHTML = `<p>f on ℤ<sub>${Nn}</sub> has period ${p} (distinct on each coset). The measured coset is ${off} + H. List every outcome with nonzero probability after QFT<sub>ℤ${Nn}</sub>, comma-separated.</p>`; }
-  if (t === 'simon') { const n = pick([3, 4]); const s = rnd(1, 2 ** n - 1); const ans = []; for (let y = 0; y < 2 ** n; y++) { let b = y & s, c = 0; while (b) { c ^= b & 1; b >>= 1; } if (!c) ans.push(y.toString(2).padStart(n, '0')); } cur = { t, n, s: s.toString(2).padStart(n, '0'), ans }; $('#genQ').innerHTML = `<p>Simon on ℤ<sub>2</sub><sup>${n}</sup> with hidden s = <code>${cur.s}</code>. List all of H⊥ as bitstrings.</p>`; }
-  if (t === 'dlog') { const p = pick([7, 11, 13]), r = p - 1; let g = 2; while (order(g, p) !== r) g++; const s = rnd(1, r - 1), h = powmod(g, s, p); const nonInv = []; const inv = []; for (let y = 1; y < r; y++) (gcd(y, r) > 1 ? nonInv : inv).push(y); const y1s = Math.random() < 0.6 ? [pick(nonInv)] : [pick(nonInv), pick(inv)]; const samples = y1s.map(y => [y, mod(s * y, r)]); const ans = []; for (let c = 0; c < r; c++) if (samples.every(([a, b]) => mod(b - c * a, r) === 0)) ans.push(String(c)); const wrong = []; for (let c = 0; c < p; c++) if (samples.every(([a, b]) => mod(b - c * a, p) === 0)) wrong.push(String(c)); cur = { t, p, r, g, h, s, samples, ans, wrong }; $('#genQ').innerHTML = `<p>In ℤ<sub>${p}</sub><sup>*</sup>, g = ${g} has order ${r}, and h = ${h} = g<sup>s</sup>. Fourier sampling returned ${samples.map(([a, b]) => `(${a}, ${b})`).join(' and ')}. List every s in {0,…,${r - 1}} consistent with these samples.</p>`; }
-  if (t === 'factor') { const Nn = pick([15, 21, 33, 35, 39]); const as = []; for (let a = 2; a < Nn - 1; a++) if (gcd(a, Nn) === 1) as.push(a); const a = pick(as), r = order(a, Nn); let out = 'fail'; if (r % 2 === 0) { const b = powmod(a, r / 2, Nn); if (b !== Nn - 1) out = [gcd(b - 1, Nn), gcd(b + 1, Nn)].sort((x, y) => x - y).join(','); } cur = { t, Nn, a, r, out }; $('#genQ').innerHTML = `<p>Factor N = ${Nn} with a = ${a}. Answer as <code>r; p,q</code> (smaller factor first) or <code>r; fail</code> if the reduction must restart.</p>`; }
+  if (t === 'period') { const Nn = pick([8, 10, 12, 15, 16, 18, 20]); const ds = []; for (let p = 2; p < Nn; p++) if (Nn % p === 0) ds.push(p); const p = pick(ds), off = rnd(0, p - 1); const ans = []; for (let y = 0; y < Nn; y += Nn / p) ans.push(String(y)); cur = { t, Nn, p, ans, H: Array.from({ length: Nn / p }, (_, k) => String(k * p)) }; $('#genQ').innerHTML = `<p>\\(f\\) on \\(\\mathbb{Z}_{${Nn}}\\) has period \\(${p}\\) (distinct on each coset). The measured coset is \\(${off} + H\\). List every outcome with nonzero probability after \\(\\mathrm{QFT}_{\\mathbb{Z}_{${Nn}}}\\), comma-separated.</p>`; }
+  if (t === 'simon') { const n = pick([3, 4]); const s = rnd(1, 2 ** n - 1); const ans = []; for (let y = 0; y < 2 ** n; y++) { let b = y & s, c = 0; while (b) { c ^= b & 1; b >>= 1; } if (!c) ans.push(y.toString(2).padStart(n, '0')); } cur = { t, n, s: s.toString(2).padStart(n, '0'), ans }; $('#genQ').innerHTML = `<p>Simon on \\(\\mathbb{Z}_2^{${n}}\\) with hidden \\(s = ${cur.s}\\). List all of \\(H^\\perp\\) as bitstrings.</p>`; }
+  if (t === 'dlog') { const p = pick([7, 11, 13]), r = p - 1; let g = 2; while (order(g, p) !== r) g++; const s = rnd(1, r - 1), h = powmod(g, s, p); const nonInv = []; const inv = []; for (let y = 1; y < r; y++) (gcd(y, r) > 1 ? nonInv : inv).push(y); const y1s = Math.random() < 0.6 ? [pick(nonInv)] : [pick(nonInv), pick(inv)]; const samples = y1s.map(y => [y, mod(s * y, r)]); const ans = []; for (let c = 0; c < r; c++) if (samples.every(([a, b]) => mod(b - c * a, r) === 0)) ans.push(String(c)); const wrong = []; for (let c = 0; c < p; c++) if (samples.every(([a, b]) => mod(b - c * a, p) === 0)) wrong.push(String(c)); cur = { t, p, r, g, h, s, samples, ans, wrong }; $('#genQ').innerHTML = `<p>In \\(\\mathbb{Z}_{${p}}^*\\), \\(g = ${g}\\) has order \\(${r}\\), and \\(h = ${h} = g^s\\). Fourier sampling returned ${samples.map(([a, b]) => `\\((${a}, ${b})\\)`).join(' and ')}. List every \\(s \\in \\{0,\\dots,${r - 1}\\}\\) consistent with these samples.</p>`; }
+  if (t === 'factor') { const Nn = pick([15, 21, 33, 35, 39]); const as = []; for (let a = 2; a < Nn - 1; a++) if (gcd(a, Nn) === 1) as.push(a); const a = pick(as), r = order(a, Nn); let out = 'fail'; if (r % 2 === 0) { const b = powmod(a, r / 2, Nn); if (b !== Nn - 1) out = [gcd(b - 1, Nn), gcd(b + 1, Nn)].sort((x, y) => x - y).join(','); } cur = { t, Nn, a, r, out }; $('#genQ').innerHTML = `<p>Factor \\(N = ${Nn}\\) with \\(a = ${a}\\). Answer as <code>r; p,q</code> (smaller factor first) or <code>r; fail</code> if the reduction must restart.</p>`; }
+  typeset($('#genQ'));
 }
 function genCheck() {
   if (!cur) return; const raw = $('#genAns').value.trim(), fb = $('#genFb'); let msg = '';
   if (cur.t === 'period' || cur.t === 'simon') {
     const got = parseList(raw).map(x => cur.t === 'period' ? String(+x) : x);
-    if (setEq(got, cur.ans)) msg = '✓ Correct. ' + (cur.t === 'period' ? `These are the multiples of N/p = ${cur.Nn / cur.p}; |H⊥| = |G|/|H| = ${cur.ans.length}.` : `|H⊥| = 2ⁿ⁻¹ = ${cur.ans.length}.`);
-    else if (cur.t === 'period' && setEq(got, cur.H)) msg = `✗ That is H (multiples of p = ${cur.p}), not H⊥. H⊥ is the multiples of N/p.`;
-    else { const miss = cur.ans.filter(x => !got.includes(x)), extra = got.filter(x => !cur.ans.includes(x)); msg = `✗ ${miss.length ? 'Missing: ' + miss.join(', ') + '. ' : ''}${extra.length ? 'Not in H⊥: ' + extra.join(', ') + '. ' : ''}${miss.includes('0') || miss.includes('0'.repeat(cur.n || 1)) ? 'Zero is always in H⊥. ' : ''}${cur.t === 'simon' ? 'Test: y·s must be 0 mod 2.' : `Test: y·p ≡ 0 mod ${cur.Nn}.`}`; }
+    if (setEq(got, cur.ans)) msg = '✓ Correct. ' + (cur.t === 'period' ? `These are the multiples of \\(N/p = ${cur.Nn / cur.p}\\); \\(|H^\\perp| = |G|/|H| = ${cur.ans.length}\\).` : `\\(|H^\\perp| = 2^{n-1} = ${cur.ans.length}\\).`);
+    else if (cur.t === 'period' && setEq(got, cur.H)) msg = `✗ That is \\(H\\) (multiples of \\(p = ${cur.p}\\)), not \\(H^\\perp\\). \\(H^\\perp\\) is the multiples of \\(N/p\\).`;
+    else { const miss = cur.ans.filter(x => !got.includes(x)), extra = got.filter(x => !cur.ans.includes(x)); msg = `✗ ${miss.length ? 'Missing: ' + miss.join(', ') + '. ' : ''}${extra.length ? 'Not in \\(H^\\perp\\): ' + extra.join(', ') + '. ' : ''}${miss.includes('0') || miss.includes('0'.repeat(cur.n || 1)) ? 'Zero is always in \\(H^\\perp\\). ' : ''}${cur.t === 'simon' ? 'Test: \\(y\\cdot s \\equiv 0 \\pmod 2\\).' : `Test: \\(y\\,p \\equiv 0 \\pmod{${cur.Nn}}\\).`}`; }
   }
   if (cur.t === 'dlog') {
     const got = parseList(raw).map(x => String(+x));
-    if (setEq(got, cur.ans)) msg = `✓ Correct. ${cur.ans.length > 1 ? `Not unique yet: a sample with y₁ coprime to ${cur.r} (or another non-invertible one) would pin it down.` : 'Unique.'} (True s = ${cur.s}.)`;
-    else if (setEq(got, cur.wrong)) msg = `✗ You solved mod p = ${cur.p}. Exponents live mod the order r = ${cur.r}.`;
-    else msg = `✗ Solve y₂ ≡ s·y₁ (mod ${cur.r}) for each sample, then intersect. ${cur.samples.some(([a]) => gcd(a, cur.r) > 1) ? `When gcd(y₁, ${cur.r}) > 1 there are several solutions; keep all of them.` : ''}`;
+    if (setEq(got, cur.ans)) msg = `✓ Correct. ${cur.ans.length > 1 ? `Not unique yet: a sample with \\(\\gcd(y_1, ${cur.r}) = 1\\) (or another non-invertible one) would pin it down.` : 'Unique.'} (True s = ${cur.s}.)`;
+    else if (setEq(got, cur.wrong)) msg = `✗ You solved mod \\(p = ${cur.p}\\). Exponents live mod the order \\(r = ${cur.r}\\).`;
+    else msg = `✗ Solve \\(y_2 \\equiv s\\,y_1 \\pmod{${cur.r}}\\) for each sample, then intersect. ${cur.samples.some(([a]) => gcd(a, cur.r) > 1) ? `When \\(\\gcd(y_1, ${cur.r}) > 1\\) there are several solutions; keep all of them.` : ''}`;
   }
   if (cur.t === 'factor') {
     const [rs, fs] = raw.split(';').map(x => (x || '').trim()); const rr = +rs;
     if (rr !== cur.r) msg = `✗ Order is wrong. List ${cur.a}^k mod ${cur.Nn} for k = 1, 2, … until you hit 1.`;
     else { const want = cur.out, got = (fs || '').replace(/\s/g, '').split(',').map(Number).sort((x, y) => x - y).join(','); if (want === 'fail') msg = (fs || '').toLowerCase().startsWith('fail') ? '✓ Correct: ' + (cur.r % 2 ? 'r is odd.' : 'b ≡ −1 mod N.') + ' Restart with a new a.' : `✗ r = ${cur.r} ${cur.r % 2 ? 'is odd' : `is even but b = ${powmod(cur.a, cur.r / 2, cur.Nn)} ≡ −1`}, so this a fails.`; else msg = got === want ? '✓ Correct.' : `✗ r is right. Compute b = ${cur.a}^${cur.r / 2} mod ${cur.Nn}, then gcd(b − 1, N) and gcd(b + 1, N).`; }
   }
-  fb.innerHTML = msg;
+  fb.innerHTML = msg; typeset(fb);
 }
 $('#genNew').addEventListener('click', genNew); $('#genCheck').addEventListener('click', genCheck);
 $('#genAns').addEventListener('keydown', e => { if (e.key === 'Enter') genCheck(); });
@@ -849,15 +967,16 @@ $('#genShow').addEventListener('click', () => { if (!cur) return; const a = cur.
 $('#genType').addEventListener('change', genNew); genNew();
 
 /* ---------------- Speak ---------------- */
+const R = String.raw;
 const PROMPTS = [
-  ['Why does the second register stay unentangled in phase estimation, and when does it not?', ['When the input is an eigenvector, U^x only multiplies it by a scalar e^{iθx}.', 'A scalar can be moved onto the first register (phase kickback), so the state factors.', 'With a superposition of eigenvectors, each component kicks back its own phase and the registers become entangled.', 'That entanglement is what makes Shor output a random j/r.']],
-  ['What does repeating phase estimation buy you, and what does it not?', ['Each run outputs a nearest bin with probability at least 8/π², otherwise anything.', 'Failures are not unbiased noise, so averaging is wrong; the median of repeated runs is right.', 'Repetition boosts confidence to 1 − δ, not precision.', 'Precision ε ≈ 2⁻ⁿ improves only by adding qubits (higher powers of U).']],
-  ['Why does the coset offset not change the output distribution?', ['After the QFT, the offset contributes the factor χ_y(g₀).', 'It has modulus 1, so it disappears in |·|².', 'It is a relative phase across outcomes, not a global phase.', 'Same as L10: shifting a function does not change its frequency content.']],
-  ['State the hidden subgroup problem and map Simon and period finding onto it.', ['G is a finite abelian group; f is constant on cosets of H and distinct across cosets.', 'Simon: G = ℤ₂ⁿ, H = {0, s}.', 'Period finding: G = ℤ_N, H = multiples of p, with p | N.', 'Goal: find generators of H in poly(log |G|) time.']],
-  ['Why does Fourier sampling output only elements of H⊥?', ['The amplitude on y is proportional to the sum of χ_y(h) over h in H.', 'χ_y restricted to H is a character of H.', 'A nontrivial character sums to zero (re-index by h → h + h′).', 'So only y with χ_y ≡ 1 on H survive, each with probability |H|/|G|.']],
-  ['Walk through the factoring reduction and say where each failure comes from.', ['Pick random a; if gcd(a, N) > 1 you are done already.', 'Find the order r quantumly; restart if r is odd.', 'b = a^{r/2} satisfies (b − 1)(b + 1) ≡ 0 mod N, and b ≢ 1 by minimality of r.', 'Restart if b ≡ −1; otherwise gcd(b ± 1, N) are the factors.']],
-  ['How is Shor\'s algorithm phase estimation in disguise?', ['Shor\'s oracle with second register |1⟩ is controlled powers of U_a, by repeated squaring.', 'On the orbit of 1, U_a is a cyclic shift with eigenphases 2πj/r.', '|1⟩ is a uniform superposition of those eigenvectors.', 'So the output is an estimate of a uniformly random j/r; continued fractions give r.']],
-  ['Why is the non-abelian HSP hard if few queries suffice?', ['Ettinger–Høyer–Knill: O(log |G|) queries carry enough information.', 'Extracting it needs a joint measurement on many coset states with no known efficient circuit.', 'Irreducible representations are d×d matrices, so the coset shift is not just a phase.', 'Instances: graph isomorphism via S_{2n}; dihedral HSP connects to lattice problems.']],
+  [R`Why does the second register stay unentangled in phase estimation, and when does it not?`, [R`When the input is an eigenvector, \(U^x\) only multiplies it by the scalar \(e^{i\theta x}\).`, R`A scalar can be moved onto the first register (phase kickback), so the state factors.`, R`With a superposition of eigenvectors, each component kicks back its own phase and the registers become entangled.`, R`That entanglement is why Shor outputs a uniformly random \(j/r\).`]],
+  [R`What does repeating phase estimation buy you, and what does it not?`, [R`Each run outputs a nearest bin with probability at least \(8/\pi^2\), otherwise anything.`, R`Failures are not unbiased noise, so averaging is wrong; take the median of repeated runs.`, R`Repetition boosts confidence to \(1-\delta\), not precision.`, R`Precision \(\varepsilon\approx 2^{-n}\) improves only with more qubits (higher powers \(U^{2^k}\)).`]],
+  [R`Why does the coset offset not change the output distribution?`, [R`After the QFT, the offset contributes the factor \(\chi_y(g_0)\).`, R`It has modulus \(1\), so it disappears in \(|\cdot|^2\).`, R`It is a relative phase across outcomes \(y\), not a global phase.`, R`Same as L10: shifting a function does not change its frequency content.`]],
+  [R`State the hidden subgroup problem and map Simon and period finding onto it.`, [R`\(G\) is a finite abelian group; \(f\) is constant on cosets of \(H\) and distinct across cosets.`, R`Simon: \(G=\mathbb{Z}_2^n\), \(H=\{0,s\}\).`, R`Period finding: \(G=\mathbb{Z}_N\), \(H=p\,\mathbb{Z}_N\) with \(p\mid N\).`, R`Goal: output generators of \(H\) in \(\mathrm{poly}(\log|G|)\) time.`]],
+  [R`Why does Fourier sampling output only elements of \(H^\perp\)?`, [R`The amplitude on \(y\) is proportional to \(\sum_{h\in H}\chi_y(h)\).`, R`\(\chi_y\) restricted to \(H\) is a character of \(H\).`, R`A nontrivial character sums to zero: re-index by \(h\mapsto h+h'\).`, R`So only \(y\) with \(\chi_y|_H\equiv1\) survive, each with probability \(|H|/|G|\).`]],
+  [R`Walk through the factoring reduction and say where each failure comes from.`, [R`Pick a random \(a\); if \(\gcd(a,N)>1\) you are already done.`, R`Find the order \(r\) quantumly; restart if \(r\) is odd.`, R`\(b=a^{r/2}\) satisfies \((b-1)(b+1)\equiv0 \pmod N\), and \(b\not\equiv1\) by minimality of \(r\).`, R`Restart if \(b\equiv-1\); otherwise \(\gcd(b\pm1,N)\) are the factors.`]],
+  [R`How is Shor's algorithm phase estimation in disguise?`, [R`Shor's oracle with second register \(|1\rangle\) is controlled powers of \(U_a\), by repeated squaring.`, R`On the orbit of \(1\), \(U_a\) is a cyclic shift with eigenphases \(2\pi j/r\).`, R`\(|1\rangle=\frac{1}{\sqrt r}\sum_j|\psi_j\rangle\) is a uniform superposition of those eigenvectors.`, R`So the output estimates a uniformly random \(j/r\); continued fractions give \(r\).`]],
+  [R`Why is the non-abelian HSP hard if few queries suffice?`, [R`Ettinger–Høyer–Knill: \(\mathrm{poly}(\log|G|)\) queries carry enough information to identify \(H\).`, R`Extracting it needs a joint measurement on many coset states with no known efficient circuit.`, R`Irreducible representations are \(d\times d\) matrices, so the coset shift is not just a phase.`, R`Instances: graph isomorphism via \(S_{2n}\); the dihedral HSP connects to lattice problems.`]],
 ];
 const rated = load('cs259q-speak', {});
 const list = $('#speakList');
@@ -871,7 +990,7 @@ PROMPTS.forEach(([q, claims], i) => {
   const stop = () => { clearInterval(timer); timer = null; go.textContent = 'Start 60 s'; cl.hidden = false; };
   go.addEventListener('click', () => { if (timer) { stop(); return; } left = 60; tEl.textContent = left; go.textContent = 'Stop'; timer = setInterval(() => { left--; tEl.textContent = left; if (left <= 0) stop(); }, 1000); });
   const upd = () => { const v = claims.map((_, j) => $(`#sp${i}_${j}`).checked); rated[i] = v; save('cs259q-speak', rated); const n = v.filter(Boolean).length; $('.score', d).textContent = `${n} of ${claims.length} claims${n === claims.length ? ': clean.' : '. Say the missing ones out loud once, then retry tomorrow.'}`; };
-  $$('input', cl).forEach(x => x.addEventListener('change', upd)); upd();
+  $$('input', cl).forEach(x => x.addEventListener('change', upd)); upd(); typeset(d);
   const rec = $('.rec', d), au = $('audio', d); let mr = null, chunks = [];
   rec.addEventListener('click', async () => {
     if (mr && mr.state === 'recording') { mr.stop(); return; }
@@ -884,3 +1003,5 @@ route();
 select('ahsp');
 })();
 </script>
+</body>
+</html>
