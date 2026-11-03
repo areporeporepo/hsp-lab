@@ -62,6 +62,20 @@ td.serif { font: 15px/1.4 var(--serif); }
 ol.actions { margin: 0; padding-left: 22px; display: grid; gap: 10px; max-width: 70ch; }
 ol.actions li span { display: block; font: 13px/1.4 var(--mono); color: var(--muted); }
 svg text { font-family: var(--mono); }
+
+.prob { background: var(--paper); border: 1px solid var(--rule); padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.prob header { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.prob h3 { margin: 0; }
+.fields { display: grid; gap: 10px; }
+.field { text-transform: none; letter-spacing: 0; font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font: 13px/1.3 var(--mono); }
+.field > span.lbl { min-width: 14ch; color: var(--muted); }
+.field input { width: 16ch; }
+.mark-ok { font: 500 13px var(--mono); min-width: 8ch; }
+.reveal { border-top: 1px solid var(--rule); padding-top: 10px; }
+.pad { width: 100%; height: 280px; background: var(--bg); border: 1px dashed var(--rule); touch-action: none; display: block; }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.score { font: 500 14px var(--mono); }
+.notation td:first-child { white-space: nowrap; }
 @media (max-width: 700px) { section { grid-template-columns: 1fr; gap: 10px; } .mark b { display: inline; margin-right: 8px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -70,15 +84,37 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
 <script src="core.js"></script>
+<script src="problems.js"></script>
 
 <div class="wrap">
 <header>
   <h1>Hidden Subgroup Lab</h1>
   <p>From group theory to the 2026 resource estimates for breaking RSA and elliptic curves. The quantum labs run live in your browser, as a gate-level state-vector simulation or an analytic formula evaluated numerically, so you can change the inputs and check the math yourself. Hardware numbers come from the cited papers or a labeled textbook model.</p>
   <nav class="ladder" aria-label="Sections">
-    <a href="#hsp">1 HSP</a><span>/</span><a href="#period">2 period</a><span>/</span><a href="#qft">3 QFT circuit</a><span>/</span><a href="#shor">4 Shor</a><span>/</span><a href="#simon">5 Simon</a><span>/</span><a href="#regev">6 Regev</a><span>/</span><a href="#ftqc">7 error correction</a><span>/</span><a href="#frontier">8 2026 frontier</a><span>/</span><a href="#github">9 GitHub</a><span>/</span><a href="#next">10 next</a>
+    <a href="#practice">P practice</a><span>/</span><a href="#hsp">1 HSP</a><span>/</span><a href="#period">2 period</a><span>/</span><a href="#qft">3 QFT circuit</a><span>/</span><a href="#shor">4 Shor</a><span>/</span><a href="#simon">5 Simon</a><span>/</span><a href="#regev">6 Regev</a><span>/</span><a href="#ftqc">7 error correction</a><span>/</span><a href="#frontier">8 2026 frontier</a><span>/</span><a href="#github">9 GitHub</a><span>/</span><a href="#next">10 next</a>
   </nav>
 </header>
+
+<!-- P -->
+<section id="practice">
+  <div class="mark"><b>P</b>Practice</div>
+  <div class="body">
+    <h2>Problems for L13 and L14, in course notation</h2>
+    <p>Twelve problems that build from the L10 to L12 material into the abelian HSP (L13) and Grover (L14). Type an answer and press Check. Fractions like <code>1/12</code> work, and lists take commas. Each problem has a hint, a full solution, and a scratch pad for Apple Pencil.</p>
+    <div class="scroll"><table class="notation">
+      <thead><tr><th>Course notes</th><th>This page, §4</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>\(N = 2^n\) (toy problem), \(N' = 2^n\) (factoring)</td><td>\(Q = 2^n\)</td><td>size of the first register</td></tr>
+        <tr><td>\(p\) (toy), \(r\) (order)</td><td>\(r\)</td><td>the period</td></tr>
+        <tr><td>\(\omega = e^{2\pi i/N}\)</td><td>\(e^{2\pi i/Q}\)</td><td>root of unity in \(\mathrm{QFT}_n\)</td></tr>
+        <tr><td>\(\gcd(y_1, y_2, \dots) = N/p\)</td><td>continued fractions</td><td>post-processing. Class assumes \(p \mid N\) (exact peaks); §4 handles the general case</td></tr>
+        <tr><td>\(U_a|y\rangle = |ay \bmod N\rangle\), phases \(s/r\)</td><td>(same)</td><td>Kitaev view: Shor is phase estimation on \(U_a\)</td></tr>
+      </tbody>
+    </table></div>
+    <div class="readout"><span>solved</span> <b id="pScore">0 / 12</b></div>
+    <div id="pList" class="body"></div>
+  </div>
+</section>
 
 <!-- 1 -->
 <section id="hsp">
@@ -506,6 +542,45 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\
     const other = [[2026.6, 5e5, "Google ECDLP-256 <500k", -1], [2026.6, 2.6e4, "Oratomic P-256, 26k atoms", -1]];
     other.forEach(([t, v, s, side]) => { g.strokeStyle = c.ink; g.fillStyle = c.paper || css("--paper"); g.beginPath(); g.arc(sx(t), sy(v), 4.5, 0, 7); g.fill(); g.stroke(); halo(s, sx(t) - 9, sy(v) + 18, "right"); });
   }
+
+
+  // ---------- practice problems ----------
+  const solved = new Set();
+  function pad(canvas) {
+    const g = canvas.getContext("2d"); let drawing = false, penSeen = false, last = null;
+    function size() { const r = canvas.getBoundingClientRect(), d = window.devicePixelRatio || 1; const img = canvas.width ? g.getImageData(0, 0, canvas.width, canvas.height) : null; canvas.width = r.width * d; canvas.height = r.height * d; g.setTransform(d, 0, 0, d, 0, 0); if (img) g.putImageData(img, 0, 0); }
+    size();
+    const pos = (e) => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    canvas.addEventListener("pointerdown", (e) => { if (e.pointerType === "pen") penSeen = true; if (penSeen && e.pointerType === "touch") return; drawing = true; last = pos(e); canvas.setPointerCapture(e.pointerId); e.preventDefault(); });
+    canvas.addEventListener("pointermove", (e) => { if (!drawing) return; const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+      for (const ev of evs) { const p = pos(ev); g.strokeStyle = css("--ink"); g.lineCap = "round"; g.lineJoin = "round"; g.lineWidth = 0.8 + 2.4 * (ev.pressure || 0.5); g.beginPath(); g.moveTo(last[0], last[1]); g.lineTo(p[0], p[1]); g.stroke(); last = p; } e.preventDefault(); });
+    const end = () => { drawing = false; }; canvas.addEventListener("pointerup", end); canvas.addEventListener("pointercancel", end);
+    return { clear: () => g.clearRect(0, 0, canvas.width, canvas.height) };
+  }
+  function renderProblems() {
+    const list = $("pList"); list.innerHTML = "";
+    Problems.problems.forEach((p, i) => {
+      const el = document.createElement("article"); el.className = "prob"; el.id = p.id;
+      el.innerHTML = `<header><span class="tag">${p.lec}</span><h3>${i + 1}. ${p.title}</h3></header><p>${p.body}</p>
+        <div class="fields">${p.fields.map((f, j) => `<label class="field" for="${p.id}_${j}"><span class="lbl">${f.label}</span><input id="${p.id}_${j}" class="wide" ${f.kind === "num" ? 'inputmode="decimal"' : ""} autocomplete="off" autocapitalize="off" spellcheck="false"><span class="mark-ok" id="${p.id}_${j}_m"></span></label>`).join("")}</div>
+        <div class="btnrow"><button data-a="check">Check</button><button class="ghost" data-a="hint">Hint</button><button class="ghost" data-a="sol">Solution</button><button class="ghost" data-a="pad">Scratch pad</button></div>
+        <div class="reveal" data-r="hint" hidden><p>${p.hint}</p></div>
+        <div class="reveal" data-r="sol" hidden><p>${p.solution}</p></div>
+        <div data-r="pad" hidden><canvas class="pad" aria-label="Scratch pad for problem ${i + 1}"></canvas><div class="btnrow" style="margin-top:6px"><button class="ghost" data-a="clear">Clear pad</button></div></div>`;
+      list.appendChild(el);
+      let padObj = null;
+      el.addEventListener("click", (e) => {
+        const a = e.target.dataset && e.target.dataset.a; if (!a) return;
+        if (a === "check") { let all = true; p.fields.forEach((f, j) => { const v = $(`${p.id}_${j}`).value, good = Problems.check(f, v); $(`${p.id}_${j}_m`).textContent = v.trim() === "" ? "" : good ? "✓ right" : "✗ try again"; if (!good) all = false; }); if (all) solved.add(p.id); else solved.delete(p.id); $("pScore").textContent = `${solved.size} / ${Problems.problems.length}`; }
+        if (a === "hint" || a === "sol") { const r = el.querySelector(`[data-r="${a}"]`); r.hidden = !r.hidden; }
+        if (a === "pad") { const r = el.querySelector('[data-r="pad"]'); r.hidden = !r.hidden; if (!r.hidden && !padObj) padObj = pad(r.querySelector("canvas")); }
+        if (a === "clear" && padObj) padObj.clear();
+      });
+      el.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.tagName === "INPUT") el.querySelector('[data-a="check"]').click(); });
+    });
+    typeset(list);
+  }
+  renderProblems();
 
   function all() { drawPeriod(); runQFT(); drawShor(); regev(); ftqc(); timeline(); }
   prepShor(); simonReset(); all();
