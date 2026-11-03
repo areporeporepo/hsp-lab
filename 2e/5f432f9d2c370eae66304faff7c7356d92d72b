@@ -1,0 +1,23 @@
+LICENSE
+  s_af9ddb94094741::t_2a65715eea45be 1-21
+index.html
+  s_af9ddb94094741::t_3364c9a63bdbcd 1-886
+README.md
+  s_af9ddb94094741::t_490b45800f103d 1-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2e5f432f9d2c370eae66304faff7c7356d92d72b",
+  "prompts": {},
+  "sessions": {
+    "s_af9ddb94094741": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "276a01eb-9f57-4582-a622-66d10f6821fb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "anh nguyen <anh.nqqq@icloud.com>"
+    }
+  }
+}
